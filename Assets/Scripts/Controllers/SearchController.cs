@@ -29,6 +29,11 @@ namespace Controllers
         {
             _view.HidePage();
         }
+
+        public void ClearInputField()
+        {
+            _view.ClearInputField();
+        }
         
 
         

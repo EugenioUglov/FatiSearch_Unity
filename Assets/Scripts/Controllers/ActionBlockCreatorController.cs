@@ -14,7 +14,6 @@ public class ActionBlockCreatorController : MonoBehaviour
     public GameObject ActionDropdown;
     public GameObject TagsInputField;
     public GameObject ImagePathInputField;
-    public GameObject DeleteButton;
     
     
     [Header("Links")]
@@ -57,8 +56,6 @@ public class ActionBlockCreatorController : MonoBehaviour
         if (string.IsNullOrEmpty(tagsTextFromInputField) == false)
         {
             string[] tags = tagsTextFromInputField.Split(',');
-         
-            print("Count tags: " + tags.Length);
 
             // Delete empty spaces from sides of tags.
             for (int i_tag = 0; i_tag < tags.Length; i_tag++)
@@ -67,8 +64,6 @@ public class ActionBlockCreatorController : MonoBehaviour
                 tagsList.Add(tags[i_tag].Trim());
             }
         }
-        
-        
 
         string imagePath = ImagePathInputField.GetComponent<TMP_InputField>().text;
         
@@ -82,8 +77,10 @@ public class ActionBlockCreatorController : MonoBehaviour
         else if (_pageController.PageState == PageController.PageStateEnum.ActionBlockModifier)
         {
             _actionBlockController.UpdateActionBlock(_actionBlockModifierController.OriginalTitle, actionBlock);
-            DeleteButton.SetActive(false);
+            _actionBlockModifierController.HideDeleteButton();
         }
+        
+        _searchController.ClearInputField();
 
         OnEnd();
     }
@@ -95,10 +92,17 @@ public class ActionBlockCreatorController : MonoBehaviour
         
         if (_pageController.PageState == PageController.PageStateEnum.ActionBlockModifier)
         {
-            print("PageState Modify close");
             SetDefaultFields();
-            DeleteButton.SetActive(false);
+            _actionBlockModifierController.HideDeleteButton();
         }
+    }
+    
+    public void OnEnd()
+    {
+        _actionBlockController.ShowActionBlocks();
+        HidePage();
+        //_searchController.ShowPage();
+        SetDefaultFields();
     }
 
 
@@ -110,7 +114,6 @@ public class ActionBlockCreatorController : MonoBehaviour
         ImagePathInputField.GetComponent<TMP_InputField>().text = "";
     }
     
-    
     private void UpdateActionBlock()
     {
         string title = TitleInputField.GetComponent<TMP_InputField>().text;
@@ -120,24 +123,18 @@ public class ActionBlockCreatorController : MonoBehaviour
         string content = ContentInputField.GetComponent<TMP_InputField>().text;
         string tagsTextFromInputField = TagsInputField.GetComponent<TMP_InputField>().text;
         List<string> tagsList = new List<string>();
-        print("tagsTextFromInputField: " + tagsTextFromInputField);
         
         if (string.IsNullOrEmpty(tagsTextFromInputField) == false)
         {
             string[] tags = tagsTextFromInputField.Split(',');
          
-            print("Count tags: " + tags.Length);
-
             // Delete empty spaces from sides of tags.
             for (int i_tag = 0; i_tag < tags.Length; i_tag++)
             {
-                print("tag : " + tags[i_tag]);
                 tagsList.Add(tags[i_tag].Trim());
             }
         }
         
-        
-
         string imagePath = ImagePathInputField.GetComponent<TMP_InputField>().text;
         
         ActionBlockModel.ActionBlock actionBlockNew = new ActionBlockModel.ActionBlock(title, action, content, tagsList, imagePath);
@@ -148,13 +145,4 @@ public class ActionBlockCreatorController : MonoBehaviour
         //_searchController.ShowPage();
         SetDefaultFields();
     }
-
-    public void OnEnd()
-    {
-        _actionBlockController.ShowActionBlocks();
-        HidePage();
-        //_searchController.ShowPage();
-        SetDefaultFields();
-    }
-    
 }

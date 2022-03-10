@@ -10,6 +10,8 @@ using Unity.VisualScripting;
 
 public class ActionBlockModel : MonoBehaviour
 {
+    [SerializeField] private AlertController _alertController;
+    
     public static class ActionEnum
     {
         public const string OpenPath = "OpenPath";
@@ -144,7 +146,7 @@ public class ActionBlockModel : MonoBehaviour
         }
 
         
-        return actionBlocksToShow.ToArray(); 
+        return actionBlocksToShow.ToArray().Reverse().ToArray(); 
     }
 
     public ActionBlock[] GetActionBlocksFromFile()
@@ -182,8 +184,6 @@ public class ActionBlockModel : MonoBehaviour
         {
             AddActionBlockToVariables(actionBlock, false);
         }
-    
-        print("Set Action-Blocks");
         
         //_actionBlocks = actionBlocks.ToList();
         //UpdateIndexActionBlocks();
@@ -215,12 +215,14 @@ public class ActionBlockModel : MonoBehaviour
         //if (_actionBlockByTitle.TryGetValue(titleLowerCase, out var val))
         if (_actionBlockByTitle.Contains(titleLowerCase))
         {
-            throw new InvalidOperationException("Action-Block with title \"" + actionBlock.Title + "\" already exists");
+            _alertController.Show("Action-Block with title \"" + actionBlock.Title + "\" already exists.");
+            return;
         }
         
         if (string.IsNullOrEmpty(titleLowerCase))
         {
-            throw new InvalidOperationException("Error! Title is not defined.");
+            _alertController.Show("Error! Title is not defined.");
+            return;
         }
 
 
@@ -233,20 +235,16 @@ public class ActionBlockModel : MonoBehaviour
             {
                 if (tag == actionBlock.Title)
                 {
-                    print("Tag already exists " + actionBlock.Title);
                     return;
                 }
             }
         
-            print("Tag has been added " + actionBlock.Title);
             actionBlock.Tags.Add(actionBlock.Title);
         }
         
 
         AddActionBlockToVariables(actionBlock);
-        
-        print("Action-BLock " + actionBlock.Title + " created");
-        
+
         OnUpdateActionBlocks();
     }
 
@@ -265,8 +263,7 @@ public class ActionBlockModel : MonoBehaviour
                     return;
                 }
             }
-        
-            print("Tag has been added " + actionBlock.Title);
+            
             actionBlock.Tags.Add(actionBlock.Title);
         }
         
@@ -274,6 +271,8 @@ public class ActionBlockModel : MonoBehaviour
         _actionBlockByTitle.Remove(titleLowerCase);
         
         AddActionBlockToVariables(actionBlock);
+        
+        UpdateIndexActionBlockByTags();
         
         print("Action-BLock " + actionBlock.Title + " has been modified");
         
@@ -382,6 +381,7 @@ public class ActionBlockModel : MonoBehaviour
 
         foreach (var actionBlock in actionBlocks)
         {
+            print(actionBlock.Title);
             // Add Action-Blocks by tag.
             // Separated elements by ",".
             foreach (string tagPhrase in actionBlock.Tags)
@@ -420,7 +420,5 @@ public class ActionBlockModel : MonoBehaviour
         ActionBlock[] actionBlocks = GetActionBlocks().ToArray();
         string actionBlocksJSON = JsonConvert.SerializeObject(actionBlocks);
         _fileController.Save(actionBlocksFilePath, actionBlocksJSON);
-
-        print("Action-Blocks have been saved");
     }
 }

@@ -13,8 +13,10 @@ public class ActionBlockView : MonoBehaviour
     [SerializeField] private GameObject _actionBlockPrefab;
     [SerializeField] private GameObject _scrollViewContent;
     [SerializeField] private GameObject _searchPage;
+    [SerializeField] private GameObject _executionErrorPanel;
     [SerializeField] private TextMeshProUGUI _centralLogText;
     [SerializeField] private TextMeshProUGUI _foundResultsText;
+    
     public Action CallbackStartLoadingActionBlocksToShow;
     public Action<string> CallBackActionBlockShowed;
     
@@ -86,7 +88,6 @@ public class ActionBlockView : MonoBehaviour
         
             //GameObject image = GameObject.Find ("RawImage");
             //image.GetComponent<RawImage>().texture = www.texture;
-            print(actionBlockPrefab.GetComponent<ActionBlockEntity>().GetTitle());
             Image imageComponent = actionBlockPrefab.GetComponent<ActionBlockEntity>().Image.GetComponent<Image>();
             /*
             var spriteFromFile = Sprite.Create(www.texture, new Rect(0.0f, 0.0f, www.texture.width, www.texture.height), new Vector2(0.5f, 0.5f), 100.0f);
@@ -100,9 +101,17 @@ public class ActionBlockView : MonoBehaviour
                 Sprite spriteFromFile = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height),
                     new Vector2(0.5f, 0.0f), 1.0f);
                 imageComponent.sprite = spriteFromFile;
-                float valueSizeProportion = texture.width / imageComponent.rectTransform.sizeDelta.x;
+
+                float heightOfImageComponentActionBlock = imageComponent.rectTransform.sizeDelta.y;
+                float heightOfDownloadedImage = texture.height;
+                float newHeightImageForActionBlock = texture.height / (texture.width / imageComponent.rectTransform.sizeDelta.x);
+                if (newHeightImageForActionBlock > heightOfImageComponentActionBlock)
+                {
+                    newHeightImageForActionBlock = heightOfImageComponentActionBlock;
+                }
+                
                 imageComponent.rectTransform.sizeDelta = new Vector2(imageComponent.rectTransform.sizeDelta.x,
-                    texture.height / valueSizeProportion);
+                    newHeightImageForActionBlock);
                 // Set white color for image component to right visibility of image.
                 imageComponent.color = new Color32(255, 255, 255, 255);
             }
@@ -129,6 +138,16 @@ public class ActionBlockView : MonoBehaviour
         actionBlocksPrefabsShowed.Clear();
     }
 
+    public void ShowExecutionError()
+    {
+        _executionErrorPanel.SetActive(true);
+    }
+    
+    public void HideExecutionError()
+    {
+        _executionErrorPanel.SetActive(false);
+    }
+
     private void OnActionBlocksDownloaded()
     {
         _foundResultsText.text = "Found " + actionBlocksPrefabsShowed.Count + " results";
@@ -136,6 +155,7 @@ public class ActionBlockView : MonoBehaviour
 
         if (CallBackActionBlockShowed != null) CallBackActionBlockShowed(actionBlocksPrefabsShowed.Count.ToString());
     }
+
 
     private void OnImagesSet()
     {

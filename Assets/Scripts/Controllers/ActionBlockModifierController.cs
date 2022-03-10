@@ -7,6 +7,7 @@ using UnityEngine;
 
 public class ActionBlockModifierController : MonoBehaviour
 {
+    [Header("View")]
     [SerializeField] private GameObject _deleteButton;
 
     
@@ -21,11 +22,16 @@ public class ActionBlockModifierController : MonoBehaviour
     private ActionBlockModel.ActionBlock originalActionBlock;
 
 
-    private void Awake()
+    #region View
+    
+    public void HideDeleteButton()
     {
-  
+        _deleteButton.SetActive(false);
     }
-
+    
+    #endregion View
+    
+    
     public void ShowSettingsToUpdateActionBlock(ActionBlockModel.ActionBlock actionBlock)
     {
         originalActionBlock = actionBlock;

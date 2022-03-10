@@ -16,9 +16,11 @@ public class ActionBlockController : MonoBehaviour
 
     [SerializeField] private ActionBlockModifierController _actionBlockModifierController;
     [SerializeField] private ActionBlockCreatorController _actionBlockCreatorController;
+    [SerializeField] private AlertController _alertController;
 
     public Action CallbackStartLoadingActionBlocksToShow;
     public Action<string> CallBackActionBlockShowed;
+    
     
     public void Init()
     {
@@ -100,7 +102,7 @@ public class ActionBlockController : MonoBehaviour
 
         return false;
     }
-
+    
     private void OnActionBlockClicked(ActionBlockClickedEvent actionBlockClickedEvent)
     {
         string titleActionBlock = actionBlockClickedEvent.Title;
@@ -111,7 +113,6 @@ public class ActionBlockController : MonoBehaviour
     {
         string titleActionBlock = actionBlockSettingsClickedEvent.Title;
         ActionBlockModel.ActionBlock actionBlock = GetActionBlockByTitle(titleActionBlock);
-        print("Settings clicked " + titleActionBlock);
         _actionBlockModifierController.ShowSettingsToUpdateActionBlock(actionBlock);
     }
 
@@ -156,8 +157,7 @@ public class ActionBlockController : MonoBehaviour
         }
         catch (Exception exception)
         {
-            Console.WriteLine(exception);
-            print("Not possible to open path: " + path);
+            _alertController.Show("Not possible to execute Action-Block");
         }
     }
 
