@@ -14,6 +14,10 @@ namespace Controllers
             EventAggregator.AddListener<KeyClickedEvent>(this, OnKeyEnterClicked);
         }
 
+        public string GetTextFromInputField()
+        {
+            return _view.GetTextFromInputField();
+        }
         
         public void OnClickEnterButton()
         {
@@ -43,6 +47,8 @@ namespace Controllers
             SearchEnteredEvent searchEnteredEvent = new SearchEnteredEvent();
             searchEnteredEvent.Request = userRequest;
             EventAggregator.Invoke<SearchEnteredEvent>(searchEnteredEvent);
+            
+            _view.FocusInputField();
         }
         
         

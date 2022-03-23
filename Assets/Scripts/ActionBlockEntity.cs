@@ -8,6 +8,7 @@ using UnityEngine.UI;
 public class ActionBlockEntity : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI _titleText;
+    [SerializeField] private GameObject _titleGameObject;
     public GameObject Image;
 
   
@@ -15,6 +16,13 @@ public class ActionBlockEntity : MonoBehaviour
     public string GetTitle()
     {
         return _titleText.text;
+    }
+
+    public void SetTitleColorRed()
+    {
+        //_titleGameObject.GetComponent<TextMeshProUGUI>().color = new Color(186,89,89,255);
+        // Set color red.
+        _titleGameObject.GetComponent<TextMeshProUGUI>().color = new Color32(255, 38, 0, 255);
     }
     
     public void SetTitle(string title)

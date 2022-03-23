@@ -1,9 +1,10 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
 
 public class FileController : MonoBehaviour
-{  
+{
     public string GetContentFromFile(string path)
     {
         using (StreamReader streamReader = new StreamReader(path))
@@ -56,6 +57,17 @@ public class FileController : MonoBehaviour
 
         return fileInfo;
     }
+
+    public bool IsPathExists(string path)
+    {
+        if (Directory.Exists(path))
+        {
+            return true;
+        }
+
+        return false;
+    }
+    
     
     /*
     public string GetContentFromFileByPath(string path)
@@ -85,5 +97,4 @@ public class FileController : MonoBehaviour
     }
     */
     
-
 }

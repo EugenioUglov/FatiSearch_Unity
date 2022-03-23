@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Controllers;
 using TMPro;
 using UnityEngine;
@@ -14,7 +15,6 @@ public class ActionBlockCreatorController : MonoBehaviour
     public GameObject ActionDropdown;
     public GameObject TagsInputField;
     public GameObject ImagePathInputField;
-    
     
     [Header("Links")]
     [SerializeField] private GameObject _actionBlockSettingsPage;
@@ -34,7 +34,18 @@ public class ActionBlockCreatorController : MonoBehaviour
     
     public void ShowSettingsForActionBlock()
     {
+        string title = TitleInputField.GetComponent<TMP_InputField>().text;
+        string textFromSearchInputField = _searchController.GetTextFromInputField();
+
+        if (string.IsNullOrEmpty(title) && string.IsNullOrEmpty(textFromSearchInputField) == false)
+        {
+            TitleInputField.GetComponent<TMP_InputField>().text = textFromSearchInputField;
+        }
+
         _actionBlockSettingsPage.SetActive(true);
+        
+        TitleInputField.GetComponent<TMP_InputField>().Select();
+        TitleInputField.GetComponent<TMP_InputField>().ActivateInputField();
     }
     
     public void HidePage()
@@ -42,37 +53,35 @@ public class ActionBlockCreatorController : MonoBehaviour
         _actionBlockSettingsPage.SetActive(false);
     }
 
-    
     public void OnClickButtonSaveNewSettingsActionBlock()
     {
         string title = TitleInputField.GetComponent<TMP_InputField>().text;
-        
         string action = ActionBlockModel.ActionEnum.OpenPath;
         //ActionBlockModel.ActionEnum action = _actionDropdown.GetComponent<Dropdown>().value.ToString();
         string content = ContentInputField.GetComponent<TMP_InputField>().text;
         string tagsTextFromInputField = TagsInputField.GetComponent<TMP_InputField>().text;
         List<string> tagsList = new List<string>();
-        
+
         if (string.IsNullOrEmpty(tagsTextFromInputField) == false)
         {
-            string[] tags = tagsTextFromInputField.Split(',');
+            string[] tags_to_add = tagsTextFromInputField.Split(',');
 
-            // Delete empty spaces from sides of tags.
-            for (int i_tag = 0; i_tag < tags.Length; i_tag++)
+            for (int i_tag = 0; i_tag < tags_to_add.Length; i_tag++)
             {
-                print("tag : " + tags[i_tag]);
-                tagsList.Add(tags[i_tag].Trim());
+                // Delete empty spaces from sides of tags.
+                string tagToAdd = tags_to_add[i_tag].Trim();
+                
+                tagsList.Add(tagToAdd);
             }
         }
 
         string imagePath = ImagePathInputField.GetComponent<TMP_InputField>().text;
-        
         ActionBlockModel.ActionBlock actionBlock = new ActionBlockModel.ActionBlock(title, action, content, tagsList, imagePath);
-        
-        
+
         if (_pageController.PageState == PageController.PageStateEnum.ActionBlockCreator)
         {
-            _actionBlockController.CreateActionBlock(actionBlock);
+            bool isCreated = _actionBlockController.CreateActionBlock(actionBlock);
+            if (isCreated == false) return;
         }
         else if (_pageController.PageState == PageController.PageStateEnum.ActionBlockModifier)
         {
@@ -81,7 +90,6 @@ public class ActionBlockCreatorController : MonoBehaviour
         }
         
         _searchController.ClearInputField();
-
         OnEnd();
     }
     
@@ -117,7 +125,6 @@ public class ActionBlockCreatorController : MonoBehaviour
     private void UpdateActionBlock()
     {
         string title = TitleInputField.GetComponent<TMP_InputField>().text;
-        
         string action = ActionBlockModel.ActionEnum.OpenPath;
         //ActionBlockModel.ActionEnum action = _actionDropdown.GetComponent<Dropdown>().value.ToString();
         string content = ContentInputField.GetComponent<TMP_InputField>().text;
@@ -136,13 +143,9 @@ public class ActionBlockCreatorController : MonoBehaviour
         }
         
         string imagePath = ImagePathInputField.GetComponent<TMP_InputField>().text;
-        
         ActionBlockModel.ActionBlock actionBlockNew = new ActionBlockModel.ActionBlock(title, action, content, tagsList, imagePath);
-        
-       
         _actionBlockController.ShowActionBlocks();
         HidePage();
-        //_searchController.ShowPage();
         SetDefaultFields();
     }
 }

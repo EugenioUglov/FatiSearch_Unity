@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Controllers;
 using TMPro;
 using UnityEngine;
 
@@ -12,6 +13,7 @@ public class Main : MonoBehaviour
     [SerializeField] private ActionBlockController _actionBlockController;
     [SerializeField] private TextMeshProUGUI _centralLogText;
     [SerializeField] private DragAndDropController _dragAndDropController;
+    [SerializeField] private SearchController _searchController;
 
     void Start()
     {
@@ -24,6 +26,7 @@ public class Main : MonoBehaviour
         ActionBlockModel.ActionBlock[] actionBlocksFromFile = _actionBlockController.GetActionBlocksFromFile();
         _actionBlockController.SetActionBlocks(actionBlocksFromFile);
         _actionBlockController.ShowActionBlocks();
+        _searchController.ShowPage();
     }
 
     private void OnGetDroppedFilesPaths(string[] paths)
@@ -60,7 +63,7 @@ public class Main : MonoBehaviour
     private void OnActionBlocksShowed(string countActionBlocks)
     {
         _centralLogText.text = "";
-        print("_centralLogText.text");
+        // print("_centralLogText.text");
     }
 
     public void Quit()

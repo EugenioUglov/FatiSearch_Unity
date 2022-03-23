@@ -7,8 +7,8 @@ public class AlertView : MonoBehaviour
 {
     [SerializeField] private GameObject _alertPanel;
     [SerializeField] private TextMeshProUGUI _textComponent;
-
-
+    
+    
     public void SetText(string newText)
     {
         _textComponent.text = newText;

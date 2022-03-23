@@ -2,10 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.IO;
 using System.Linq;
 using UnityEngine;
 using Newtonsoft.Json;
 using Unity.VisualScripting;
+using System.Text.RegularExpressions;
 
 
 public class ActionBlockModel : MonoBehaviour
@@ -23,14 +25,13 @@ public class ActionBlockModel : MonoBehaviour
     [SerializeField] private FileController _fileController;
     
     private string actionBlocksFilePath = "Action-Blocks.json";
+    private string backupFolderPath = "Backup";
 
-    //private List<ActionBlock> _actionBlocks = new List<ActionBlock>();
-    //private Dictionary<string, ActionBlock> _actionBlockByTitle = new Dictionary<string, ActionBlock>();
     private OrderedDictionary _actionBlockByTitle = new OrderedDictionary();
     private Dictionary<string, HashSet<ActionBlock>> _actionBlocksByTag = new Dictionary<string, HashSet<ActionBlock>>();
-    
-    
-    
+
+
+
     public struct ActionBlock
     {
         public string Title;
@@ -53,14 +54,6 @@ public class ActionBlockModel : MonoBehaviour
     {
         List<ActionBlock> actionBlocks = new List<ActionBlock>();
         
-        /*
-        foreach (KeyValuePair<string, ActionBlock> item in _actionBlockByTitle)
-        {
-            actionBlocks.Add(item.Value);
-        }
-        */
-
-
         ICollection actionBlocksFromDictionary = _actionBlockByTitle.Values;
 
         foreach (var actionBlock in actionBlocksFromDictionary)
@@ -204,91 +197,93 @@ public class ActionBlockModel : MonoBehaviour
         return titlesActionBlocks;
     }
 
-
-    
-    public void CreateActionBlock(ActionBlock actionBlock)
+    public bool CreateActionBlock(ActionBlock actionBlock)
     {
+        OnStartChangeActionBlocksVariables();
+        
         string titleLowerCase = actionBlock.Title.ToLower();
 
-
-        // If title already exists.
-        //if (_actionBlockByTitle.TryGetValue(titleLowerCase, out var val))
-        if (_actionBlockByTitle.Contains(titleLowerCase))
+        if (IsTitleValid(titleLowerCase) == false)
         {
-            _alertController.Show("Action-Block with title \"" + actionBlock.Title + "\" already exists.");
-            return;
-        }
-        
-        if (string.IsNullOrEmpty(titleLowerCase))
-        {
-            _alertController.Show("Error! Title is not defined.");
-            return;
+            return false;
         }
 
-
-        // Add tags from title words.
-        AddTitleToTag();        
+        actionBlock.Tags = GetUpdatedTagsForCreationActionBlock(titleLowerCase, actionBlock);
         
-        void AddTitleToTag()
+        AddActionBlockToVariables(actionBlock);
+        OnUpdateActionBlocks();
+
+        return true;
+        
+        bool IsTitleValid(string title)
         {
-            foreach (var tag in actionBlock.Tags)
+            // If title already exists.
+            if (_actionBlockByTitle.Contains(title))
             {
-                if (tag == actionBlock.Title)
-                {
-                    return;
-                }
+                _alertController.Show("Action-Block with this title already exists.");
+                return false;
             }
         
-            actionBlock.Tags.Add(actionBlock.Title);
+            if (string.IsNullOrEmpty(title))
+            {
+                _alertController.Show("Error! Title is not defined.");
+                return false;
+            }
+
+            return true;
         }
-        
-
-        AddActionBlockToVariables(actionBlock);
-
-        OnUpdateActionBlocks();
     }
 
-    public void UpdateActionBlock(string originalTitle, ActionBlock actionBlock)
+    public bool UpdateActionBlock(string originalTitle, ActionBlock actionBlock)
     {
-        // Add tags from title words.
-        AddTitleToTag();        
+        OnStartChangeActionBlocksVariables();
         
-        void AddTitleToTag()
+        string originalTitleLowerCase = originalTitle.ToLower();
+        string newTitle = actionBlock.Title;
+
+        if (IsTitleValid(originalTitleLowerCase, newTitle) == false)
         {
-            foreach (var tag in actionBlock.Tags)
+            return false;
+        }
+
+        actionBlock.Tags = GetUpdatedTagsForCreationActionBlock(originalTitleLowerCase, actionBlock);
+
+        _actionBlockByTitle.Remove(originalTitleLowerCase);
+        AddActionBlockToVariables(actionBlock);
+        UpdateIndexActionBlockByTags();
+        
+        print("Action-BLock " + actionBlock.Title + " has been updated");
+        
+        OnUpdateActionBlocks();
+
+        return true;
+        
+        bool IsTitleValid(string originalTitle, string newTitle)
+        {
+            if (originalTitle != newTitle)
             {
-                if (tag == actionBlock.Title)
+                // If title already exists.
+                if (_actionBlockByTitle.Contains(newTitle))
                 {
-                    print("Tag already exists " + actionBlock.Title);
-                    return;
+                    _alertController.Show("Action-Block with this title already exists.");
+                    return false;
+                }
+                
+                if (string.IsNullOrEmpty(newTitle))
+                {
+                    _alertController.Show("Error! Title is not defined.");
+                    return false;
                 }
             }
             
-            actionBlock.Tags.Add(actionBlock.Title);
+            return true;
         }
-        
-        string titleLowerCase = originalTitle.ToLower();
-        _actionBlockByTitle.Remove(titleLowerCase);
-        
-        AddActionBlockToVariables(actionBlock);
-        
-        UpdateIndexActionBlockByTags();
-        
-        print("Action-BLock " + actionBlock.Title + " has been modified");
-        
-        OnUpdateActionBlocks();
     }
 
     private void AddActionBlockToVariables(ActionBlock actionBlock, bool isAddToStart = true)
     {
-        //_actionBlocks.Insert(0, actionBlock);
-        
         string titleLowerCase = actionBlock.Title.ToLower();
-
-        /*
-        // Add Action-Block by title.
-        _actionBlockByTitle[titleLowerCase] = actionBlock;
-        */
+        
         if (isAddToStart)
         {
             // Insert a new key to the beginning of the OrderedDictionary
@@ -318,7 +313,6 @@ public class ActionBlockModel : MonoBehaviour
                     _actionBlocksByTag[tagWordLowCase] = new HashSet<ActionBlock>(){};
                 }
                 
-
                 _actionBlocksByTag[tagWordLowCase].Add(actionBlock);
             }
         }
@@ -327,6 +321,7 @@ public class ActionBlockModel : MonoBehaviour
 
     public void DeleteActionBlock(ActionBlock actionBlock)
     {
+        OnStartChangeActionBlocksVariables();
         _actionBlockByTitle.Remove(actionBlock.Title.ToLower());
         UpdateIndexActionBlockByTags();
         OnUpdateActionBlocks();
@@ -381,7 +376,6 @@ public class ActionBlockModel : MonoBehaviour
 
         foreach (var actionBlock in actionBlocks)
         {
-            print(actionBlock.Title);
             // Add Action-Blocks by tag.
             // Separated elements by ",".
             foreach (string tagPhrase in actionBlock.Tags)
@@ -403,7 +397,6 @@ public class ActionBlockModel : MonoBehaviour
                         _actionBlocksByTag[tagWordLowCase] = new HashSet<ActionBlock>() { };
                     }
 
-
                     _actionBlocksByTag[tagWordLowCase].Add(actionBlock);
                 }
             }
@@ -414,11 +407,126 @@ public class ActionBlockModel : MonoBehaviour
     {
         Save();
     }
+
+    public void OnStartChangeActionBlocksVariables()
+    {
+        ActionBlock[] actionBlocks = GetActionBlocks().ToArray();
+        string actionBlocksJSON = JsonConvert.SerializeObject(actionBlocks);
+
+        CreateFolderIfMissing(backupFolderPath);
+        
+        _fileController.Save(backupFolderPath + "/" + "Action-Blocks_" + 
+                             DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".json", 
+            actionBlocksJSON);
+    }
     
     private void Save()
     {
         ActionBlock[] actionBlocks = GetActionBlocks().ToArray();
         string actionBlocksJSON = JsonConvert.SerializeObject(actionBlocks);
         _fileController.Save(actionBlocksFilePath, actionBlocksJSON);
+    }
+    
+    private string GetTextWithoutSpecialSymbols(string textToCheck)
+    {
+        return Regex.Replace(textToCheck, @"[^0-9a-zA-Z]", " ");
+        
+        /*
+        // 2 Way
+        StringBuilder sb = new StringBuilder();
+        
+        foreach (char c in str) {
+            if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) {
+                sb.Append(c);
+            }
+        }
+        
+        return sb.ToString();
+        */
+    }
+    
+    
+    private List<string> GetUpdatedTagsForCreationActionBlock(string originalTitle, ActionBlock actionBlock)
+    {
+        string titleLowerCase = actionBlock.Title.ToLower();
+        string titleWithoutSpecialSymbols = GetTextWithoutSpecialSymbols(actionBlock.Title.ToLower());
+        List<string> tags = actionBlock.Tags;
+            
+        // Add tags from title words.
+        AddTitleToTag();
+
+        if (string.Equals(titleLowerCase, titleWithoutSpecialSymbols) == false && originalTitle != actionBlock.Title)
+        {
+            AddTitleWithoutSpecialSymbolsToTag();
+        }
+        
+        NormalizeTags();
+        
+        void AddTitleToTag()
+        {
+            foreach (var tag in tags)
+            {
+                if (tag == actionBlock.Title)
+                {
+                    print("Tag already exists " + actionBlock.Title);
+                    return;
+                }
+            }
+            
+            tags.Add(actionBlock.Title);
+        }
+
+        void AddTitleWithoutSpecialSymbolsToTag()
+        {
+            foreach (var tag in tags)
+            {
+                if (tag == titleWithoutSpecialSymbols)
+                {
+                    print("title without spec symbols exists: " + titleWithoutSpecialSymbols);
+                    return;
+                }
+            }
+            
+            print("Add title without spec symbols: " + titleWithoutSpecialSymbols);
+            tags.Add(titleWithoutSpecialSymbols);
+        }
+
+        void NormalizeTags()
+        {
+            List<string> newTags = new List<string>();
+                
+            foreach (string tag in tags)
+            {
+                print("tag not trimmed: " + tag);
+                // Delete empty spaces from sides of tags.
+                string tagTrimmed = tag.Trim();
+                print("tag not trimmed: " + tagTrimmed);
+                
+                if (string.IsNullOrEmpty(tagTrimmed) == false)
+                {
+                    newTags.Add(tagTrimmed);
+                }
+            }
+
+            tags = newTags;
+        }
+
+        return tags;
+    }
+    
+    private void CreateFolderIfMissing(string path)
+    {
+        try
+        {
+            if (!Directory.Exists(path))
+            {
+                // Try to create the directory.
+                DirectoryInfo di = Directory.CreateDirectory(path);
+            }
+        }
+        catch (IOException ioex)
+        {
+            _alertController.Show(ioex.ToString());
+        }
     }
 }

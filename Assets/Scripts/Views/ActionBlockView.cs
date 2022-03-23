@@ -16,6 +16,7 @@ public class ActionBlockView : MonoBehaviour
     [SerializeField] private GameObject _executionErrorPanel;
     [SerializeField] private TextMeshProUGUI _centralLogText;
     [SerializeField] private TextMeshProUGUI _foundResultsText;
+    [SerializeField] private GameObject _foundResultsGameObject;
     
     public Action CallbackStartLoadingActionBlocksToShow;
     public Action<string> CallBackActionBlockShowed;
@@ -25,7 +26,7 @@ public class ActionBlockView : MonoBehaviour
     
     public void ShowActionBlocks(HashSet<ActionBlockModel.ActionBlock> actionBlocks)
     {
-        print("ShowActionBlocks");
+        // print("ShowActionBlocks");
         _searchPage.SetActive(false);
         if (CallbackStartLoadingActionBlocksToShow != null) CallbackStartLoadingActionBlocksToShow();
 
@@ -39,9 +40,13 @@ public class ActionBlockView : MonoBehaviour
                 _scrollViewContent.transform, false) as GameObject;
       
             actionBlocksPrefabsShowed.Add(actionBlockPrefabShowed);
-            
             actionBlockPrefabShowed.GetComponent<ActionBlockEntity>().SetTitle(actionBlock.Title);
             imagePaths.Add(actionBlock.ImagePath);
+            
+            if (Directory.Exists(actionBlock.Content) == false && File.Exists(actionBlock.Content) == false && IsURLValid(actionBlock.Content) == false)
+            {
+                actionBlockPrefabShowed.GetComponent<ActionBlockEntity>().SetTitleColorRed();
+            }
         }
 
         OnActionBlocksDownloaded();
@@ -65,11 +70,11 @@ public class ActionBlockView : MonoBehaviour
             return sprite;
         }
 
-        
         return null;
     }
     
-    private IEnumerator SetSprite(GameObject[] actionBlocksPrefabsShowed, string[] imagePaths) {
+    private IEnumerator SetSprite(GameObject[] actionBlocksPrefabsShowed, string[] imagePaths) 
+    {
         for (var i = 0; i < actionBlocksPrefabsShowed.Length; i++)
         {
             string imagePath = imagePaths[i];
@@ -151,14 +156,20 @@ public class ActionBlockView : MonoBehaviour
     private void OnActionBlocksDownloaded()
     {
         _foundResultsText.text = "Found " + actionBlocksPrefabsShowed.Count + " results";
+ 
+        
         _searchPage.SetActive(true);
 
         if (CallBackActionBlockShowed != null) CallBackActionBlockShowed(actionBlocksPrefabsShowed.Count.ToString());
     }
-
-
+    
     private void OnImagesSet()
     {
         print("Images set");
+    }
+
+    private bool IsURLValid(string url)
+    {
+        return Uri.IsWellFormedUriString(url, UriKind.Absolute);
     }
 }

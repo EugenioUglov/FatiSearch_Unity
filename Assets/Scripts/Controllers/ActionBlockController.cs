@@ -8,15 +8,16 @@ using Unity.VisualScripting;
 using Debug = UnityEngine.Debug;
 
 
-
 public class ActionBlockController : MonoBehaviour
 {
+    [Header("Links")]
     [SerializeField] private ActionBlockModel _model;
     [SerializeField] private ActionBlockView _view;
 
     [SerializeField] private ActionBlockModifierController _actionBlockModifierController;
     [SerializeField] private ActionBlockCreatorController _actionBlockCreatorController;
     [SerializeField] private AlertController _alertController;
+    [SerializeField] private BottomMessageController _bottomMessageController;
 
     public Action CallbackStartLoadingActionBlocksToShow;
     public Action<string> CallBackActionBlockShowed;
@@ -72,10 +73,10 @@ public class ActionBlockController : MonoBehaviour
         _actionBlockCreatorController.HidePage();
     }
 
-    
-    public void CreateActionBlock(ActionBlockModel.ActionBlock actionBlock)
+    public bool CreateActionBlock(ActionBlockModel.ActionBlock actionBlock)
     {
-        _model.CreateActionBlock(actionBlock);
+        bool isCreated = _model.CreateActionBlock(actionBlock);
+        return isCreated;
     }
     
     public void UpdateActionBlock(string title, ActionBlockModel.ActionBlock actionBlock)
@@ -83,7 +84,6 @@ public class ActionBlockController : MonoBehaviour
         _model.UpdateActionBlock(title, actionBlock);
     }
 
-    
     public void DeleteActionBlock(ActionBlockModel.ActionBlock actionBlock)
     {
         _model.DeleteActionBlock(actionBlock);
@@ -97,11 +97,14 @@ public class ActionBlockController : MonoBehaviour
         if (actionBlock.Title != null)
         {
             ExecuteByActionBlock(actionBlock);
+            _bottomMessageController.Show("Execution \"" + actionBlock.Title + "\"");
+            
             return true;
         }
 
         return false;
     }
+
     
     private void OnActionBlockClicked(ActionBlockClickedEvent actionBlockClickedEvent)
     {
@@ -134,7 +137,6 @@ public class ActionBlockController : MonoBehaviour
         _view.ShowActionBlocks(actionBlocksToShow);
     }
     
-
     private void ExecuteByActionBlock(ActionBlockModel.ActionBlock actionBlock)
     {
         if (actionBlock.Action == ActionBlockModel.ActionEnum.OpenPath)
@@ -147,8 +149,6 @@ public class ActionBlockController : MonoBehaviour
         }
     }
 
-
-    
     private void OpenPath(string path)
     {
         try

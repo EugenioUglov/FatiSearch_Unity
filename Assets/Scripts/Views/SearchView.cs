@@ -26,11 +26,21 @@ namespace Views
         public void ShowPage()
         {
             _searchPage.SetActive(true);
+            _inputField.GetComponent<TMP_InputField>().GetComponent<TMP_InputField>().Select();
+            _inputField.GetComponent<TMP_InputField>().GetComponent<TMP_InputField>().ActivateInputField();
+            
+            FocusInputField();
         } 
     
         public void HidePage()
         {
             _searchPage.SetActive(false);
-        } 
+        }
+
+        public void FocusInputField()
+        {
+            _inputField.GetComponent<TMP_InputField>().Select();
+            _inputField.GetComponent<TMP_InputField>().ActivateInputField();
+        }
     }
 }
