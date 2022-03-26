@@ -16,6 +16,7 @@ public class ActionBlockModifierController : MonoBehaviour
     [SerializeField] private ActionBlockController _actionBlockController;
     [SerializeField] private PageService _pageService;
     [SerializeField] private SearchController _searchController;
+    [SerializeField] private AlertController _alertController;
     
     public string OriginalTitle => originalActionBlock.Title;
     
@@ -52,18 +53,7 @@ public class ActionBlockModifierController : MonoBehaviour
         //_searchController.ShowPage();
         _actionBlockCreatorController.SetDefaultFields();
     }
-    
-    public void OnClickButtonChooseImage()
-    {
-        var extensions = new [] {
-            new ExtensionFilter("Image Files", "png", "jpg", "jpeg" )
-        };
-        
-        var paths = StandaloneFileBrowser.OpenFilePanel("Open File", "", extensions, true);
-        
-        _actionBlockCreatorController.ImagePathInputField.GetComponent<TMP_InputField>().text = paths[0];
-    }
-    
+
     public void OnClickButtonChooseContent()
     {
         var extensions = new [] {
@@ -71,9 +61,43 @@ public class ActionBlockModifierController : MonoBehaviour
         };
         
         var paths = StandaloneFileBrowser.OpenFilePanel("Open File", "", extensions, true);
-        
+
+        if (paths.Length > 1)
+        {
+            _alertController.Show("Choose one file");
+            return;
+        }
+
+        if (paths.Length < 1)
+        {
+            return;
+        }
+
         _actionBlockCreatorController.ContentInputField.GetComponent<TMP_InputField>().text = paths[0];
     }
+    
+    public void OnClickButtonChooseImage()
+    {
+        var extensions = new [] {
+            new ExtensionFilter("Image Files", "png", "jpg", "jpeg")
+        };
+        
+        var paths = StandaloneFileBrowser.OpenFilePanel("Open File", "", extensions, true);
+        
+        if (paths.Length > 1)
+        {
+            _alertController.Show("Choose one file");
+            return;
+        }
+        
+        if (paths.Length < 1)
+        {
+            return;
+        }
+        
+        _actionBlockCreatorController.ImagePathInputField.GetComponent<TMP_InputField>().text = paths[0];
+    }
+    
     
     private void SetFieldsForActionBlockToModify(ActionBlockModel.ActionBlock actionBlock)
     {
@@ -93,6 +117,4 @@ public class ActionBlockModifierController : MonoBehaviour
 
         _actionBlockCreatorController.ImagePathInputField.GetComponent<TMP_InputField>().text = actionBlock.ImagePath;
     }
-    
-    
 }

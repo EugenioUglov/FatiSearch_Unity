@@ -153,13 +153,6 @@ public class ActionBlockModel : MonoBehaviour
             {
                 actionBlocksFromFile =
                     JsonConvert.DeserializeObject<ActionBlock[]>(actionBlocksJSONFromFile);
-
-                if (actionBlocksFromFile.Length == 0)
-                {
-
-                }
-
-                print(actionBlocksJSONFromFile);
             }
             catch (Exception exception)
             {
@@ -177,9 +170,6 @@ public class ActionBlockModel : MonoBehaviour
         {
             AddActionBlockToVariables(actionBlock, false);
         }
-        
-        //_actionBlocks = actionBlocks.ToList();
-        //UpdateIndexActionBlocks();
     }
 
     public List<string> GetTitlesActionBlocksByTag(string tag)
@@ -280,6 +270,50 @@ public class ActionBlockModel : MonoBehaviour
         }
     }
 
+
+    public void DeleteActionBlock(ActionBlock actionBlock)
+    {
+        OnStartChangeActionBlocksVariables();
+        _actionBlockByTitle.Remove(actionBlock.Title.ToLower());
+        UpdateIndexActionBlockByTags();
+        OnUpdateActionBlocks();
+    }
+    
+    private void UpdateIndexActionBlockByTags()
+    {
+        _actionBlocksByTag.Clear();
+
+        ActionBlock[] actionBlocks = GetActionBlocks().ToArray();
+
+        foreach (var actionBlock in actionBlocks)
+        {
+            // Add Action-Blocks by tag.
+            // Separated elements by ",".
+            foreach (string tagPhrase in actionBlock.Tags)
+            {
+                string[] wordsFromTag = tagPhrase.Split(' ');
+
+
+                // Separated elements by " ".
+                foreach (string tagWord in wordsFromTag)
+                {
+                    // Skip empty symbols.
+                    if (string.IsNullOrEmpty(tagWord)) continue;
+
+                    string tagWordLowCase = tagWord.ToLower();
+
+                    // Create new List for tags if doesn't exist yes.
+                    if (_actionBlocksByTag.TryGetValue(tagWordLowCase, out HashSet<ActionBlock> value1) == false)
+                    {
+                        _actionBlocksByTag[tagWordLowCase] = new HashSet<ActionBlock>() { };
+                    }
+
+                    _actionBlocksByTag[tagWordLowCase].Add(actionBlock);
+                }
+            }
+        }
+    }
+
     private void AddActionBlockToVariables(ActionBlock actionBlock, bool isAddToStart = true)
     {
         string titleLowerCase = actionBlock.Title.ToLower();
@@ -319,97 +353,15 @@ public class ActionBlockModel : MonoBehaviour
     }
 
 
-    public void DeleteActionBlock(ActionBlock actionBlock)
-    {
-        OnStartChangeActionBlocksVariables();
-        _actionBlockByTitle.Remove(actionBlock.Title.ToLower());
-        UpdateIndexActionBlockByTags();
-        OnUpdateActionBlocks();
-    }
     
-    /*
-    private void UpdateIndexActionBlocks()
-    {
-        ActionBlock[] actionBlocks = GetActionBlocks().ToArray();
-        
-        foreach (var actionBlock in actionBlocks)
-        {
-            string titleLowerCase = actionBlock.Title.ToLower();
-        
-            // Add Action-Block by title.
-            _actionBlockByTitle[titleLowerCase] = actionBlock;
-            
-            
-            // Add Action-Blocks by tag.
-            // Separated elements by ",".
-            foreach (string tagPhrase in actionBlock.Tags)
-            {
-                string[] wordsFromTag = tagPhrase.Split(' ');
-                
-                
-                // Separated elements by " ".
-                foreach (string tagWord in wordsFromTag)
-                {
-                    // Skip empty symbols.
-                    if (string.IsNullOrEmpty(tagWord)) continue;
-                
-                    string tagWordLowCase = tagWord.ToLower();
-                
-                    // Create new List for tags if doesn't exist yes.
-                    if (_actionBlocksByTag.TryGetValue(tagWordLowCase, out HashSet<ActionBlock> value1) == false) {
-                        _actionBlocksByTag[tagWordLowCase] = new HashSet<ActionBlock>(){};
-                    }
-                
-
-                    _actionBlocksByTag[tagWordLowCase].Add(actionBlock);
-                }
-            }
-        }
-    }
-    */
-
-    private void UpdateIndexActionBlockByTags()
-    {
-        _actionBlocksByTag.Clear();
-
-        ActionBlock[] actionBlocks = GetActionBlocks().ToArray();
-
-        foreach (var actionBlock in actionBlocks)
-        {
-            // Add Action-Blocks by tag.
-            // Separated elements by ",".
-            foreach (string tagPhrase in actionBlock.Tags)
-            {
-                string[] wordsFromTag = tagPhrase.Split(' ');
-
-
-                // Separated elements by " ".
-                foreach (string tagWord in wordsFromTag)
-                {
-                    // Skip empty symbols.
-                    if (string.IsNullOrEmpty(tagWord)) continue;
-
-                    string tagWordLowCase = tagWord.ToLower();
-
-                    // Create new List for tags if doesn't exist yes.
-                    if (_actionBlocksByTag.TryGetValue(tagWordLowCase, out HashSet<ActionBlock> value1) == false)
-                    {
-                        _actionBlocksByTag[tagWordLowCase] = new HashSet<ActionBlock>() { };
-                    }
-
-                    _actionBlocksByTag[tagWordLowCase].Add(actionBlock);
-                }
-            }
-        }
-    }
-
     private void OnUpdateActionBlocks()
     {
         Save();
     }
 
-    public void OnStartChangeActionBlocksVariables()
+    private void OnStartChangeActionBlocksVariables()
     {
+        /*
         ActionBlock[] actionBlocks = GetActionBlocks().ToArray();
         string actionBlocksJSON = JsonConvert.SerializeObject(actionBlocks);
 
@@ -418,6 +370,7 @@ public class ActionBlockModel : MonoBehaviour
         _fileController.Save(backupFolderPath + "/" + "Action-Blocks_" + 
                              DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".json", 
             actionBlocksJSON);
+        */
     }
     
     private void Save()

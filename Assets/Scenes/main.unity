@@ -9093,6 +9093,7 @@ GameObject:
   - component: {fileID: 2008285835}
   - component: {fileID: 2008285834}
   - component: {fileID: 2008285825}
+  - component: {fileID: 2008285836}
   m_Layer: 0
   m_Name: Main Logic
   m_TagString: Untagged
@@ -9150,6 +9151,7 @@ MonoBehaviour:
   _actionBlockController: {fileID: 2008285818}
   _pageService: {fileID: 2008285825}
   _searchController: {fileID: 2008285829}
+  _alertController: {fileID: 2008285832}
 --- !u!114 &2008285821
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9311,8 +9313,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8fb4bb1fc4cec034491a9c02508be156, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _dragAndDropService: {fileID: 0}
-  _actionBlockController: {fileID: 0}
+  _dragAndDropService: {fileID: 2008285836}
+  _actionBlockController: {fileID: 2008285818}
 --- !u!114 &2008285832
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9367,6 +9369,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _view: {fileID: 2008285834}
+--- !u!114 &2008285836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2008285817}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de6b5a90b47c0d444a95e92b57e64732, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2024325903
 GameObject:
   m_ObjectHideFlags: 0

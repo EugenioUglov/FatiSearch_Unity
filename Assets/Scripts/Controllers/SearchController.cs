@@ -18,6 +18,7 @@ namespace Controllers
         public void Init()
         {
             _view.BindChangeInputFieldValue(OnValueInputFieldChanged);
+            ShowPage();
         }
         
         public string GetTextFromInputField()
@@ -60,10 +61,12 @@ namespace Controllers
 
         private void OnKeyClicked(KeyClickedEvent keyClickedEvent)
         {
-            print("Page " + _pageService.PageState);
+            print(_pageService.PageState);
+            
             if (_pageService.PageState == PageService.PageStateEnum.SearchPage)
             {
                 _view.FocusInputField();
+                
                 if (keyClickedEvent.KeyCodeEntered == KeyCode.Return)
                 {
                     OnEnterInputField();
