@@ -30,8 +30,8 @@ public class BottomMessageView : MonoBehaviour
 
         var position = _bottomMessagePanelTransform.position;
         
-        Vector3 startPosition = new Vector3(position.x, -25, position.z);
-        Vector3 endPosition = new Vector3(position.x, 23, position.z);
+        Vector3 startPosition = new Vector3(position.x, position.y, position.z);
+        Vector3 endPosition = new Vector3(position.x, position.y + 60, position.z);
 
         StartCoroutine(MoveBottomMessage(startPosition: startPosition, endPosition: endPosition, callbackEnd: OnEnd));
 
@@ -45,8 +45,8 @@ public class BottomMessageView : MonoBehaviour
     {
         var position = _bottomMessagePanelTransform.position;
         
-        Vector3 startPosition = new Vector3(position.x, 23, position.z);
-        Vector3 endPosition = new Vector3(position.x, -25, position.z);
+        Vector3 startPosition = new Vector3(position.x, position.y, position.z);
+        Vector3 endPosition = new Vector3(position.x, position.y - 60, position.z);
 
         StartCoroutine(MoveBottomMessage(startPosition, endPosition, callbackEnd: OnEndMove));
 

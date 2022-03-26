@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using Controllers;
 using SFB;
 using TMPro;
@@ -10,7 +8,6 @@ public class ActionBlockModifierController : MonoBehaviour
     [Header("View")]
     [SerializeField] private GameObject _deleteButton;
 
-    
     [Header("Links")]
     [SerializeField] private ActionBlockCreatorController _actionBlockCreatorController;
     [SerializeField] private ActionBlockController _actionBlockController;
@@ -79,11 +76,11 @@ public class ActionBlockModifierController : MonoBehaviour
     public void OnClickButtonChooseImage()
     {
         var extensions = new [] {
-            new ExtensionFilter("Image Files", "png", "jpg", "jpeg")
+            new ExtensionFilter("Image File", "png", "jpg", "jpeg", "ico", "gif")
         };
         
         var paths = StandaloneFileBrowser.OpenFilePanel("Open File", "", extensions, true);
-        
+    
         if (paths.Length > 1)
         {
             _alertController.Show("Choose one file");
@@ -98,7 +95,7 @@ public class ActionBlockModifierController : MonoBehaviour
         _actionBlockCreatorController.ImagePathInputField.GetComponent<TMP_InputField>().text = paths[0];
     }
     
-    
+
     private void SetFieldsForActionBlockToModify(ActionBlockModel.ActionBlock actionBlock)
     {
         _actionBlockCreatorController.TitleInputField.GetComponent<TMP_InputField>().text = actionBlock.Title;
