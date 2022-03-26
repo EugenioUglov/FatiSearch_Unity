@@ -9,8 +9,14 @@ public class BottomMessageView : MonoBehaviour
 {
     [SerializeField] private GameObject _bottomMessagePanel;
     [SerializeField] private TextMeshProUGUI _textBottomAlertComponent;
-    
-    
+
+    private Transform _bottomMessagePanelTransform;
+
+    private void Awake()
+    {
+        _bottomMessagePanelTransform = _bottomMessagePanel.transform;
+    }
+
     public void SetText(string newText)
     {
         // Set color yellow.
@@ -21,13 +27,12 @@ public class BottomMessageView : MonoBehaviour
     public void Show()
     {
         _bottomMessagePanel.SetActive(true);
+
+        var position = _bottomMessagePanelTransform.position;
         
-        Vector3 startPosition = new Vector3(_bottomMessagePanel.transform.position.x, -25,
-            _bottomMessagePanel.transform.position.z);
-        Vector3 endPosition = new Vector3(
-            _bottomMessagePanel.transform.position.x, 23, _bottomMessagePanel.transform.position.z);
-        int speed = 100;
-        
+        Vector3 startPosition = new Vector3(position.x, -25, position.z);
+        Vector3 endPosition = new Vector3(position.x, 23, position.z);
+
         StartCoroutine(MoveBottomMessage(startPosition: startPosition, endPosition: endPosition, callbackEnd: OnEnd));
 
         void OnEnd()
@@ -35,15 +40,30 @@ public class BottomMessageView : MonoBehaviour
             print("end move");
         }
     }
+    
+    public void Hide()
+    {
+        var position = _bottomMessagePanelTransform.position;
+        
+        Vector3 startPosition = new Vector3(position.x, 23, position.z);
+        Vector3 endPosition = new Vector3(position.x, -25, position.z);
 
+        StartCoroutine(MoveBottomMessage(startPosition, endPosition, callbackEnd: OnEndMove));
+
+        void OnEndMove()
+        {
+            _bottomMessagePanel.SetActive(false);
+        }
+    }
+    
     private IEnumerator MoveBottomMessage(Vector3 startPosition, Vector3 endPosition, int speed = 100, Action callbackEnd = null)
     {
-        _bottomMessagePanel.transform.position = startPosition;
+        _bottomMessagePanelTransform.position = startPosition;
         
-        while (_bottomMessagePanel.transform.position != endPosition)
+        while (_bottomMessagePanelTransform.position != endPosition)
         {           
-            _bottomMessagePanel.transform.position = Vector3.MoveTowards(
-                _bottomMessagePanel.transform.position,
+            _bottomMessagePanelTransform.position = Vector3.MoveTowards(
+                _bottomMessagePanelTransform.position,
                 endPosition,
                 Time.deltaTime * speed);
 
@@ -51,21 +71,5 @@ public class BottomMessageView : MonoBehaviour
         }
 
         if (callbackEnd != null) callbackEnd();
-    }
-
-    public void Hide()
-    {
-        Vector3 startPosition = new Vector3(_bottomMessagePanel.transform.position.x, 23,
-            _bottomMessagePanel.transform.position.z);
-        Vector3 endPosition = new Vector3(
-            _bottomMessagePanel.transform.position.x, -25, _bottomMessagePanel.transform.position.z);
-        int speed = 100;
-        
-        StartCoroutine(MoveBottomMessage(startPosition, endPosition, callbackEnd: OnEndMove));
-
-        void OnEndMove()
-        {
-            _bottomMessagePanel.SetActive(false);
-        }
     }
 }

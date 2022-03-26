@@ -7,41 +7,36 @@ using B83.Win32;
 
 public class DragAndDropController : MonoBehaviour
 {
-    List<string> log = new List<string>();
-    public Action<string[]> CallbackGetDroppedFilesPaths;
-    
-    void OnEnable()
-    {
-        // must be installed on the main thread to get the right thread id.
-        UnityDragAndDropHook.InstallHook();
-        UnityDragAndDropHook.OnDroppedFiles += OnFiles;
-    }
-    void OnDisable()
-    {
-        UnityDragAndDropHook.UninstallHook();
-    }
+   [Header("Links")]
+   [SerializeField] private DragAndDropService _dragAndDropService;
+   [SerializeField] private ActionBlockController _actionBlockController;
 
-    void OnFiles(List<string> aFiles, POINT aPos)
-    {
-        CallbackGetDroppedFilesPaths(aFiles.ToArray());
+   public void Init()
+   {
+      _dragAndDropService.CallbackGetDroppedFilesPaths = OnGetDroppedFilesPaths;
+   }
+   
+   private void OnGetDroppedFilesPaths(string[] paths)
+   {
+      foreach (string path in paths)
+      {
+         string fileName = Path.GetFileNameWithoutExtension(path);
+         String[] foldersOfPath = path.Split('\\');
+         List<string> tags = new List<string>();
+                    
+         for (int i = 0; i < foldersOfPath.Length - 1; i++)
+         {
+            // Add to tags folders without the file name or last folder.
+                
+            tags.Add(foldersOfPath[i]);
+         }
 
-
-        // do something with the dropped file names. aPos will contain the 
-        // mouse position within the window where the files has been dropped.
-        //string str = "Dropped " + aFiles.Count + " files at: " + aPos + "\n\t" +
-        //            aFiles.Aggregate((a, b) => a + "\n\t" + b);
-
-
-        //Debug.Log(str);
-        //log.Add(str);
-
-    }
-
-    private void OnGUI()
-    {
-        if (GUILayout.Button("clear log"))
-            log.Clear();
-        foreach (var s in log)
-            GUILayout.Label(s);
-    }
+         ActionBlockModel.ActionBlock actionBlock = 
+            new ActionBlockModel.ActionBlock(fileName, ActionBlockModel.ActionEnum.OpenPath, 
+               path, tags);
+            
+         _actionBlockController.CreateActionBlock(actionBlock);
+         _actionBlockController.ShowActionBlocks();
+      }
+   }
 }

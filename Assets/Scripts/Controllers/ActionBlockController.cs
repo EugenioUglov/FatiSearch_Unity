@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 using Unity.VisualScripting;
 using Debug = UnityEngine.Debug;
@@ -18,9 +19,7 @@ public class ActionBlockController : MonoBehaviour
     [SerializeField] private ActionBlockCreatorController _actionBlockCreatorController;
     [SerializeField] private AlertController _alertController;
     [SerializeField] private BottomMessageController _bottomMessageController;
-
-    public Action CallbackStartLoadingActionBlocksToShow;
-    public Action<string> CallBackActionBlockShowed;
+    [SerializeField] private TextMeshProUGUI _centralLogText;
     
     
     public void Init()
@@ -28,18 +27,21 @@ public class ActionBlockController : MonoBehaviour
         EventAggregator.AddListener<ActionBlockClickedEvent>(this, OnActionBlockClicked);
         EventAggregator.AddListener<ActionBlockSettingsClickedEvent>(this, OnActionBlockSettingsClicked);
         EventAggregator.AddListener<SearchEnteredEvent>(this, OnSearchEntered);
-        _view.CallbackStartLoadingActionBlocksToShow = OnStartLoadingActionBlocksToShow;
-        _view.CallBackActionBlockShowed = OnActionBlocksShowed;
+        
+        ActionBlockModel.ActionBlock[] actionBlocksFromFile = GetActionBlocksFromFile();
+        SetActionBlocks(actionBlocksFromFile);
+        ShowActionBlocks();
     }
 
     public void OnStartLoadingActionBlocksToShow()
     {
-        if (CallbackStartLoadingActionBlocksToShow != null) CallbackStartLoadingActionBlocksToShow();
+        HideSettingsForActionBlocks();
+        _centralLogText.text = "Loading...";
     }
     
     public void OnActionBlocksShowed(string countActionBlocks)
     {
-        if (CallBackActionBlockShowed != null) CallBackActionBlockShowed(countActionBlocks);
+        _centralLogText.text = "";
     }
 
     public ActionBlockModel.ActionBlock[] GetActionBlocksFromFile()

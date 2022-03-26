@@ -8,24 +8,33 @@ namespace Views
     public class SearchView : MonoBehaviour
     {
         [SerializeField] private Button _enterButton;
-        [SerializeField] private GameObject _inputField;
+        [SerializeField] private GameObject _inputFieldGO;
+        [SerializeField] private GameObject _textFromInputFieldGO;
         [SerializeField] private GameObject _searchPage;
+
+        private TMP_InputField _inputFieldTMP;
         
+            
+        private void Awake()
+        {
+            _inputFieldTMP = _inputFieldGO.GetComponent<TMP_InputField>();
+            
+        }
+
         public string GetTextFromInputField()
         {
-            string text = _inputField.GetComponent<TMP_InputField>().text;
+            string text = _inputFieldTMP.text;
             
             return text;
         }
 
         public void ClearInputField()
         {
-            _inputField.GetComponent<TMP_InputField>().text = "";
+            _inputFieldTMP.text = "";
         }
         
         public void ShowPage()
         {
-            print("Show search page");
             _searchPage.SetActive(true);
             FocusInputField();
         } 
@@ -37,8 +46,28 @@ namespace Views
 
         public void FocusInputField()
         {
-            _inputField.GetComponent<TMP_InputField>().Select();
-            _inputField.GetComponent<TMP_InputField>().ActivateInputField();
+            _inputFieldTMP.Select();
+            _inputFieldTMP.ActivateInputField();
+        }
+
+        public void OnEnterInputField()
+        {
+            _textFromInputFieldGO.GetComponent<TextMeshProUGUI>().color = new Color32(50, 50, 50, 255);
+            FocusInputField();
+        }
+        
+        public void BindChangeInputFieldValue(Action<string> callbackValueChanged)
+        {
+            _inputFieldTMP.onValueChanged.AddListener(delegate
+            {
+                OnValueInputFieldChanged();
+                callbackValueChanged(GetTextFromInputField());
+            });
+        }
+        
+        private void OnValueInputFieldChanged()
+        {
+            _textFromInputFieldGO.GetComponent<TextMeshProUGUI>().color = new Color32(50, 50, 50, 128);
         }
     }
 }

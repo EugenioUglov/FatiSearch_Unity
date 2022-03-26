@@ -19,7 +19,6 @@ public class ActionBlockView : MonoBehaviour
     [SerializeField] private GameObject _foundResultsGameObject;
     
     public Action CallbackStartLoadingActionBlocksToShow;
-    public Action<string> CallBackActionBlockShowed;
     
     private List<GameObject> actionBlocksPrefabsShowed = new List<GameObject>();
     
@@ -157,8 +156,6 @@ public class ActionBlockView : MonoBehaviour
  
         
         _searchPage.SetActive(true);
-
-        if (CallBackActionBlockShowed != null) CallBackActionBlockShowed(actionBlocksPrefabsShowed.Count.ToString());
     }
     
     private bool IsURLValid(string url)

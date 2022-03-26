@@ -2187,7 +2187,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 0.0000071525574, y: 22.825012}
+  m_AnchoredPosition: {x: 0.0000071525574, y: 22.824951}
   m_SizeDelta: {x: 337.8855, y: 45.65}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &435975434
@@ -3733,7 +3733,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -18.686096, y: -2.539795}
+  m_AnchoredPosition: {x: -18.685669, y: -2.5396729}
   m_SizeDelta: {x: 75.9449, y: 20.7108}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &818442482
@@ -6752,7 +6752,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -573.43, y: -35.5}
+  m_AnchoredPosition: {x: -573.43, y: -35.499634}
   m_SizeDelta: {x: 250.2, y: -100.48999}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1301120463
@@ -6884,7 +6884,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1327070040}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -6906,7 +6906,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -71, y: 15}
-  m_SizeDelta: {x: 100, y: 100}
+  m_SizeDelta: {x: 100, y: 476}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1337215234
 GameObject:
@@ -8313,7 +8313,7 @@ GameObject:
   - component: {fileID: 1775923032}
   - component: {fileID: 1775923031}
   m_Layer: 5
-  m_Name: Found Results - Text (TMP)
+  m_Name: Search Results - Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8447,7 +8447,7 @@ GameObject:
   - component: {fileID: 1813738403}
   - component: {fileID: 1813738402}
   m_Layer: 5
-  m_Name: SearchResults - Panel
+  m_Name: Search Results - Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8470,7 +8470,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 36, y: -4.5500183}
+  m_AnchoredPosition: {x: 36, y: -4.5499268}
   m_SizeDelta: {x: 988, y: -101.700035}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1813738402
@@ -9118,6 +9118,7 @@ MonoBehaviour:
   _actionBlockCreatorController: {fileID: 2008285826}
   _alertController: {fileID: 2008285832}
   _bottomMessageController: {fileID: 2008285835}
+  _centralLogText: {fileID: 547541391}
 --- !u!4 &2008285819
 Transform:
   m_ObjectHideFlags: 0
@@ -9174,7 +9175,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _actionBlockController: {fileID: 2008285818}
-  _centralLogText: {fileID: 547541391}
   _dragAndDropController: {fileID: 2008285831}
   _searchController: {fileID: 2008285829}
 --- !u!114 &2008285823
@@ -9295,8 +9295,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9b007cdadd74d1d967bd8e6c79c4a89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _enterButton: {fileID: 0}
-  _inputField: {fileID: 1739705076}
+  _enterButton: {fileID: 1110672481}
+  _inputFieldGO: {fileID: 1739705076}
+  _textFromInputFieldGO: {fileID: 944470930}
   _searchPage: {fileID: 1426625002}
 --- !u!114 &2008285831
 MonoBehaviour:
@@ -9310,6 +9311,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8fb4bb1fc4cec034491a9c02508be156, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _dragAndDropService: {fileID: 0}
+  _actionBlockController: {fileID: 0}
 --- !u!114 &2008285832
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9545,11 +9548,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
-  m_ScreenMatchMode: 0
+  m_ReferenceResolution: {x: 800, y: 1080}
+  m_ScreenMatchMode: 1
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96

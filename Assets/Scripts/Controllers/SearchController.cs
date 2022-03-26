@@ -15,6 +15,11 @@ namespace Controllers
             EventAggregator.AddListener<KeyClickedEvent>(this, OnKeyClicked);
         }
 
+        public void Init()
+        {
+            _view.BindChangeInputFieldValue(OnValueInputFieldChanged);
+        }
+        
         public string GetTextFromInputField()
         {
             return _view.GetTextFromInputField();
@@ -50,7 +55,7 @@ namespace Controllers
             searchEnteredEvent.Request = userRequest;
             EventAggregator.Invoke<SearchEnteredEvent>(searchEnteredEvent);
 
-            _view.FocusInputField();
+            _view.OnEnterInputField();
         }
 
         private void OnKeyClicked(KeyClickedEvent keyClickedEvent)
@@ -64,6 +69,12 @@ namespace Controllers
                     OnEnterInputField();
                 }
             }
+        }
+
+        private void OnValueInputFieldChanged(string text)
+        {
+            
+            print("Value changed");
         }
     }
 }
