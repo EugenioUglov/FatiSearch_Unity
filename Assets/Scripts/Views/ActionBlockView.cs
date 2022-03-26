@@ -127,8 +127,6 @@ public class ActionBlockView : MonoBehaviour
                                                     actionBlockPrefab.GetComponent<ActionBlockEntity>().GetTitle());
             }
         }
-        
-        OnImagesSet();
     }
     
     public void ClearActionBlocks()
@@ -163,11 +161,6 @@ public class ActionBlockView : MonoBehaviour
         if (CallBackActionBlockShowed != null) CallBackActionBlockShowed(actionBlocksPrefabsShowed.Count.ToString());
     }
     
-    private void OnImagesSet()
-    {
-        print("Images set");
-    }
-
     private bool IsURLValid(string url)
     {
         return Uri.IsWellFormedUriString(url, UriKind.Absolute);

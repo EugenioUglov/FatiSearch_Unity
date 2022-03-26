@@ -29,7 +29,7 @@ public class ActionBlockController : MonoBehaviour
         EventAggregator.AddListener<ActionBlockSettingsClickedEvent>(this, OnActionBlockSettingsClicked);
         EventAggregator.AddListener<SearchEnteredEvent>(this, OnSearchEntered);
         _view.CallbackStartLoadingActionBlocksToShow = OnStartLoadingActionBlocksToShow;
-        _view.CallBackActionBlockShowed = OnActionBlockShowed;
+        _view.CallBackActionBlockShowed = OnActionBlocksShowed;
     }
 
     public void OnStartLoadingActionBlocksToShow()
@@ -37,7 +37,7 @@ public class ActionBlockController : MonoBehaviour
         if (CallbackStartLoadingActionBlocksToShow != null) CallbackStartLoadingActionBlocksToShow();
     }
     
-    public void OnActionBlockShowed(string countActionBlocks)
+    public void OnActionBlocksShowed(string countActionBlocks)
     {
         if (CallBackActionBlockShowed != null) CallBackActionBlockShowed(countActionBlocks);
     }
@@ -58,9 +58,11 @@ public class ActionBlockController : MonoBehaviour
     }
     
     public void ShowActionBlocks()
-    { 
+    {
+        OnStartLoadingActionBlocksToShow();
         var allActionBlocks = _model.GetActionBlocks();
         _view.ShowActionBlocks(allActionBlocks.ToHashSet());
+        OnActionBlocksShowed(allActionBlocks.Count.ToString());
     }
 
     public void ShowSettingsForActionBlock()

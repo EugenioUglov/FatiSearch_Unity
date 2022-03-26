@@ -14,7 +14,7 @@ public class ActionBlockModifierController : MonoBehaviour
     [Header("Links")]
     [SerializeField] private ActionBlockCreatorController _actionBlockCreatorController;
     [SerializeField] private ActionBlockController _actionBlockController;
-    [SerializeField] private PageController _pageController;
+    [SerializeField] private PageService _pageService;
     [SerializeField] private SearchController _searchController;
     
     public string OriginalTitle => originalActionBlock.Title;
@@ -37,7 +37,7 @@ public class ActionBlockModifierController : MonoBehaviour
         originalActionBlock = actionBlock;
         SetFieldsForActionBlockToModify(actionBlock);
         _actionBlockCreatorController.ShowSettingsToCreateActionBlock();
-        _pageController.PageState = PageController.PageStateEnum.ActionBlockModifier;
+        _pageService.PageState = PageService.PageStateEnum.ActionBlockModifier;
         
         _deleteButton.SetActive(true);
         _searchController.HidePage();
@@ -47,7 +47,10 @@ public class ActionBlockModifierController : MonoBehaviour
     {
         _actionBlockController.DeleteActionBlock(originalActionBlock);
         _deleteButton.SetActive(false);
-        _actionBlockCreatorController.OnEnd();
+        _actionBlockController.ShowActionBlocks();
+        _actionBlockCreatorController.HidePage();
+        //_searchController.ShowPage();
+        _actionBlockCreatorController.SetDefaultFields();
     }
     
     public void OnClickButtonChooseImage()

@@ -1,8 +1,8 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PageController : MonoBehaviour
+public class PageService : MonoBehaviour
 {
     [HideInInspector] public string PageState;
 

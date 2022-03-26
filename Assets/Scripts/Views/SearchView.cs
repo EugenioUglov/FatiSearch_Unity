@@ -25,10 +25,8 @@ namespace Views
         
         public void ShowPage()
         {
+            print("Show search page");
             _searchPage.SetActive(true);
-            _inputField.GetComponent<TMP_InputField>().GetComponent<TMP_InputField>().Select();
-            _inputField.GetComponent<TMP_InputField>().GetComponent<TMP_InputField>().ActivateInputField();
-            
             FocusInputField();
         } 
     

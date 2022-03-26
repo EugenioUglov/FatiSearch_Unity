@@ -6,6 +6,13 @@ namespace Controllers
     {
         void Update()
         {
+            if (Input.anyKeyDown)
+            {
+                KeyClickedEvent keyClickedEvent = new KeyClickedEvent();
+                keyClickedEvent.KeyCodeEntered = KeyCode.None;
+                EventAggregator.Invoke<KeyClickedEvent>(keyClickedEvent);
+            }
+
             if (Input.GetKeyUp(KeyCode.Return))
             {
                 KeyClickedEvent keyClickedEvent = new KeyClickedEvent();

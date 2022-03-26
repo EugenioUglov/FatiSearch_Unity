@@ -20,13 +20,13 @@ public class ActionBlockCreatorController : MonoBehaviour
     [SerializeField] private GameObject _actionBlockSettingsPage;
     [SerializeField] private ActionBlockController _actionBlockController;
     [SerializeField] private ActionBlockModifierController _actionBlockModifierController;
-    [SerializeField] private PageController _pageController;
+    [SerializeField] private PageService _pageService;
     [SerializeField] private SearchController _searchController;
     
     
     public void ShowSettingsToCreateActionBlock()
     {
-        _pageController.PageState = PageController.PageStateEnum.ActionBlockCreator;
+        _pageService.PageState = PageService.PageStateEnum.ActionBlockCreator;
         
         _searchController.HidePage();
         ShowSettingsForActionBlock();
@@ -78,19 +78,23 @@ public class ActionBlockCreatorController : MonoBehaviour
         string imagePath = ImagePathInputField.GetComponent<TMP_InputField>().text;
         ActionBlockModel.ActionBlock actionBlock = new ActionBlockModel.ActionBlock(title, action, content, tagsList, imagePath);
 
-        if (_pageController.PageState == PageController.PageStateEnum.ActionBlockCreator)
+        if (_pageService.PageState == PageService.PageStateEnum.ActionBlockCreator)
         {
             bool isCreated = _actionBlockController.CreateActionBlock(actionBlock);
             if (isCreated == false) return;
         }
-        else if (_pageController.PageState == PageController.PageStateEnum.ActionBlockModifier)
+        else if (_pageService.PageState == PageService.PageStateEnum.ActionBlockModifier)
         {
             _actionBlockController.UpdateActionBlock(_actionBlockModifierController.OriginalTitle, actionBlock);
             _actionBlockModifierController.HideDeleteButton();
         }
         
+        
         _searchController.ClearInputField();
-        OnEnd();
+        HidePage();
+        _searchController.ShowPage();
+        _actionBlockController.ShowActionBlocks();
+        SetDefaultFields();
     }
     
     public void OnClickButtonCloseSettingsActionBlock()
@@ -98,23 +102,14 @@ public class ActionBlockCreatorController : MonoBehaviour
         HidePage();
         _searchController.ShowPage();
         
-        if (_pageController.PageState == PageController.PageStateEnum.ActionBlockModifier)
+        if (_pageService.PageState == PageService.PageStateEnum.ActionBlockModifier)
         {
             SetDefaultFields();
             _actionBlockModifierController.HideDeleteButton();
         }
     }
-    
-    public void OnEnd()
-    {
-        _actionBlockController.ShowActionBlocks();
-        HidePage();
-        //_searchController.ShowPage();
-        SetDefaultFields();
-    }
 
-
-    private void SetDefaultFields()
+    public void SetDefaultFields()
     {
         TitleInputField.GetComponent<TMP_InputField>().text = "";
         ContentInputField.GetComponent<TMP_InputField>().text = "";

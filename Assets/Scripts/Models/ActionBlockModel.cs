@@ -497,10 +497,8 @@ public class ActionBlockModel : MonoBehaviour
                 
             foreach (string tag in tags)
             {
-                print("tag not trimmed: " + tag);
                 // Delete empty spaces from sides of tags.
                 string tagTrimmed = tag.Trim();
-                print("tag not trimmed: " + tagTrimmed);
                 
                 if (string.IsNullOrEmpty(tagTrimmed) == false)
                 {

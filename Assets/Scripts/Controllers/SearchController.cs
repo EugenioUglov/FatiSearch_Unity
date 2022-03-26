@@ -8,10 +8,11 @@ namespace Controllers
     public class SearchController : MonoBehaviour
     {
         [SerializeField] private SearchView _view;
+        [SerializeField] private PageService _pageService;
 
         private void Awake()
         {
-            EventAggregator.AddListener<KeyClickedEvent>(this, OnKeyEnterClicked);
+            EventAggregator.AddListener<KeyClickedEvent>(this, OnKeyClicked);
         }
 
         public string GetTextFromInputField()
@@ -26,6 +27,8 @@ namespace Controllers
 
         public void ShowPage()
         {
+            _pageService.PageState = PageService.PageStateEnum.SearchPage;
+            
             _view.ShowPage();
         }
         
@@ -38,7 +41,6 @@ namespace Controllers
         {
             _view.ClearInputField();
         }
-        
 
         
         private void OnEnterInputField()
@@ -47,16 +49,20 @@ namespace Controllers
             SearchEnteredEvent searchEnteredEvent = new SearchEnteredEvent();
             searchEnteredEvent.Request = userRequest;
             EventAggregator.Invoke<SearchEnteredEvent>(searchEnteredEvent);
-            
+
             _view.FocusInputField();
         }
-        
-        
-        private void OnKeyEnterClicked(KeyClickedEvent keyClickedEvent)
+
+        private void OnKeyClicked(KeyClickedEvent keyClickedEvent)
         {
-            if (keyClickedEvent.KeyCodeEntered == KeyCode.Return)
+            print("Page " + _pageService.PageState);
+            if (_pageService.PageState == PageService.PageStateEnum.SearchPage)
             {
-                OnEnterInputField();    
+                _view.FocusInputField();
+                if (keyClickedEvent.KeyCodeEntered == KeyCode.Return)
+                {
+                    OnEnterInputField();
+                }
             }
         }
     }
