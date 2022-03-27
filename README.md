@@ -1,7 +1,7 @@
 # FatiSearch_Unity
 Quick data search by phrase.
 
-<iframe width="854" height="480" src="https://youtu.be/9hkBBSPFAek" frameborder="0" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/9hkBBSPFAek" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 <h2>Application Features</h2>
 * Search your data by keywords as in google search.
