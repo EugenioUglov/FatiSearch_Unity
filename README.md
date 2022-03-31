@@ -1,4 +1,4 @@
-# FatiSearch_Unity
+# Yes Sir - Unity
 Quick data search by phrase.
 
 <h2>Application Features</h2>
