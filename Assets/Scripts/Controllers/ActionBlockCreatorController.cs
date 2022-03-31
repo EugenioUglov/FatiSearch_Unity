@@ -53,6 +53,50 @@ public class ActionBlockCreatorController : MonoBehaviour
         _actionBlockSettingsPage.SetActive(false);
     }
 
+    public void OnClickButtonSaveNewSettingsActionBlock()
+    {
+        string title = TitleInputField.GetComponent<TMP_InputField>().text;
+        string action = ActionBlockModel.ActionEnum.OpenPath;
+        //ActionBlockModel.ActionEnum action = _actionDropdown.GetComponent<Dropdown>().value.ToString();
+        string content = ContentInputField.GetComponent<TMP_InputField>().text;
+        string tagsTextFromInputField = TagsInputField.GetComponent<TMP_InputField>().text;
+        List<string> tagsList = new List<string>();
+
+        if (string.IsNullOrEmpty(tagsTextFromInputField) == false)
+        {
+            string[] tags_to_add = tagsTextFromInputField.Split(',');
+
+            for (int i_tag = 0; i_tag < tags_to_add.Length; i_tag++)
+            {
+                // Delete empty spaces from sides of tags.
+                string tagToAdd = tags_to_add[i_tag].Trim();
+                
+                tagsList.Add(tagToAdd);
+            }
+        }
+
+        string imagePath = ImagePathInputField.GetComponent<TMP_InputField>().text;
+        ActionBlockModel.ActionBlock actionBlock = new ActionBlockModel.ActionBlock(title, action, content, tagsList, imagePath);
+
+        if (_pageService.PageState == PageService.PageStateEnum.ActionBlockCreator)
+        {
+            bool isCreated = _actionBlockController.CreateActionBlock(actionBlock);
+            if (isCreated == false) return;
+        }
+        else if (_pageService.PageState == PageService.PageStateEnum.ActionBlockModifier)
+        {
+            _actionBlockController.UpdateActionBlock(_actionBlockModifierController.OriginalTitle, actionBlock);
+            _actionBlockModifierController.HideDeleteButton();
+        }
+        
+        
+        _searchController.ClearInputField();
+        HidePage();
+        _searchController.ShowPage();
+        _actionBlockController.ShowActionBlocks();
+        SetDefaultFields();
+    }
+    
     public void OnClickButtonCloseSettingsActionBlock()
     {
         HidePage();
@@ -95,8 +139,7 @@ public class ActionBlockCreatorController : MonoBehaviour
         
         string imagePath = ImagePathInputField.GetComponent<TMP_InputField>().text;
         ActionBlockModel.ActionBlock actionBlockNew = new ActionBlockModel.ActionBlock(title, action, content, tagsList, imagePath);
-        _actionBlockController.SetActionBlocksToShow();
-        _actionBlockController.RefreshActionBlocksOnPage();
+        _actionBlockController.ShowActionBlocks();
         HidePage();
         SetDefaultFields();
     }

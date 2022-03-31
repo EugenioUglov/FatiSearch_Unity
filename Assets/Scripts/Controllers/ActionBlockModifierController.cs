@@ -45,8 +45,7 @@ public class ActionBlockModifierController : MonoBehaviour
     {
         _actionBlockController.DeleteActionBlock(originalActionBlock);
         _deleteButton.SetActive(false);
-        _actionBlockController.SetActionBlocksToShow();
-        _actionBlockController.RefreshActionBlocksOnPage();
+        _actionBlockController.ShowActionBlocks();
         _actionBlockCreatorController.HidePage();
         //_searchController.ShowPage();
         _actionBlockCreatorController.SetDefaultFields();
