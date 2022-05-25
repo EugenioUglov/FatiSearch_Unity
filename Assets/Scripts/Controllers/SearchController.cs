@@ -61,8 +61,6 @@ namespace Controllers
 
         private void OnKeyClicked(KeyClickedEvent keyClickedEvent)
         {
-            print(_pageService.PageState);
-            
             if (_pageService.PageState == PageService.PageStateEnum.SearchPage)
             {
                 _view.FocusInputField();

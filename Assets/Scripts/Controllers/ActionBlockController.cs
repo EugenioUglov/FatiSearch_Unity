@@ -18,8 +18,7 @@ public class ActionBlockController : MonoBehaviour
     [SerializeField] private ActionBlockModel _model;
     [SerializeField] private ActionBlockView _view;
 
-    [SerializeField] private ActionBlockModifierController _actionBlockModifierController;
-    [SerializeField] private ActionBlockCreatorController _actionBlockCreatorController;
+    [SerializeField] private ActionBlockSettingsController _actionBlockSettingsController;
     [SerializeField] private SearchController _searchController;
     [SerializeField] private AlertController _alertController;
     [SerializeField] private BottomMessageController _bottomMessageController;
@@ -33,11 +32,19 @@ public class ActionBlockController : MonoBehaviour
     private int _maxCountActionBlocksToShowAtTime = 10;
     private int _countShowedActionBlocks = 0;
     
-    private float _startScrollValue = 1;
-    private float _endScrollValue = 0;
-    
     private bool _isMouseButtonLeftDown = false;
     
+    private void Update()
+    {
+        if (Input.GetMouseButton(0))
+        {
+            _isMouseButtonLeftDown = true;
+        }
+        else
+        {
+            _isMouseButtonLeftDown = false;
+        }
+    }
     
     public void Init()
     {
@@ -109,30 +116,32 @@ public class ActionBlockController : MonoBehaviour
 
         _searchController.ShowPage();
         OnActionBlocksShowed(_actionBlocksToShow.Count.ToString());
-        //_scrollbar.interactable = true;
-    }
-
-    public void ShowSettingsForActionBlock()
-    {
-        _actionBlockCreatorController.ShowSettingsForActionBlock();
     }
 
     public void HideSettingsForActionBlocks()
     {
-        _actionBlockCreatorController.HidePage();
+        _actionBlockSettingsController.HidePage();
     }
 
     public bool CreateActionBlock(ActionBlockModel.ActionBlock actionBlock)
     {
         bool isCreated = _model.CreateActionBlock(actionBlock);
+        
+        RefreshView();
+        
         return isCreated;
     }
     
     public bool UpdateActionBlock(string title, ActionBlockModel.ActionBlock actionBlock)
     {
-        return _model.UpdateActionBlock(title, actionBlock);
+        bool isUpdated = _model.UpdateActionBlock(title, actionBlock);
+        
+        RefreshView();
+        
+        return isUpdated;
     }
 
+    
     public void DeleteActionBlock(ActionBlockModel.ActionBlock actionBlock)
     {
         _model.DeleteActionBlock(actionBlock);
@@ -141,6 +150,105 @@ public class ActionBlockController : MonoBehaviour
         RefreshActionBlocksOnPage();
     }
 
+
+
+    public bool ExecuteByTitle(string title)
+    {
+        ActionBlockModel.ActionBlock actionBlock = GetActionBlockByTitle(title);
+
+        if (actionBlock.Title != null)
+        {
+            ExecuteByActionBlock(actionBlock);
+            
+            return true;
+        }
+
+        return false;
+    }
+
+    public void OnClickButtonCreate()
+    {
+        _searchController.HidePage();
+        _actionBlockSettingsController.ShowSettingsToCreateActionBlock();
+    }
+
+    public void SetActionBlocksToShow(HashSet<ActionBlockModel.ActionBlock> newActionBlocksToShow = null)
+    {
+        if (newActionBlocksToShow == null)
+        {
+            newActionBlocksToShow = _model.GetActionBlocks().ToHashSet();
+        }
+        
+        _view.ClearActionBlocks();
+        
+        _view.ShowCountTextFoundActionBlocks(newActionBlocksToShow.Count);
+        
+        _countShowedActionBlocks = 0;
+        print("'ClearActionBlocks'");
+        _actionBlocksToShow = newActionBlocksToShow;
+    }
+    
+    private void OnActionBlockClicked(ActionBlockClickedEvent actionBlockClickedEvent)
+    {
+        string titleActionBlock = actionBlockClickedEvent.Title;
+        ExecuteByTitle(titleActionBlock);
+    }
+
+    private void OnActionBlockSettingsClicked(ActionBlockSettingsClickedEvent actionBlockSettingsClickedEvent)
+    {
+        string titleActionBlock = actionBlockSettingsClickedEvent.Title;
+        ActionBlockModel.ActionBlock actionBlock = GetActionBlockByTitle(titleActionBlock);
+        _actionBlockSettingsController.ShowSettingsToUpdateActionBlock(actionBlock);
+    }
+
+    private void OnSearchEntered(SearchEnteredEvent searchEnteredEvent)
+    {
+        string userRequest = searchEnteredEvent.Request;
+        //HashSet<ActionBlockModel.ActionBlock> actionBlocksToShow;
+        HashSet<ActionBlockModel.ActionBlock> actionBlocksToShow = _model.GetActionBlocks().ToHashSet();
+        
+        if (userRequest == "")
+        {
+            actionBlocksToShow = _model.GetActionBlocks().ToHashSet();
+        }
+        else
+        {
+            bool isExecutedByTitle = ExecuteByTitle(userRequest);
+            actionBlocksToShow = _model.GetActionBlocksByRequest(userRequest).ToHashSet();
+        }
+        
+        SetActionBlocksToShow(actionBlocksToShow);
+        RefreshActionBlocksOnPage();
+    }
+    
+    private void ExecuteByActionBlock(ActionBlockModel.ActionBlock actionBlock)
+    {
+        if (actionBlock.Action == ActionBlockModel.ActionEnum.OpenPath)
+        {
+            bool isOpened = OpenPath(actionBlock.Content);
+            
+            if (isOpened)
+            {
+                _bottomMessageController.Show("Execution \"" + actionBlock.Title + "\"");
+            }
+        }
+        else if (actionBlock.Action == ActionBlockModel.ActionEnum.SelectPath) 
+        {
+            SelectPath(actionBlock.Content);
+        }
+    }
+
+    
+    private void RefreshView()
+    {
+        _searchController.ClearInputField();
+        _searchController.ShowPage();
+        HashSet<ActionBlockModel.ActionBlock> actionBlocksToShow = _model.GetActionBlocks().ToHashSet();
+        SetActionBlocksToShow(actionBlocksToShow);
+        RefreshActionBlocksOnPage();
+        _view.SetDefaultSettingsFields();
+    }
+    
     private void OnScrollbarValueChange(float value)
     {
         if (value <= 0.2f)
@@ -177,7 +285,7 @@ public class ActionBlockController : MonoBehaviour
         }
     }
     
-    IEnumerator WaitForMouseButtonLeftUp(Action callbackMouseButtonLeftUp)
+    private IEnumerator WaitForMouseButtonLeftUp(Action callbackMouseButtonLeftUp)
     {
         while (_isMouseButtonLeftDown)
         {
@@ -187,7 +295,7 @@ public class ActionBlockController : MonoBehaviour
         callbackMouseButtonLeftUp.Invoke();
     }
     
-    IEnumerator RefreshActionBlocksAfterPause(float pauseSec, Action callbackEnd = null)
+    private IEnumerator RefreshActionBlocksAfterPause(float pauseSec, Action callbackEnd = null)
     {
         yield return new WaitForSeconds(pauseSec);
         
@@ -196,154 +304,7 @@ public class ActionBlockController : MonoBehaviour
         callbackEnd?.Invoke();
     }
 
-    private void Update()
-    {
-        if (Input.GetMouseButton(0))
-        {
-            _isMouseButtonLeftDown = true;
-        }
-        else
-        {
-            _isMouseButtonLeftDown = false;
-        }
-
-        if (Input.GetMouseButton(1))
-        {
-            Debug.Log("Right Mouse Button Down");
-        }
-
-        if (Input.GetMouseButton(2))
-        {
-            Debug.Log("Middle Mouse Button Down");
-        }
-    }
-
-    public bool ExecuteByTitle(string title)
-    {
-        ActionBlockModel.ActionBlock actionBlock = GetActionBlockByTitle(title);
-
-        if (actionBlock.Title != null)
-        {
-            ExecuteByActionBlock(actionBlock);
-            
-            return true;
-        }
-
-        return false;
-    }
-
-    public void OnClickButtonSaveNewSettingsActionBlock()
-    {
-        string title = _view.TitleInputField.GetComponent<TMP_InputField>().text;
-        string action = ActionBlockModel.ActionEnum.OpenPath;
-        //ActionBlockModel.ActionEnum action = _actionDropdown.GetComponent<Dropdown>().value.ToString();
-        string content = _view.ContentInputField.GetComponent<TMP_InputField>().text;
-        string tagsTextFromInputField = _view.TagsInputField.GetComponent<TMP_InputField>().text;
-        List<string> tagsList = new List<string>();
-
-        if (string.IsNullOrEmpty(tagsTextFromInputField) == false)
-        {
-            string[] tags_to_add = tagsTextFromInputField.Split(',');
-
-            for (int i_tag = 0; i_tag < tags_to_add.Length; i_tag++)
-            {
-                // Delete empty spaces from sides of tags.
-                string tagToAdd = tags_to_add[i_tag].Trim();
-                
-                tagsList.Add(tagToAdd);
-            }
-        }
-
-        string imagePath = _view.ImagePathInputField.GetComponent<TMP_InputField>().text;
-        ActionBlockModel.ActionBlock actionBlock = new ActionBlockModel.ActionBlock(title, action, content, tagsList, imagePath);
-
-        if (_pageService.PageState == PageService.PageStateEnum.ActionBlockCreator)
-        {
-            bool isCreated = CreateActionBlock(actionBlock);
-            if (isCreated == false) return;
-        }
-        else if (_pageService.PageState == PageService.PageStateEnum.ActionBlockModifier)
-        {
-            bool isUpdated = UpdateActionBlock(_actionBlockModifierController.OriginalTitle, actionBlock);
-            if (isUpdated == false) return;
-                
-            _actionBlockModifierController.HideDeleteButton();
-        }
-        
-        
-        _searchController.ClearInputField();
-        _actionBlockCreatorController.HidePage();
-        _searchController.ShowPage();
-        HashSet<ActionBlockModel.ActionBlock> actionBlocksToShow = _model.GetActionBlocks().ToHashSet();
-        SetActionBlocksToShow(actionBlocksToShow);
-        RefreshActionBlocksOnPage();
-        _view.SetDefaultSettingsFields();
-    }
-
-    public void SetActionBlocksToShow(HashSet<ActionBlockModel.ActionBlock> newActionBlocksToShow = null)
-    {
-        if (newActionBlocksToShow == null)
-        {
-            newActionBlocksToShow = _model.GetActionBlocks().ToHashSet();
-        }
-        
-        _view.ShowCountTextFoundActionBlocks(newActionBlocksToShow.Count);
-        
-        _countShowedActionBlocks = 0;
-        _view.ClearActionBlocks();
-        _actionBlocksToShow = newActionBlocksToShow;
-    }
     
-    private void OnActionBlockClicked(ActionBlockClickedEvent actionBlockClickedEvent)
-    {
-        string titleActionBlock = actionBlockClickedEvent.Title;
-        ExecuteByTitle(titleActionBlock);
-    }
-
-    private void OnActionBlockSettingsClicked(ActionBlockSettingsClickedEvent actionBlockSettingsClickedEvent)
-    {
-        string titleActionBlock = actionBlockSettingsClickedEvent.Title;
-        ActionBlockModel.ActionBlock actionBlock = GetActionBlockByTitle(titleActionBlock);
-        _actionBlockModifierController.ShowSettingsToUpdateActionBlock(actionBlock);
-    }
-
-    private void OnSearchEntered(SearchEnteredEvent searchEnteredEvent)
-    {
-        string userRequest = searchEnteredEvent.Request;
-        //HashSet<ActionBlockModel.ActionBlock> actionBlocksToShow;
-        HashSet<ActionBlockModel.ActionBlock> actionBlocksToShow = _model.GetActionBlocks().ToHashSet();
-        
-        if (userRequest == "")
-        {
-            actionBlocksToShow = _model.GetActionBlocks().ToHashSet();
-        }
-        else
-        {
-            bool isExecutedByTitle = ExecuteByTitle(userRequest);
-            actionBlocksToShow = _model.GetActionBlocksByRequest(userRequest).ToHashSet();
-        }
-        
-        SetActionBlocksToShow(actionBlocksToShow);
-        RefreshActionBlocksOnPage();
-    }
-    
-    private void ExecuteByActionBlock(ActionBlockModel.ActionBlock actionBlock)
-    {
-        if (actionBlock.Action == ActionBlockModel.ActionEnum.OpenPath)
-        {
-            bool isOpened = OpenPath(actionBlock.Content);
-            
-            //if (isOpened)
-            {
-                _bottomMessageController.Show("Execution \"" + actionBlock.Title + "\"");
-            }
-        }
-        else if (actionBlock.Action == ActionBlockModel.ActionEnum.SelectPath) 
-        {
-            SelectPath(actionBlock.Content);
-        }
-    }
-
     private bool OpenPath(string path)
     {
         bool isOpened = false;

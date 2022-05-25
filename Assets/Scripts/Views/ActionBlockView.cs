@@ -28,7 +28,10 @@ public class ActionBlockView : MonoBehaviour
     
     private List<GameObject> _actionBlocksPrefabsShowed = new List<GameObject>();
     
-
+    private float _topScrollbarValue = 1;
+    private float _bottomScrollbarValue = 0;
+    
+    
     public void ShowActionBlocks(HashSet<ActionBlockModel.ActionBlock> actionBlocks)
     {
         _searchPage.SetActive(false);
@@ -60,6 +63,7 @@ public class ActionBlockView : MonoBehaviour
 
     public void AddActionBlock(ActionBlockModel.ActionBlock actionBlock)
     {
+        print(actionBlock.Title);
         GameObject actionBlockPrefabShowed = Instantiate(_actionBlockPrefab, 
             _scrollViewContent.transform, false) as GameObject;
       
@@ -77,6 +81,8 @@ public class ActionBlockView : MonoBehaviour
     
     public void ClearActionBlocks()
     {
+        _scrollbar.value = _topScrollbarValue;
+        
         foreach (var actionBlockButton in _actionBlocksPrefabsShowed)
         {
             // Delete old searched Action-Blocks.
@@ -90,6 +96,14 @@ public class ActionBlockView : MonoBehaviour
     public void ShowExecutionError()
     {
         _executionErrorPanel.SetActive(true);
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            _scrollbar.value -= 0.1f;
+        }
     }
 
     public void BindScrollbarValueChange(Action<float> handler)
