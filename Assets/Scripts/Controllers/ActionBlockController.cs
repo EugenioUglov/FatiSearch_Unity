@@ -51,6 +51,7 @@ public class ActionBlockController : MonoBehaviour
         EventAggregator.AddListener<ActionBlockClickedEvent>(this, OnActionBlockClicked);
         EventAggregator.AddListener<ActionBlockSettingsClickedEvent>(this, OnActionBlockSettingsClicked);
         EventAggregator.AddListener<SearchEnteredEvent>(this, OnSearchEntered);
+        EventAggregator.AddListener<ValueChangedInInputFieldSearchEvent>(this, OnValueChangedInInputFieldSearch);
 
         _actionBlocksToShow = new HashSet<ActionBlockModel.ActionBlock>();
         ActionBlockModel.ActionBlock[] actionBlocksFromFile = GetActionBlocksFromFile();
@@ -204,7 +205,6 @@ public class ActionBlockController : MonoBehaviour
     private void OnSearchEntered(SearchEnteredEvent searchEnteredEvent)
     {
         string userRequest = searchEnteredEvent.Request;
-        //HashSet<ActionBlockModel.ActionBlock> actionBlocksToShow;
         HashSet<ActionBlockModel.ActionBlock> actionBlocksToShow = _model.GetActionBlocks().ToHashSet();
         
         if (userRequest == "")
@@ -219,6 +219,25 @@ public class ActionBlockController : MonoBehaviour
         
         SetActionBlocksToShow(actionBlocksToShow);
         RefreshActionBlocksOnPage();
+    }
+
+    private void OnValueChangedInInputFieldSearch(ValueChangedInInputFieldSearchEvent valueChangedInInputFieldSearchEvent)
+    {
+        string userRequest = valueChangedInInputFieldSearchEvent.Request;
+        HashSet<ActionBlockModel.ActionBlock> actionBlocksToShow = _model.GetActionBlocks().ToHashSet();
+        
+        if (userRequest == "")
+        {
+            actionBlocksToShow = _model.GetActionBlocks().ToHashSet();
+        }
+        else
+        {
+            actionBlocksToShow = _model.GetActionBlocksByRequest(userRequest).ToHashSet();
+        }
+        
+        SetActionBlocksToShow(actionBlocksToShow);
+        RefreshActionBlocksOnPage();
+        print("Value changed: " + valueChangedInInputFieldSearchEvent.Request);    
     }
     
     private void ExecuteByActionBlock(ActionBlockModel.ActionBlock actionBlock)

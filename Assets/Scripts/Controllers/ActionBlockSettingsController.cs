@@ -30,8 +30,6 @@ public class ActionBlockSettingsController : MonoBehaviour
     private ActionBlockModel.ActionBlock originalActionBlock;
     
     
-    
-    
     public void OnClickButtonClose()
     {        
         print(_pageService.PageState);
@@ -141,7 +139,6 @@ public class ActionBlockSettingsController : MonoBehaviour
     }
     
 
-    
     private void UpdateActionBlock()
     {
         string title = TitleInputField.GetComponent<TMP_InputField>().text;

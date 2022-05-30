@@ -18,7 +18,6 @@ namespace Views
         private void Awake()
         {
             _inputFieldTMP = _inputFieldGO.GetComponent<TMP_InputField>();
-            
         }
 
         public string GetTextFromInputField()
@@ -36,7 +35,6 @@ namespace Views
         public void ShowPage()
         {
             _searchPage.SetActive(true);
-            FocusInputField();
         } 
     
         public void HidePage()
@@ -48,6 +46,7 @@ namespace Views
         {
             _inputFieldTMP.Select();
             _inputFieldTMP.ActivateInputField();
+            _inputFieldTMP.caretPosition = _inputFieldTMP.text.Length;
         }
 
         public void OnEnterInputField()
