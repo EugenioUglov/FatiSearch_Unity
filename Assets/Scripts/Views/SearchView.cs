@@ -13,7 +13,7 @@ namespace Views
         [SerializeField] private GameObject _searchPage;
 
         private TMP_InputField _inputFieldTMP;
-        
+        private int lastCaretPosition = 0;
             
         private void Awake()
         {
@@ -35,18 +35,26 @@ namespace Views
         public void ShowPage()
         {
             _searchPage.SetActive(true);
+            FocusInputField();
+            lastCaretPosition = _inputFieldTMP.caretPosition;
         } 
     
         public void HidePage()
         {
+            _inputFieldTMP.caretPosition = lastCaretPosition;
             _searchPage.SetActive(false);
         }
 
         public void FocusInputField()
         {
+            if (_inputFieldTMP.isFocused)
+            {
+                print("is focused");
+                return;
+            }
+            
             _inputFieldTMP.Select();
             _inputFieldTMP.ActivateInputField();
-            _inputFieldTMP.caretPosition = _inputFieldTMP.text.Length;
         }
 
         public void OnEnterInputField()

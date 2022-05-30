@@ -237,7 +237,6 @@ public class ActionBlockController : MonoBehaviour
         
         SetActionBlocksToShow(actionBlocksToShow);
         RefreshActionBlocksOnPage();
-        print("Value changed: " + valueChangedInInputFieldSearchEvent.Request);    
     }
     
     private void ExecuteByActionBlock(ActionBlockModel.ActionBlock actionBlock)
@@ -257,7 +256,6 @@ public class ActionBlockController : MonoBehaviour
         }
     }
 
-    
     private void RefreshView()
     {
         _searchController.ClearInputField();
@@ -323,7 +321,6 @@ public class ActionBlockController : MonoBehaviour
         callbackEnd?.Invoke();
     }
 
-    
     private bool OpenPath(string path)
     {
         bool isOpened = false;
@@ -351,5 +348,4 @@ public class ActionBlockController : MonoBehaviour
             print("Path doesn't exist: " + path);
         }
     }
-
 }

@@ -80,7 +80,6 @@ namespace Controllers
             ValueChangedInInputFieldSearchEvent valueChangedInInputFieldSearchEvent = new ValueChangedInInputFieldSearchEvent();
             valueChangedInInputFieldSearchEvent.Request = text;
             EventAggregator.Invoke<ValueChangedInInputFieldSearchEvent>(valueChangedInInputFieldSearchEvent);
-            print("Value changed");
         }
     }
 }

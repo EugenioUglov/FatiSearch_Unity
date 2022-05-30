@@ -31,7 +31,6 @@ public class ActionBlockModel : MonoBehaviour
     private Dictionary<string, HashSet<ActionBlock>> _actionBlocksByTag = new Dictionary<string, HashSet<ActionBlock>>();
 
 
-
     public struct ActionBlock
     {
         public string Title;
