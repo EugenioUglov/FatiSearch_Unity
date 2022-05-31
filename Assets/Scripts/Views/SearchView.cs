@@ -49,7 +49,6 @@ namespace Views
         {
             if (_inputFieldTMP.isFocused)
             {
-                print("is focused");
                 return;
             }
             

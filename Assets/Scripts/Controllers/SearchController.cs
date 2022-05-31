@@ -66,7 +66,6 @@ namespace Controllers
         {
             if (_pageService.PageState == PageService.PageStateEnum.SearchPage)
             {
-                _view.FocusInputField();
                 
                 if (keyClickedEvent.KeyCodeEntered == KeyCode.Return)
                 {

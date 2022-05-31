@@ -4,8 +4,17 @@ namespace Controllers
 {
     public class InputController : MonoBehaviour
     {
+        [SerializeField] private PageService _pageService;
+        [SerializeField] private SearchService _searchService;
+        
         void Update()
         {
+            if (_pageService.PageState == PageService.PageStateEnum.SearchPage)
+            {
+                _searchService.FocusInputField();
+            }
+            
+
             if (Input.anyKeyDown)
             {
                 KeyClickedEvent keyClickedEvent = new KeyClickedEvent();
