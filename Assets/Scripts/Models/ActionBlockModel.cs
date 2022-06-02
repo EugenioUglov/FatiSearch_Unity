@@ -254,7 +254,7 @@ public class ActionBlockModel : MonoBehaviour
                 // If title already exists.
                 if (_actionBlockByTitle.Contains(newTitle))
                 {
-                    _alertController.Show("Action-Block with this title already exists.");
+                    _alertController.Show("Action-Block with this title already exists: " + newTitle);
                     return false;
                 }
                 

@@ -136,12 +136,12 @@ public class ActionBlockController : MonoBehaviour
     public bool UpdateActionBlock(string title, ActionBlockModel.ActionBlock actionBlock)
     {
         bool isUpdated = _model.UpdateActionBlock(title, actionBlock);
+        if (isUpdated == false) return isUpdated;
         
         RefreshView();
         
         return isUpdated;
     }
-
     
     public void DeleteActionBlock(ActionBlockModel.ActionBlock actionBlock)
     {
@@ -150,8 +150,6 @@ public class ActionBlockController : MonoBehaviour
         SetActionBlocksToShow(actionBlocksToShow);
         RefreshActionBlocksOnPage();
     }
-
-
 
     public bool ExecuteByTitle(string title)
     {
@@ -185,9 +183,9 @@ public class ActionBlockController : MonoBehaviour
         _view.ShowCountTextFoundActionBlocks(newActionBlocksToShow.Count);
         
         _countShowedActionBlocks = 0;
-        print("'ClearActionBlocks'");
         _actionBlocksToShow = newActionBlocksToShow;
     }
+    
     
     private void OnActionBlockClicked(ActionBlockClickedEvent actionBlockClickedEvent)
     {
@@ -297,8 +295,6 @@ public class ActionBlockController : MonoBehaviour
                     _view.UnblockScrollCapability();
                 }
             }
-            
-            print("Add more");
         }
     }
     
