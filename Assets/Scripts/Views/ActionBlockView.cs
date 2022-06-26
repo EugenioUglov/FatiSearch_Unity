@@ -220,13 +220,13 @@ public class ActionBlockView : MonoBehaviour
     
         //GameObject image = GameObject.Find ("RawImage");
         //image.GetComponent<RawImage>().texture = www.texture;
-        Image imageComponent = actionBlockPrefabShowed.GetComponent<ActionBlockEntity>().Image.GetComponent<Image>();
         /*
         var spriteFromFile = Sprite.Create(www.texture, new Rect(0.0f, 0.0f, www.texture.width, www.texture.height), new Vector2(0.5f, 0.5f), 100.0f);
         imageComponent.sprite = spriteFromFile;
         */
         try
         {
+            Image imageComponent = actionBlockPrefabShowed.GetComponent<ActionBlockEntity>().Image.GetComponent<Image>();
             var data = System.IO.File.ReadAllBytes(imagePath);
             var texture = new Texture2D(1, 1);
             texture.LoadImage(data);
@@ -250,10 +250,8 @@ public class ActionBlockView : MonoBehaviour
         catch (Exception exception)
         {
             print(exception);
-            print("Error! Not possible set image for Action-Block " + 
-                  actionBlockPrefabShowed.GetComponent<ActionBlockEntity>().GetTitle());
+            print("Warning! Not possible set image for Action-Block");
         }
-    
     }
 
     private void OnActionBlocksShowed()

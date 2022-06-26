@@ -1,7 +1,5 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using Views;
-using System.Collections.Generic;
 
 namespace Controllers
 {

@@ -323,7 +323,12 @@ public class ActionBlockController : MonoBehaviour
         
         try
         {
-            Process.Start(path);
+            Process process = new Process();
+            process.StartInfo.FileName = path;
+            process.StartInfo.UseShellExecute = true;
+            process.StartInfo.Verb = "runas";
+            process.Start();
+            // Process.Start(path);
             isOpened = true;
         }
         catch (Exception exception)
