@@ -3,6 +3,7 @@ using Controllers;
 using TMPro;
 using UnityEngine;
 using SFB;
+using UnityEngine.UI;
 
 public class ActionBlockSettingsController : MonoBehaviour
 {
@@ -90,8 +91,10 @@ public class ActionBlockSettingsController : MonoBehaviour
     public void OnClickButtonSave()
     {
         string title = TitleInputField.GetComponent<TMP_InputField>().text;
-        string action = ActionBlockModel.ActionEnum.OpenPath;
-        //ActionBlockModel.ActionEnum action = _actionDropdown.GetComponent<Dropdown>().value.ToString();
+        // string action = ActionBlockModel.ActionEnum.OpenPath;
+        // Dropdown.options[GetComponent<TMP_Dropdown>().value].text
+        print("Dropdown index: "+ ActionDropdown.GetComponent<TMP_Dropdown>().value);
+        string action = ActionDropdown.GetComponent<TMP_Dropdown>().options[ActionDropdown.GetComponent<TMP_Dropdown>().value].text;
         string content = ContentInputField.GetComponent<TMP_InputField>().text;
         string tagsTextFromInputField = TagsInputField.GetComponent<TMP_InputField>().text;
         List<string> tagsList = new List<string>();
@@ -172,6 +175,7 @@ public class ActionBlockSettingsController : MonoBehaviour
     public void ShowSettingsToUpdateActionBlock(ActionBlockModel.ActionBlock actionBlock)
     {
         originalActionBlock = actionBlock;
+
         SetFieldsForActionBlockToModify(actionBlock);
         _pageService.PageState = PageService.PageStateEnum.ActionBlockModifier;
         
@@ -225,7 +229,9 @@ public class ActionBlockSettingsController : MonoBehaviour
     private void SetFieldsForActionBlockToModify(ActionBlockModel.ActionBlock actionBlock)
     {
         TitleInputField.GetComponent<TMP_InputField>().text = actionBlock.Title;
+        ActionDropdown.GetComponent<TMP_Dropdown>().value = ActionDropdown.GetComponent<TMP_Dropdown>().options.FindIndex(option => option.text == actionBlock.Action);
         ContentInputField.GetComponent<TMP_InputField>().text = actionBlock.Content;
+        
         SetTags();
         
         void SetTags()

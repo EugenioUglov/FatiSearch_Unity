@@ -248,6 +248,15 @@ public class ActionBlockController : MonoBehaviour
                 _bottomMessageController.Show("Execution \"" + actionBlock.Title + "\"");
             }
         }
+        else if (actionBlock.Action == ActionBlockModel.ActionEnum.OpenPathAsAdministrator)
+        {
+            bool isOpened = OpenPathAsAdministrator(actionBlock.Content);
+            
+            if (isOpened)
+            {
+                _bottomMessageController.Show("Execution \"" + actionBlock.Title + "\"");
+            }
+        }
         else if (actionBlock.Action == ActionBlockModel.ActionEnum.SelectPath) 
         {
             SelectPath(actionBlock.Content);
@@ -318,6 +327,23 @@ public class ActionBlockController : MonoBehaviour
     }
 
     private bool OpenPath(string path)
+    {
+        bool isOpened = false;
+        
+        try
+        {
+            Process.Start(path);
+            isOpened = true;
+        }
+        catch (Exception exception)
+        {
+            _alertController.Show("Not possible to execute Action-Block");
+        }
+
+        return isOpened;
+    }
+    
+    private bool OpenPathAsAdministrator(string path)
     {
         bool isOpened = false;
         

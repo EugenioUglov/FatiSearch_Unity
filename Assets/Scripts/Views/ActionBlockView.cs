@@ -101,7 +101,7 @@ public class ActionBlockView : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            _scrollbar.value -= 0.1f;
+            // _scrollbar.value -= 0.1f;
         }
     }
 
@@ -275,5 +275,10 @@ public class ActionBlockView : MonoBehaviour
         _scrollbar.interactable = true;
         _scrollView.GetComponent<ScrollRect>().vertical = true;
     }
+
+    public void ScrollToTop()
+    {
+        _scrollbar.value = 1f;
+    } 
 }
 

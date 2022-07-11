@@ -17,6 +17,7 @@ public class ActionBlockModel : MonoBehaviour
     public static class ActionEnum
     {
         public const string OpenPath = "OpenPath";
+        public const string OpenPathAsAdministrator = "OpenPathAsAdministrator";
         public const string SelectPath = "SelectPath";
         public const string ShowInfo = "ShowInfo";
     }
@@ -93,7 +94,7 @@ public class ActionBlockModel : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.Log(e);
+            // Debug.Log(e);
         }
 
         return actionBlocksByTag;
@@ -104,7 +105,7 @@ public class ActionBlockModel : MonoBehaviour
         // Search by tags.
 
         List<ActionBlock> actionBlocksToShow = new List<ActionBlock>();
-        
+
         Dictionary<ActionBlock, int> priorityByActionBlock =
             new Dictionary<ActionBlock, int>();
 
@@ -112,7 +113,7 @@ public class ActionBlockModel : MonoBehaviour
 
         foreach (string tag in tags)
         {
-            ActionBlock[] actionBlocksByTag = GetActionBlocksByTag(tag).ToArray();
+            ActionBlock[] actionBlocksByTag = GetActionBlocksByTag(tag).ToArray().Reverse().ToArray();
 
             foreach (ActionBlock actionBlock in actionBlocksByTag)
             {
@@ -126,25 +127,20 @@ public class ActionBlockModel : MonoBehaviour
                 }
             }
         }
-        
-        Dictionary<ActionBlock, int> priorityByActionBlockSortedFromMin =
-            new Dictionary<ActionBlock, int>();
-            
-        // Sort array from min value.
+
+        // Sort array from min priority value.
         foreach (var pair in priorityByActionBlock.OrderBy(pair => pair.Value))
         {
-            priorityByActionBlockSortedFromMin[pair.Key] = pair.Value;
             actionBlocksToShow.Add(pair.Key);
         }
-
         
         return actionBlocksToShow.ToArray().Reverse().ToArray(); 
     }
 
     public ActionBlock[] GetActionBlocksFromFile()
     {
-        string actionBlocksJSONFromFile = _fileController.GetContentFromFile(actionBlocksFilePath);
         ActionBlock[] actionBlocksFromFile = new ActionBlock[]{};
+        string actionBlocksJSONFromFile = _fileController.GetContentFromFile(actionBlocksFilePath);
 
         if (string.IsNullOrEmpty(actionBlocksJSONFromFile) == false)
         {
