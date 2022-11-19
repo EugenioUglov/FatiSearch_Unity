@@ -26,6 +26,11 @@ namespace Views
             
             return text;
         }
+        
+        public void SetTextToInputField(string newText)
+        {
+           _inputFieldTMP.text = newText;
+        }
 
         public void ClearInputField()
         {
@@ -54,6 +59,11 @@ namespace Views
             
             _inputFieldTMP.Select();
             _inputFieldTMP.ActivateInputField();
+        }
+        
+        public bool IsSelected()
+        {
+            return _inputFieldTMP.isFocused;
         }
 
         public void OnEnterInputField()

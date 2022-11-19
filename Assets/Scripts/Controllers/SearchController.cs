@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using Views;
 
 namespace Controllers
@@ -11,6 +12,24 @@ namespace Controllers
         private void Awake()
         {
             EventAggregator.AddListener<KeyClickedEvent>(this, OnKeyClicked);
+        }
+
+        private void Update()
+        {
+            if (_view.IsSelected())
+            {
+                if (Input.GetKey(KeyCode.LeftControl))
+                {
+                    string textFromInputField = _view.GetTextFromInputField();
+                    int lastSpaceIndex = textFromInputField.LastIndexOf(' ');
+
+                    if (Input.GetKeyDown(KeyCode.Backspace))
+                    {
+                        string textUntilLastSpace = textFromInputField.Substring(0, lastSpaceIndex + 1);
+                        _view.SetTextToInputField(textUntilLastSpace);
+                    }
+                }
+            }
         }
 
         public void Init()

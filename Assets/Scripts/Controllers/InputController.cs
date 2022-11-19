@@ -13,7 +13,6 @@ namespace Controllers
             {
                 _searchService.FocusInputField();
             }
-            
 
             if (Input.anyKeyDown)
             {
