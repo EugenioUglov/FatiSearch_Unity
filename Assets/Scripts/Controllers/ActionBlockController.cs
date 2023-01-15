@@ -93,6 +93,8 @@ public class ActionBlockController : MonoBehaviour
     {
         if (_actionBlocksToShow.Count <= _countShowedActionBlocks)
         {
+            _searchController.ShowPage();
+
             return;
         }
         
