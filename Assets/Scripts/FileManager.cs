@@ -53,19 +53,19 @@ public class FileManager : MonoBehaviour
         return isOpened;
     }
 
-    public bool SelectDirectory(string diretory)
+    public bool GoToFileLocation(string path)
     {
         bool isSelected = false;
 
-        if (File.Exists(diretory))
+        if (File.Exists(path))
         {
-            Process.Start(new ProcessStartInfo("explorer.exe", " /select, " + diretory));
+            Process.Start(new ProcessStartInfo("explorer.exe", " /select, " + path));
             isSelected = true;
 
-            _logs.Add("Directory opened: " + diretory);
+            _logs.Add("GoToFileLocation: " + path);
         }
         else {
-            _logs.Add("Not possible to select directory: " + diretory);
+            _logs.Add("Not possible open file location: " + path);
         }
 
         return isSelected;

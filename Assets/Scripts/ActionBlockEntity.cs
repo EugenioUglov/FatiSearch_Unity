@@ -9,6 +9,7 @@ public class ActionBlockEntity : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI _titleText;
     [SerializeField] private GameObject _titleGameObject;
+    [SerializeField] private GameObject _fileLocationButtonGameObject;
     public GameObject Image;
 
   
@@ -42,5 +43,17 @@ public class ActionBlockEntity : MonoBehaviour
         ActionBlockSettingsClickedEvent actionBlockSettingsClickedEvent = new ActionBlockSettingsClickedEvent();
         actionBlockSettingsClickedEvent.Title = _titleText.text;
         EventAggregator.Invoke<ActionBlockSettingsClickedEvent>(actionBlockSettingsClickedEvent);
+    }
+
+    public void OnClickButtonFileLocation()
+    {
+        ActionBlockFileLocationClickedEvent actionBlockFileLocationClickedEvent = new ActionBlockFileLocationClickedEvent();
+        actionBlockFileLocationClickedEvent.Title = _titleText.text;
+        EventAggregator.Invoke<ActionBlockFileLocationClickedEvent>(actionBlockFileLocationClickedEvent);
+    }
+    
+    public void HideFileLocationButton()
+    {
+        _fileLocationButtonGameObject.SetActive(false);
     }
 }

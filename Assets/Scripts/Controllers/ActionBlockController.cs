@@ -49,6 +49,7 @@ public class ActionBlockController : MonoBehaviour
     {
         EventAggregator.AddListener<ActionBlockClickedEvent>(this, OnActionBlockClicked);
         EventAggregator.AddListener<ActionBlockSettingsClickedEvent>(this, OnActionBlockSettingsClicked);
+        EventAggregator.AddListener<ActionBlockFileLocationClickedEvent>(this, OnActionBlockFileLocationClicked);
         EventAggregator.AddListener<SearchEnteredEvent>(this, OnSearchEntered);
         EventAggregator.AddListener<ValueChangedInInputFieldSearchEvent>(this, OnValueChangedInInputFieldSearch);
 
@@ -245,6 +246,13 @@ public class ActionBlockController : MonoBehaviour
         _actionBlockSettingsController.ShowSettingsToUpdateActionBlock(actionBlock);
     }
 
+    private void OnActionBlockFileLocationClicked(ActionBlockFileLocationClickedEvent actionBlockFileLocationClickedEvent)
+    {
+        string titleActionBlock = actionBlockFileLocationClickedEvent.Title;
+        ActionBlockModel.ActionBlock actionBlock = GetActionBlockByTitle(titleActionBlock);
+        _fileManager.GoToFileLocation(path: actionBlock.Content);
+    }
+
     private void OnSearchEntered(SearchEnteredEvent searchEnteredEvent)
     {
         string userRequest = searchEnteredEvent.Request;
@@ -312,7 +320,7 @@ public class ActionBlockController : MonoBehaviour
         }
         else if (actionBlock.Action == ActionBlockModel.ActionEnum.SelectPath) 
         {
-            _fileManager.SelectDirectory(actionBlock.Content);
+            _fileManager.GoToFileLocation(actionBlock.Content);
         }
     }
 

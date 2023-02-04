@@ -72,6 +72,7 @@ public class ActionBlockView : MonoBehaviour
         if (Directory.Exists(actionBlock.Content) == false && File.Exists(actionBlock.Content) == false && IsURLValid(actionBlock.Content) == false)
         {
             actionBlockPrefabShowed.GetComponent<ActionBlockEntity>().SetTitleColorRed();
+            actionBlockPrefabShowed.GetComponent<ActionBlockEntity>().HideFileLocationButton();
         }
         
         // Set images async.
