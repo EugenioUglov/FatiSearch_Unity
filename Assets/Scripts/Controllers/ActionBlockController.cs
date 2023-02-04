@@ -1,15 +1,12 @@
 using System;
-using System.Collections;
-using System.Diagnostics;
-using System.Collections.Generic;
 using System.IO;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Controllers;
 using TMPro;
 using UnityEngine;
 using Unity.VisualScripting;
-using UnityEngine.UI;
-using Debug = UnityEngine.Debug;
 
 
 public class ActionBlockController : MonoBehaviour
@@ -23,6 +20,7 @@ public class ActionBlockController : MonoBehaviour
     [SerializeField] private AlertController _alertController;
     [SerializeField] private BottomMessageController _bottomMessageController;
     [SerializeField] private PageService _pageService;
+    [SerializeField] private FileManager _fileManager;
 
     [Header("UI")]
     [SerializeField] private TextMeshProUGUI _centralLogText;
@@ -33,6 +31,7 @@ public class ActionBlockController : MonoBehaviour
     private int _countShowedActionBlocks = 0;
     
     private bool _isMouseButtonLeftDown = false;
+
     
     private void Update()
     {
@@ -61,6 +60,26 @@ public class ActionBlockController : MonoBehaviour
         HashSet<ActionBlockModel.ActionBlock> actionBlocksToShow = _model.GetActionBlocks().ToHashSet();
         SetActionBlocksToShow(actionBlocksToShow);
         RefreshActionBlocksOnPage();
+
+        // string[] directoriesForAutoCreationActionBlocks = _model.GetDirectoriesForAutoCreationActionBlocksFromFile();
+
+        // foreach (string currentDirectory in directoriesForAutoCreationActionBlocks)
+        // {
+        //     print("Auto directory: " + currentDirectory);
+        //     CreateActionBlocksFromFolderIncludingSubfolders(directory: currentDirectory);
+        // }
+        // CreateActionBlocksFromFolderIncludingSubfolders(directory: @"D:\Fun\Games\0 Shortcuts\Feels");
+        
+    }
+
+    private void CreateActionBlocksFromFolderIncludingSubfolders(string directory)
+    {
+        string[] fileDirectories = _fileManager.GetFileDirectoriesFromFolderWithSubfolders(directory);
+
+        foreach (string currentDirectory in fileDirectories)
+        {
+            CreateActionBlockByPath(path: currentDirectory, isShowError: false);
+        }
     }
 
     public void OnStartLoadingActionBlocksToShow()
@@ -126,14 +145,39 @@ public class ActionBlockController : MonoBehaviour
         _actionBlockSettingsController.HidePage();
     }
 
-    public bool CreateActionBlock(ActionBlockModel.ActionBlock actionBlock)
+    public bool CreateActionBlock(ActionBlockModel.ActionBlock actionBlock, bool isShowError = true)
     {
-        bool isCreated = _model.CreateActionBlock(actionBlock);
+        bool isCreated = _model.CreateActionBlock(actionBlock, isShowError);
         
         RefreshView();
         
         return isCreated;
     }
+
+    public bool CreateActionBlockByPath(string path, bool isShowError = true)
+    {
+        string fileName = Path.GetFileNameWithoutExtension(path);
+        String[] foldersOfPath = path.Split('\\');
+        List<string> tags = new List<string>();
+                
+        for (int i = 0; i < foldersOfPath.Length - 1; i++)
+        {
+            // Add to tags folder names from path of a file.
+            
+            tags.Add(foldersOfPath[i]);
+        }
+
+        ActionBlockModel.ActionBlock actionBlock = 
+        new ActionBlockModel.ActionBlock(fileName, ActionBlockModel.ActionEnum.OpenPath, 
+            path, tags);
+        
+        CreateActionBlock(actionBlock, isShowError);
+        SetActionBlocksToShow();
+        RefreshActionBlocksOnPage();
+
+        return true;
+    }
+
     
     public bool UpdateActionBlock(string title, ActionBlockModel.ActionBlock actionBlock)
     {
@@ -243,25 +287,33 @@ public class ActionBlockController : MonoBehaviour
     {
         if (actionBlock.Action == ActionBlockModel.ActionEnum.OpenPath)
         {
-            bool isOpened = OpenPath(actionBlock.Content);
+            bool isOpened = _fileManager.OpenDirectory(actionBlock.Content);
             
             if (isOpened)
             {
                 _bottomMessageController.Show("Execution \"" + actionBlock.Title + "\"");
+            }
+            else
+            {
+                _alertController.Show("Not possible to execute Action-Block " + actionBlock.Title);
             }
         }
         else if (actionBlock.Action == ActionBlockModel.ActionEnum.OpenPathAsAdministrator)
         {
-            bool isOpened = OpenPathAsAdministrator(actionBlock.Content);
+            bool isOpened = _fileManager.OpenDirectoryAsAdministrator(actionBlock.Content);
             
             if (isOpened)
             {
                 _bottomMessageController.Show("Execution \"" + actionBlock.Title + "\"");
             }
+            else
+            {
+                _alertController.Show("Not possible to execute Action-Block " + actionBlock.Title);
+            }
         }
         else if (actionBlock.Action == ActionBlockModel.ActionEnum.SelectPath) 
         {
-            SelectPath(actionBlock.Content);
+            _fileManager.SelectDirectory(actionBlock.Content);
         }
     }
 
@@ -326,55 +378,5 @@ public class ActionBlockController : MonoBehaviour
         RefreshActionBlocksOnPage();
         
         callbackEnd?.Invoke();
-    }
-
-    private bool OpenPath(string path)
-    {
-        bool isOpened = false;
-        
-        try
-        {
-            Process.Start(path);
-            isOpened = true;
-        }
-        catch (Exception exception)
-        {
-            _alertController.Show("Not possible to execute Action-Block");
-        }
-
-        return isOpened;
-    }
-    
-    private bool OpenPathAsAdministrator(string path)
-    {
-        bool isOpened = false;
-        
-        try
-        {
-            Process process = new Process();
-            process.StartInfo.FileName = path;
-            process.StartInfo.UseShellExecute = true;
-            process.StartInfo.Verb = "runas";
-            process.Start();
-            // Process.Start(path);
-            isOpened = true;
-        }
-        catch (Exception exception)
-        {
-            _alertController.Show("Not possible to execute Action-Block");
-        }
-
-        return isOpened;
-    }
-
-    private void SelectPath(string path)
-    {
-        if (File.Exists(path))
-        {
-            Process.Start(new ProcessStartInfo("explorer.exe", " /select, " + path));
-        }
-        else {
-            print("Path doesn't exist: " + path);
-        }
     }
 }

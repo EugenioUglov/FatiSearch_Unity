@@ -6,6 +6,7 @@ public class AlertController : MonoBehaviour
 {
     [SerializeField] private AlertView _view;
 
+
     public void OnClickButtonOk()
     {
         _view.Hide();

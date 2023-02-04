@@ -4598,7 +4598,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1694890424}
   m_HandleRect: {fileID: 1694890423}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -5348,7 +5348,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 349171880}
   m_HandleRect: {fileID: 349171879}
   m_Direction: 0
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -9099,6 +9099,7 @@ GameObject:
   - component: {fileID: 2008285825}
   - component: {fileID: 2008285836}
   - component: {fileID: 2008285838}
+  - component: {fileID: 2008285840}
   m_Layer: 0
   m_Name: Logic
   m_TagString: Untagged
@@ -9125,6 +9126,7 @@ MonoBehaviour:
   _alertController: {fileID: 2008285832}
   _bottomMessageController: {fileID: 2008285835}
   _pageService: {fileID: 2008285825}
+  _fileManager: {fileID: 2008285840}
   _centralLogText: {fileID: 547541391}
 --- !u!4 &2008285819
 Transform:
@@ -9430,6 +9432,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _view: {fileID: 2008285830}
+--- !u!114 &2008285840
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2008285817}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66921fcd37941564abedb5ee29d26822, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2024325903
 GameObject:
   m_ObjectHideFlags: 0

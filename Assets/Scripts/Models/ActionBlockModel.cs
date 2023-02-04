@@ -151,12 +151,36 @@ public class ActionBlockModel : MonoBehaviour
             }
             catch (Exception exception)
             {
+                print("Warning! File with Action-Blocks.json not found");
                 print(exception);
-                print("Error! File with Action-Blocks not found");
             }
         }
 
         return actionBlocksFromFile;
+    }
+
+    public string[] GetDirectoriesForAutoCreationActionBlocksFromFile()
+    {
+        string filePath = "DirectoriesForAutoCreationActionBlocks.json";
+
+        string[] directoriesFromFile = new string[]{};
+        string directoriesJSONFromFile = _fileController.GetContentFromFile(filePath);
+
+        if (string.IsNullOrEmpty(directoriesJSONFromFile) == false)
+        {
+            try
+            {
+                directoriesFromFile =
+                    JsonConvert.DeserializeObject<string[]>(directoriesJSONFromFile);
+            }
+            catch (Exception exception)
+            {
+                print("Warning! File with DirectoriesForAutoCreationActionBlocks.json not found");
+                print(exception);
+            }
+        }
+
+        return directoriesFromFile;
     }
 
     public void SetActionBlocks(ActionBlock[] actionBlocks)
@@ -182,12 +206,18 @@ public class ActionBlockModel : MonoBehaviour
         return titlesActionBlocks;
     }
 
-    public bool CreateActionBlock(ActionBlock actionBlock)
+    public bool CreateActionBlock(ActionBlock actionBlock, bool isShowError = true)
     {
         OnStartChangeActionBlocksVariables();
+
         
         string titleLowerCase = actionBlock.Title.ToLower();
 
+        // foreach (DictionaryEntry item in _actionBlockByTitle)
+        // {
+        //     print(item.Key);
+        //     print(item.Value);
+        // }
         if (IsTitleValid(titleLowerCase) == false)
         {
             return false;
@@ -200,18 +230,27 @@ public class ActionBlockModel : MonoBehaviour
 
         return true;
         
+        
         bool IsTitleValid(string title)
         {
             // If title already exists.
             if (_actionBlockByTitle.Contains(title))
             {
-                _alertController.Show("Action-Block with this title already exists.");
+                if (isShowError)
+                {
+                    _alertController.Show("Action-Block with this title already exists.");
+                }
+
                 return false;
             }
         
             if (string.IsNullOrEmpty(title))
             {
-                _alertController.Show("Error! Title is not defined.");
+                if (isShowError)
+                {
+                    _alertController.Show("Error! Title is not defined.");
+                }
+                
                 return false;
             }
 
@@ -309,10 +348,10 @@ public class ActionBlockModel : MonoBehaviour
         }
     }
 
-    private void AddActionBlockToVariables(ActionBlock actionBlock, bool isAddToStart = true)
+    private bool AddActionBlockToVariables(ActionBlock actionBlock, bool isAddToStart = true)
     {
         string titleLowerCase = actionBlock.Title.ToLower();
-        
+
         if (isAddToStart)
         {
             // Insert a new key to the beginning of the OrderedDictionary
@@ -345,6 +384,8 @@ public class ActionBlockModel : MonoBehaviour
                 _actionBlocksByTag[tagWordLowCase].Add(actionBlock);
             }
         }
+
+        return true;
     }
 
 
@@ -430,12 +471,11 @@ public class ActionBlockModel : MonoBehaviour
             {
                 if (tag == titleWithoutSpecialSymbols)
                 {
-                    print("title without spec symbols exists: " + titleWithoutSpecialSymbols);
+                    // Tag as the title without spec symbols exists.
                     return;
                 }
             }
             
-            print("Add title without spec symbols: " + titleWithoutSpecialSymbols);
             tags.Add(titleWithoutSpecialSymbols);
         }
 

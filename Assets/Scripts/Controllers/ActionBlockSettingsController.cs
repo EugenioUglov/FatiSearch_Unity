@@ -33,7 +33,7 @@ public class ActionBlockSettingsController : MonoBehaviour
     
     public void OnClickButtonClose()
     {        
-        print(_pageService.PageState);
+        print("Page: " + _pageService.PageState);
         if (_pageService.PageState == PageService.PageStateEnum.ActionBlockModifier)
         {
             SetDefaultFields();
