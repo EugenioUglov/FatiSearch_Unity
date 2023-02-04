@@ -223,7 +223,10 @@ public class ActionBlockModel : MonoBehaviour
             return false;
         }
 
-        actionBlock.Tags = GetUpdatedTagsForCreationActionBlock(titleLowerCase, actionBlock);
+        string normalizedTitle = GetNormalizedTitle(titleLowerCase);
+        
+        actionBlock.Title = normalizedTitle;
+        actionBlock.Tags = GetUpdatedTagsForCreationActionBlock(normalizedTitle, actionBlock);
         
         AddActionBlockToVariables(actionBlock);
         OnUpdateActionBlocks();
@@ -236,9 +239,20 @@ public class ActionBlockModel : MonoBehaviour
             // If title already exists.
             if (_actionBlockByTitle.Contains(title))
             {
-                if (isShowError)
+                ActionBlock existingActionBlock = GetActionBlockByTitle(title);
+
+                if (existingActionBlock.Content == actionBlock.Content)
                 {
-                    _alertController.Show("Action-Block with this title already exists.");
+                    if (isShowError)
+                    {
+                        _alertController.Show("Action-Block with this title already exists.");
+                    }
+
+                    return false;
+                }
+                else
+                {
+                   return true; 
                 }
 
                 return false;
@@ -255,6 +269,24 @@ public class ActionBlockModel : MonoBehaviour
             }
 
             return true;
+        }
+   
+        string GetNormalizedTitle(string title)
+        {
+            string normalizedTitle = title;
+
+            if (_actionBlockByTitle.Contains(title))
+            {
+                ActionBlock existingActionBlock = GetActionBlockByTitle(title);
+
+                if (existingActionBlock.Content != actionBlock.Content)
+                {
+                    normalizedTitle = title + " (" + actionBlock.Content + ")";
+                }
+            }
+
+
+            return normalizedTitle;
         }
     }
 

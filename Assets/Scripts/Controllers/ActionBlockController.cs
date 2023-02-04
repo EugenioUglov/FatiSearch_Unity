@@ -52,24 +52,25 @@ public class ActionBlockController : MonoBehaviour
         EventAggregator.AddListener<SearchEnteredEvent>(this, OnSearchEntered);
         EventAggregator.AddListener<ValueChangedInInputFieldSearchEvent>(this, OnValueChangedInInputFieldSearch);
 
+        _view.BindScrollbarValueChange(OnScrollbarValueChange);
+
+
         _actionBlocksToShow = new HashSet<ActionBlockModel.ActionBlock>();
         ActionBlockModel.ActionBlock[] actionBlocksFromFile = GetActionBlocksFromFile();
-        _view.BindScrollbarValueChange(OnScrollbarValueChange);
         
         SetActionBlocks(actionBlocksFromFile);
         HashSet<ActionBlockModel.ActionBlock> actionBlocksToShow = _model.GetActionBlocks().ToHashSet();
-        SetActionBlocksToShow(actionBlocksToShow);
+
+        string[] directoriesForAutoCreationActionBlocks = _model.GetDirectoriesForAutoCreationActionBlocksFromFile();
+
+        foreach (string currentDirectory in directoriesForAutoCreationActionBlocks)
+        {
+            print("Auto directory: " + currentDirectory);
+            CreateActionBlocksFromFolderIncludingSubfolders(directory: currentDirectory);
+        }
+
+        SetActionBlocksToShow();
         RefreshActionBlocksOnPage();
-
-        // string[] directoriesForAutoCreationActionBlocks = _model.GetDirectoriesForAutoCreationActionBlocksFromFile();
-
-        // foreach (string currentDirectory in directoriesForAutoCreationActionBlocks)
-        // {
-        //     print("Auto directory: " + currentDirectory);
-        //     CreateActionBlocksFromFolderIncludingSubfolders(directory: currentDirectory);
-        // }
-        // CreateActionBlocksFromFolderIncludingSubfolders(directory: @"D:\Fun\Games\0 Shortcuts\Feels");
-        
     }
 
     private void CreateActionBlocksFromFolderIncludingSubfolders(string directory)
@@ -172,8 +173,6 @@ public class ActionBlockController : MonoBehaviour
             path, tags);
         
         CreateActionBlock(actionBlock, isShowError);
-        SetActionBlocksToShow();
-        RefreshActionBlocksOnPage();
 
         return true;
     }

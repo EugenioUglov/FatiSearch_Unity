@@ -22,5 +22,8 @@ public class DragAndDropController : MonoBehaviour
       {
          _actionBlockController.CreateActionBlockByPath(path);
       }
+
+      _actionBlockController.SetActionBlocksToShow();
+      _actionBlockController.RefreshActionBlocksOnPage();
    }
 }
