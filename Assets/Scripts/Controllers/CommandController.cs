@@ -21,12 +21,8 @@ public class CommandController : MonoBehaviour
 
     private void OnKeyDown(KeyClickedEvent keyClickedEvent)
     {
-        // _view.SetFocus();
-        print("keyClicked");
-        print("Is selected: " + _view.IsSelected());
         if (_pageService.PageState == PageService.PageStateEnum.SearchPage && _view.IsSelected())
         {
-            
             if (keyClickedEvent.KeyCodeEntered == KeyCode.Return)
             {
                 OnEnterInputField();

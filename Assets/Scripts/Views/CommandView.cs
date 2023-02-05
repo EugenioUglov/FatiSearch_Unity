@@ -12,6 +12,16 @@ public class CommandView : MonoBehaviour
     private void Awake()
     {
         _inputFieldTMP = _inputFieldGO.GetComponent<TMP_InputField>();
+
+        _inputFieldTMP.onSelect.AddListener(delegate
+        {
+            print("Command input field Selected");
+        });
+        
+        _inputFieldTMP.onDeselect.AddListener(delegate
+        {
+            print("Command input field Deselected");
+        });
     }
 
     public string GetTextFromInputField()
