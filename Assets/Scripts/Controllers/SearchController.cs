@@ -81,9 +81,8 @@ namespace Controllers
 
         private void OnKeyClicked(KeyClickedEvent keyClickedEvent)
         {
-            if (_pageService.PageState == PageService.PageStateEnum.SearchPage)
+            if (_pageService.PageState == PageService.PageStateEnum.SearchPage && _view.IsSelected())
             {
-                
                 if (keyClickedEvent.KeyCodeEntered == KeyCode.Return)
                 {
                     OnEnterInputField();

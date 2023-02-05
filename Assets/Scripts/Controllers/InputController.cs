@@ -11,7 +11,7 @@ namespace Controllers
         {
             if (_pageService.PageState == PageService.PageStateEnum.SearchPage)
             {
-                _searchService.FocusInputField();
+                // _searchService.FocusInputField();
             }
 
             if (Input.anyKeyDown)
@@ -27,6 +27,13 @@ namespace Controllers
                 keyClickedEvent.KeyCodeEntered = KeyCode.Return;
                 EventAggregator.Invoke<KeyClickedEvent>(keyClickedEvent);
             }
+
+            // if (Input.GetKeyDown(KeyCode.Return))
+            // {
+            //     KeyDownEvent keyDowndEvent = new KeyDownEvent();
+            //     keyDowndEvent.KeyCodeEntered = KeyCode.Return;
+            //     EventAggregator.Invoke<KeyDownEvent>(keyDowndEvent);
+            // }
         }
     }
 }

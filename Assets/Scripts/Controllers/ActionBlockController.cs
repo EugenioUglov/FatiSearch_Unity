@@ -51,6 +51,7 @@ public class ActionBlockController : MonoBehaviour
         EventAggregator.AddListener<ActionBlockSettingsClickedEvent>(this, OnActionBlockSettingsClicked);
         EventAggregator.AddListener<ActionBlockFileLocationClickedEvent>(this, OnActionBlockFileLocationClicked);
         EventAggregator.AddListener<SearchEnteredEvent>(this, OnSearchEntered);
+        EventAggregator.AddListener<CommandEnteredEvent>(this, OnCommandEntered);
         EventAggregator.AddListener<ValueChangedInInputFieldSearchEvent>(this, OnValueChangedInInputFieldSearch);
 
         _view.BindScrollbarValueChange(OnScrollbarValueChange);
@@ -270,6 +271,20 @@ public class ActionBlockController : MonoBehaviour
         
         SetActionBlocksToShow(actionBlocksToShow);
         RefreshActionBlocksOnPage();
+    }
+
+    private void OnCommandEntered(CommandEnteredEvent commandEnteredEvent)
+    {
+        string userRequest = commandEnteredEvent.Request;
+        print("command from user: " + userRequest);
+        if (userRequest.ToLower() == "execute all found results")
+        {
+            foreach (ActionBlockModel.ActionBlock actionBlock in _actionBlocksToShow)
+            {
+                ExecuteByTitle(actionBlock.Title);
+            }
+        }
+        
     }
 
     private void OnValueChangedInInputFieldSearch(ValueChangedInInputFieldSearchEvent valueChangedInInputFieldSearchEvent)
