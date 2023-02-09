@@ -223,7 +223,29 @@ public class ActionBlockModel : MonoBehaviour
             return false;
         }
 
-        string normalizedTitle = GetNormalizedTitle(titleLowerCase);
+        // string normalizedTitle = GetNormalizedTitle(titleLowerCase);
+
+        string normalizedTitle = titleLowerCase;
+
+        if (_actionBlockByTitle.Contains(normalizedTitle))
+        {
+            ActionBlock existingActionBlock = GetActionBlockByTitle(normalizedTitle);
+
+            if (existingActionBlock.Content != actionBlock.Content)
+            {
+                normalizedTitle = normalizedTitle + " (" + actionBlock.Content + ")";
+
+                if (_actionBlockByTitle.Contains(normalizedTitle))
+                {
+                    return false;
+                }
+
+                string originalTitleOfExistingActionBlock = existingActionBlock.Title;
+                string newTitleForExistingActionBlock = existingActionBlock.Title + " (" + existingActionBlock.Content + ")"; 
+                existingActionBlock.Title = newTitleForExistingActionBlock;
+                UpdateActionBlock(originalTitleOfExistingActionBlock, existingActionBlock);
+            }
+        }
         
         actionBlock.Title = normalizedTitle;
         actionBlock.Tags = GetUpdatedTagsForCreationActionBlock(normalizedTitle, actionBlock);
@@ -271,23 +293,15 @@ public class ActionBlockModel : MonoBehaviour
             return true;
         }
    
-        string GetNormalizedTitle(string title)
-        {
-            string normalizedTitle = title;
-
-            if (_actionBlockByTitle.Contains(title))
-            {
-                ActionBlock existingActionBlock = GetActionBlockByTitle(title);
-
-                if (existingActionBlock.Content != actionBlock.Content)
-                {
-                    normalizedTitle = title + " (" + actionBlock.Content + ")";
-                }
-            }
+        // string GetNormalizedTitle(string title)
+        // {
 
 
-            return normalizedTitle;
-        }
+
+        //     return normalizedTitle;
+        // }
+
+
     }
 
     public bool UpdateActionBlock(string originalTitle, ActionBlock actionBlock)

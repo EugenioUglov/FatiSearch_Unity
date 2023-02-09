@@ -63,6 +63,7 @@ public class ActionBlockController : MonoBehaviour
         SetActionBlocks(actionBlocksFromFile);
         HashSet<ActionBlockModel.ActionBlock> actionBlocksToShow = _model.GetActionBlocks().ToHashSet();
 
+          DateTime before = DateTime.Now;
         string[] directoriesForAutoCreationActionBlocks = _model.GetDirectoriesForAutoCreationActionBlocksFromFile();
 
         foreach (string currentDirectory in directoriesForAutoCreationActionBlocks)
@@ -71,9 +72,20 @@ public class ActionBlockController : MonoBehaviour
             CreateActionBlocksFromFolderIncludingSubfolders(directory: currentDirectory);
         }
 
+        DateTime after = DateTime.Now; 
+        TimeSpan duration = after.Subtract(before);
+        Debug.Log("directoriesForAutoCreationActionBlocks: " + duration.Milliseconds);
+
+        before = DateTime.Now;
         SetActionBlocksToShow();
         RefreshActionBlocksOnPage();
+        after = DateTime.Now; 
+        duration = after.Subtract(before);
+
+        Debug.Log("RefreshActionBlocksOnPage: " + duration.Milliseconds);
     }
+
+
 
     private void CreateActionBlocksFromFolderIncludingSubfolders(string directory)
     {
@@ -284,7 +296,6 @@ public class ActionBlockController : MonoBehaviour
                 ExecuteByTitle(actionBlock.Title);
             }
         }
-        
     }
 
     private void OnValueChangedInInputFieldSearch(ValueChangedInInputFieldSearchEvent valueChangedInInputFieldSearchEvent)
