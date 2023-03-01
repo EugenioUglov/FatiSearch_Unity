@@ -17,6 +17,8 @@ public class ActionBlockView : MonoBehaviour
     public GameObject ImagePathInputField;
     
     [SerializeField] private GameObject _actionBlockPrefab;
+    [SerializeField] private GameObject _loadingTextPrefab;
+
     [SerializeField] private GameObject _scrollViewContent;
     [SerializeField] private GameObject _searchPage;
     [SerializeField] private GameObject _executionErrorPanel;
@@ -30,6 +32,7 @@ public class ActionBlockView : MonoBehaviour
     
     private float _topScrollbarValue = 1;
     private float _bottomScrollbarValue = 0;
+    private GameObject loadingTextPrefabShowed;
     
     
     public void ShowActionBlocks(HashSet<ActionBlockModel.ActionBlock> actionBlocks)
@@ -63,8 +66,14 @@ public class ActionBlockView : MonoBehaviour
 
     public void AddActionBlock(ActionBlockModel.ActionBlock actionBlock)
     {
+        BlockScrollCapability();
+
         GameObject actionBlockPrefabShowed = Instantiate(_actionBlockPrefab, 
             _scrollViewContent.transform, false) as GameObject;
+
+        _scrollbar.value = 0.02f;
+        UnblockScrollCapability();
+
       
         _actionBlocksPrefabsShowed.Add(actionBlockPrefabShowed);
         actionBlockPrefabShowed.GetComponent<ActionBlockEntity>().SetTitle(actionBlock.Title);
@@ -280,6 +289,19 @@ public class ActionBlockView : MonoBehaviour
     public void ScrollToTop()
     {
         _scrollbar.value = 1f;
-    } 
+    }
+
+    public void AddLoadingText()
+    {
+       loadingTextPrefabShowed = Instantiate(_loadingTextPrefab, 
+            _scrollViewContent.transform, false) as GameObject;
+
+        _scrollbar.value = 1;
+    }
+
+    public void DestroyLoadingText()
+    {
+        Destroy(loadingTextPrefabShowed);
+    }
 }
 

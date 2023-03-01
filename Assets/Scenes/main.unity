@@ -4890,7 +4890,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1694890423}
   m_Direction: 2
   m_Value: 0
-  m_Size: 0.99726826
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -10157,8 +10157,6 @@ GameObject:
   - component: {fileID: 2008285822}
   - component: {fileID: 2008285818}
   - component: {fileID: 2008285837}
-  - component: {fileID: 2008285826}
-  - component: {fileID: 2008285820}
   - component: {fileID: 2008285839}
   - component: {fileID: 2008285821}
   - component: {fileID: 2008285823}
@@ -10220,18 +10218,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2008285820
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2008285817}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5c078b6f13f50b44822a7e7be022d9b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &2008285821
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10300,18 +10286,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PageState: 
---- !u!114 &2008285826
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2008285817}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a587ffdc1f1fbe4d902eb6e2c015a60, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &2008285827
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10341,6 +10315,7 @@ MonoBehaviour:
   TagsInputField: {fileID: 1658461812}
   ImagePathInputField: {fileID: 807966809}
   _actionBlockPrefab: {fileID: 2058610361709996432, guid: f1801d3c98791ae4a9650086e3ef15ee, type: 3}
+  _loadingTextPrefab: {fileID: 2562481789765908907, guid: ecec6bde5962b074796c9b97b40363e4, type: 3}
   _scrollViewContent: {fileID: 1906725998}
   _searchPage: {fileID: 1426625002}
   _executionErrorPanel: {fileID: 818442480}

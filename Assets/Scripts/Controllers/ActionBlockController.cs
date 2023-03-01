@@ -29,8 +29,8 @@ public class ActionBlockController : MonoBehaviour
     private HashSet<ActionBlockModel.ActionBlock> _actionBlocksToShow;
     private int _maxCountActionBlocksToShowAtTime = 10;
     private int _countShowedActionBlocks = 0;
-    
     private bool _isMouseButtonLeftDown = false;
+    private bool _isLoadingActionBlocks = false;
 
     
     private void Update()
@@ -63,26 +63,16 @@ public class ActionBlockController : MonoBehaviour
         SetActionBlocks(actionBlocksFromFile);
         HashSet<ActionBlockModel.ActionBlock> actionBlocksToShow = _model.GetActionBlocks().ToHashSet();
 
-          DateTime before = DateTime.Now;
         string[] directoriesForAutoCreationActionBlocks = _model.GetDirectoriesForAutoCreationActionBlocksFromFile();
 
         foreach (string currentDirectory in directoriesForAutoCreationActionBlocks)
         {
-            print("Auto directory: " + currentDirectory);
-            CreateActionBlocksFromFolderIncludingSubfolders(directory: currentDirectory);
+            // CreateActionBlocksFromFolderIncludingSubfolders(directory: currentDirectory);
+            CreateActionBlocksFromFoldersIncludingSubfolders(directory: currentDirectory);
         }
 
-        DateTime after = DateTime.Now; 
-        TimeSpan duration = after.Subtract(before);
-        Debug.Log("directoriesForAutoCreationActionBlocks: " + duration.Milliseconds);
-
-        before = DateTime.Now;
         SetActionBlocksToShow();
         RefreshActionBlocksOnPage();
-        after = DateTime.Now; 
-        duration = after.Subtract(before);
-
-        Debug.Log("RefreshActionBlocksOnPage: " + duration.Milliseconds);
     }
 
 
@@ -95,6 +85,18 @@ public class ActionBlockController : MonoBehaviour
         {
             CreateActionBlockByPath(path: currentDirectory, isShowError: false);
         }
+    }
+
+    private void CreateActionBlocksFromFoldersIncludingSubfolders(string directory)
+    {
+        string[] fileDirectories = _fileManager.GetFileDirectoriesFromFolderWithSubfolders(directory);
+
+        CreateActionBlocksByPaths(paths: fileDirectories, isShowError: false);
+
+        // foreach (string currentDirectory in fileDirectories)
+        // {
+        //     CreateActionBlockByPath(path: currentDirectory, isShowError: false);
+        // }
     }
 
     public void OnStartLoadingActionBlocksToShow()
@@ -135,8 +137,8 @@ public class ActionBlockController : MonoBehaviour
         ActionBlockModel.ActionBlock[] actionBlocksToShowArray = _actionBlocksToShow.ToArray();
         int countShowedAtTime = 0;
         
-        _searchController.HidePage();
-        OnStartLoadingActionBlocksToShow();
+        // _searchController.HidePage();
+        // OnStartLoadingActionBlocksToShow();
 
         for (var i = 0; i < actionBlocksToShowArray.Length; i++)
         {
@@ -151,7 +153,7 @@ public class ActionBlockController : MonoBehaviour
             countShowedAtTime++;
         }
 
-        _searchController.ShowPage();
+        // _searchController.ShowPage();
         OnActionBlocksShowed(_actionBlocksToShow.Count.ToString());
     }
 
@@ -163,6 +165,15 @@ public class ActionBlockController : MonoBehaviour
     public bool CreateActionBlock(ActionBlockModel.ActionBlock actionBlock, bool isShowError = true)
     {
         bool isCreated = _model.CreateActionBlock(actionBlock, isShowError);
+        
+        RefreshView();
+        
+        return isCreated;
+    }
+
+    public bool CreateActionBlocks(ActionBlockModel.ActionBlock[] actionBlocks, bool isShowError = true)
+    {
+        bool isCreated = _model.CreateActionBlocks(actionBlocks, isShowError);
         
         RefreshView();
         
@@ -190,6 +201,37 @@ public class ActionBlockController : MonoBehaviour
 
         return true;
     }
+
+    public bool CreateActionBlocksByPaths(string[] paths, bool isShowError = true)
+    {
+        List<ActionBlockModel.ActionBlock> actionBlocks = new List<ActionBlockModel.ActionBlock>();
+
+        foreach (string path in paths)
+        {
+            string fileName = Path.GetFileNameWithoutExtension(path);
+            String[] foldersOfPath = path.Split('\\');
+            List<string> tags = new List<string>();
+                    
+            for (int i = 0; i < foldersOfPath.Length - 1; i++)
+            {
+                // Add to tags folder names from path of a file.
+                
+                tags.Add(foldersOfPath[i]);
+            }
+
+            ActionBlockModel.ActionBlock actionBlock = 
+            new ActionBlockModel.ActionBlock(fileName, ActionBlockModel.ActionEnum.OpenPath, 
+                path, tags);
+
+            actionBlocks.Add(actionBlock);
+        }
+
+        
+        CreateActionBlocks(actionBlocks.ToArray(), isShowError);
+
+        return true;
+    }
+
 
     
     public bool UpdateActionBlock(string title, ActionBlockModel.ActionBlock actionBlock)
@@ -362,21 +404,27 @@ public class ActionBlockController : MonoBehaviour
     
     private void OnScrollbarValueChange(float value)
     {
-        if (value <= 0.2f)
+        if (_isLoadingActionBlocks == false && value <= 0.004f)
         {
             if (_actionBlocksToShow.Count <= _countShowedActionBlocks)
             {
                 return;
             }
+
+            _isLoadingActionBlocks = true;
+
             
             bool isMouseButtonLeftDownOnStartRefreshActionBlocks = _isMouseButtonLeftDown;
 
-
-            _view.BlockScrollCapability();
+            _view.AddLoadingText();
+            // _view.BlockScrollCapability();
             StartCoroutine(RefreshActionBlocksAfterPause(0.1f, OnRefreshed));
 
             void OnRefreshed()
-            {            
+            {   
+                _isLoadingActionBlocks = false;
+                _view.DestroyLoadingText();
+                
                 if (isMouseButtonLeftDownOnStartRefreshActionBlocks)
                 {
                     StartCoroutine(WaitForMouseButtonLeftUp(OnMouseButtonLeftUp));

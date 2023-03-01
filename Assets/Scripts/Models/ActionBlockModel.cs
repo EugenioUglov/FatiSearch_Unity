@@ -292,16 +292,97 @@ public class ActionBlockModel : MonoBehaviour
 
             return true;
         }
-   
-        // string GetNormalizedTitle(string title)
-        // {
+    }
 
+    public bool CreateActionBlocks(ActionBlock[] actionBlocks, bool isShowError = true)
+    {
+        foreach (ActionBlock actionBlock in actionBlocks)
+        {
+            OnStartChangeActionBlocksVariables();
 
+            
+            string titleLowerCase = actionBlock.Title.ToLower();
 
-        //     return normalizedTitle;
-        // }
+            // foreach (DictionaryEntry item in _actionBlockByTitle)
+            // {
+            //     print(item.Key);
+            //     print(item.Value);
+            // }
+            if (IsTitleValid(titleLowerCase, actionBlock) == false)
+            {
+                return false;
+            }
 
+            // string normalizedTitle = GetNormalizedTitle(titleLowerCase);
 
+            string normalizedTitle = titleLowerCase;
+
+            if (_actionBlockByTitle.Contains(normalizedTitle))
+            {
+                ActionBlock existingActionBlock = GetActionBlockByTitle(normalizedTitle);
+
+                if (existingActionBlock.Content != actionBlock.Content)
+                {
+                    normalizedTitle = normalizedTitle + " (" + actionBlock.Content + ")";
+
+                    if (_actionBlockByTitle.Contains(normalizedTitle))
+                    {
+                       continue;
+                    }
+
+                    string originalTitleOfExistingActionBlock = existingActionBlock.Title;
+                    string newTitleForExistingActionBlock = existingActionBlock.Title + " (" + existingActionBlock.Content + ")"; 
+                    existingActionBlock.Title = newTitleForExistingActionBlock;
+                    UpdateActionBlock(originalTitleOfExistingActionBlock, existingActionBlock);
+                }
+            }
+            
+            ActionBlock actionBlockToCreate = actionBlock;
+            actionBlockToCreate.Title = normalizedTitle;
+            actionBlockToCreate.Tags = GetUpdatedTagsForCreationActionBlock(normalizedTitle, actionBlockToCreate);
+            AddActionBlockToVariables(actionBlockToCreate);
+        }
+
+        OnUpdateActionBlocks();
+
+        return true;
+        
+        bool IsTitleValid(string title, ActionBlock actionBlockToAdd)
+        {
+            // If title already exists.
+            if (_actionBlockByTitle.Contains(title))
+            {
+                ActionBlock existingActionBlock = GetActionBlockByTitle(title);
+
+                if (existingActionBlock.Content == actionBlockToAdd.Content)
+                {
+                    if (isShowError)
+                    {
+                        _alertController.Show("Action-Block with this title already exists.");
+                    }
+
+                    return false;
+                }
+                else
+                {
+                   return true; 
+                }
+
+                return false;
+            }
+        
+            if (string.IsNullOrEmpty(title))
+            {
+                if (isShowError)
+                {
+                    _alertController.Show("Error! Title is not defined.");
+                }
+                
+                return false;
+            }
+
+            return true;
+        }
     }
 
     public bool UpdateActionBlock(string originalTitle, ActionBlock actionBlock)
@@ -394,11 +475,11 @@ public class ActionBlockModel : MonoBehaviour
         }
     }
 
-    private bool AddActionBlockToVariables(ActionBlock actionBlock, bool isAddToStart = true)
+    private bool AddActionBlockToVariables(ActionBlock actionBlock, bool isAddToBeginning = true)
     {
         string titleLowerCase = actionBlock.Title.ToLower();
 
-        if (isAddToStart)
+        if (isAddToBeginning)
         {
             // Insert a new key to the beginning of the OrderedDictionary
             _actionBlockByTitle.Insert(0, titleLowerCase, actionBlock);
@@ -443,16 +524,7 @@ public class ActionBlockModel : MonoBehaviour
 
     private void OnStartChangeActionBlocksVariables()
     {
-        /*
-        ActionBlock[] actionBlocks = GetActionBlocks().ToArray();
-        string actionBlocksJSON = JsonConvert.SerializeObject(actionBlocks);
 
-        CreateFolderIfMissing(backupFolderPath);
-        
-        _fileController.Save(backupFolderPath + "/" + "Action-Blocks_" + 
-                             DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".json", 
-            actionBlocksJSON);
-        */
     }
     
     private void Save()
@@ -560,5 +632,17 @@ public class ActionBlockModel : MonoBehaviour
         {
             _alertController.Show(ioex.ToString());
         }
+    }
+
+    private void CreateBackupFileWithActionBlocks()
+    {
+        ActionBlock[] actionBlocks = GetActionBlocks().ToArray();
+        string actionBlocksJSON = JsonConvert.SerializeObject(actionBlocks);
+
+        CreateFolderIfMissing(backupFolderPath);
+        
+        _fileController.Save(backupFolderPath + "/" + "Action-Blocks_" + 
+                             DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".json", 
+            actionBlocksJSON);
     }
 }

@@ -5,8 +5,8 @@ using UnityEngine;
 public class CommandController : MonoBehaviour
 {
     [SerializeField] private CommandView _view;
-
     [SerializeField] private PageService _pageService;
+
 
     private void Awake()
     {
