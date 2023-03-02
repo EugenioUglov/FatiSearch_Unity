@@ -415,14 +415,14 @@ public class ActionBlockController : MonoBehaviour
 
             
             bool isMouseButtonLeftDownOnStartRefreshActionBlocks = _isMouseButtonLeftDown;
-
+            _view.BlockScrollCapability();
             _view.AddLoadingText();
-            // _view.BlockScrollCapability();
+            
+
             StartCoroutine(RefreshActionBlocksAfterPause(0.1f, OnRefreshed));
 
             void OnRefreshed()
             {   
-                _isLoadingActionBlocks = false;
                 _view.DestroyLoadingText();
                 
                 if (isMouseButtonLeftDownOnStartRefreshActionBlocks)
@@ -438,6 +438,8 @@ public class ActionBlockController : MonoBehaviour
                 {
                     _view.UnblockScrollCapability();
                 }
+
+                _isLoadingActionBlocks = false;
             }
         }
     }
@@ -455,6 +457,9 @@ public class ActionBlockController : MonoBehaviour
     private IEnumerator RefreshActionBlocksAfterPause(float pauseSec, Action callbackEnd = null)
     {
         yield return new WaitForSeconds(pauseSec);
+        _view.ScrollToBottom();
+        yield return new WaitForSeconds(pauseSec);
+
         
         RefreshActionBlocksOnPage();
         

@@ -34,7 +34,14 @@ public class ActionBlockView : MonoBehaviour
     private float _bottomScrollbarValue = 0;
     private GameObject loadingTextPrefabShowed;
     
-    
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            // _scrollbar.value -= 0.1f;
+        }
+    }
+
     public void ShowActionBlocks(HashSet<ActionBlockModel.ActionBlock> actionBlocks)
     {
         _searchPage.SetActive(false);
@@ -66,13 +73,13 @@ public class ActionBlockView : MonoBehaviour
 
     public void AddActionBlock(ActionBlockModel.ActionBlock actionBlock)
     {
-        BlockScrollCapability();
+        // BlockScrollCapability();
 
         GameObject actionBlockPrefabShowed = Instantiate(_actionBlockPrefab, 
             _scrollViewContent.transform, false) as GameObject;
 
-        _scrollbar.value = 0.02f;
-        UnblockScrollCapability();
+        // _scrollbar.value = 0.02f;
+        // UnblockScrollCapability();
 
       
         _actionBlocksPrefabsShowed.Add(actionBlockPrefabShowed);
@@ -105,14 +112,6 @@ public class ActionBlockView : MonoBehaviour
     public void ShowExecutionError()
     {
         _executionErrorPanel.SetActive(true);
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            // _scrollbar.value -= 0.1f;
-        }
     }
 
     public void BindScrollbarValueChange(Action<float> handler)
@@ -274,6 +273,11 @@ public class ActionBlockView : MonoBehaviour
         return Uri.IsWellFormedUriString(url, UriKind.Absolute);
     }
     
+    public float GetScrollValue()
+    {
+        return _scrollbar.value;
+    }
+    
     public void BlockScrollCapability()
     {
         _scrollbar.interactable = false;
@@ -290,13 +294,17 @@ public class ActionBlockView : MonoBehaviour
     {
         _scrollbar.value = 1f;
     }
+    
+    public void ScrollToBottom()
+    {
+        _scrollbar.value = 0f;
+    }
 
     public void AddLoadingText()
     {
-       loadingTextPrefabShowed = Instantiate(_loadingTextPrefab, 
+        loadingTextPrefabShowed = Instantiate(_loadingTextPrefab, 
             _scrollViewContent.transform, false) as GameObject;
-
-        _scrollbar.value = 1;
+            print(loadingTextPrefabShowed.name);
     }
 
     public void DestroyLoadingText()
