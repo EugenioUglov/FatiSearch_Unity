@@ -25,7 +25,7 @@ public class ActionBlockController : MonoBehaviour
     [Header("UI")]
     [SerializeField] private TextMeshProUGUI _centralLogText;
     
-    
+    private int _maxCountActionBlocksToCreate = 50;
     private HashSet<ActionBlockModel.ActionBlock> _actionBlocksToShow;
     private int _maxCountActionBlocksToShowAtTime = 10;
     private int _countShowedActionBlocks = 0;
@@ -73,6 +73,13 @@ public class ActionBlockController : MonoBehaviour
 
         SetActionBlocksToShow();
         RefreshActionBlocksOnPage();
+
+        HashSet<ActionBlockModel.ActionBlock> existActionBlocks = _model.GetActionBlocks().ToHashSet();
+
+        if (existActionBlocks.Count() >= _maxCountActionBlocksToCreate) 
+        {
+            _alertController.Show("The limit has been reached.\nMaximum amount of Action-Blocks in demo version is " + _maxCountActionBlocksToCreate + ".");
+        }
     }
 
 
@@ -164,6 +171,15 @@ public class ActionBlockController : MonoBehaviour
 
     public bool CreateActionBlock(ActionBlockModel.ActionBlock actionBlock, bool isShowError = true)
     {
+        HashSet<ActionBlockModel.ActionBlock> existActionBlocks = _model.GetActionBlocks().ToHashSet();
+
+        if (existActionBlocks.Count() >= _maxCountActionBlocksToCreate) 
+        {
+            _alertController.Show("The limit has been reached.\nMaximum amount of Action-Blocks in demo version is " + _maxCountActionBlocksToCreate + ".");
+
+            return false;
+        }
+
         bool isCreated = _model.CreateActionBlock(actionBlock, isShowError);
         
         RefreshView();
