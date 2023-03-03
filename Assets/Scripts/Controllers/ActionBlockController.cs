@@ -137,8 +137,8 @@ public class ActionBlockController : MonoBehaviour
         ActionBlockModel.ActionBlock[] actionBlocksToShowArray = _actionBlocksToShow.ToArray();
         int countShowedAtTime = 0;
         
-        // _searchController.HidePage();
-        // OnStartLoadingActionBlocksToShow();
+        _searchController.HidePage();
+        OnStartLoadingActionBlocksToShow();
 
         for (var i = 0; i < actionBlocksToShowArray.Length; i++)
         {
@@ -153,7 +153,7 @@ public class ActionBlockController : MonoBehaviour
             countShowedAtTime++;
         }
 
-        // _searchController.ShowPage();
+        _searchController.ShowPage();
         OnActionBlocksShowed(_actionBlocksToShow.Count.ToString());
     }
 
@@ -285,6 +285,8 @@ public class ActionBlockController : MonoBehaviour
         
         _countShowedActionBlocks = 0;
         _actionBlocksToShow = newActionBlocksToShow;
+        _view.ScrollToTop();
+
     }
     
     

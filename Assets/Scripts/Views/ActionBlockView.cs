@@ -73,26 +73,38 @@ public class ActionBlockView : MonoBehaviour
 
     public void AddActionBlock(ActionBlockModel.ActionBlock actionBlock)
     {
-        // BlockScrollCapability();
+        print("Add action-block");
 
         GameObject actionBlockPrefabShowed = Instantiate(_actionBlockPrefab, 
             _scrollViewContent.transform, false) as GameObject;
 
-        // _scrollbar.value = 0.02f;
-        // UnblockScrollCapability();
-
-      
         _actionBlocksPrefabsShowed.Add(actionBlockPrefabShowed);
         actionBlockPrefabShowed.GetComponent<ActionBlockEntity>().SetTitle(actionBlock.Title);
+
+        RefreshHeightOfActionBlock();
             
         if (Directory.Exists(actionBlock.Content) == false && File.Exists(actionBlock.Content) == false && IsURLValid(actionBlock.Content) == false)
         {
             actionBlockPrefabShowed.GetComponent<ActionBlockEntity>().SetTitleColorRed();
             actionBlockPrefabShowed.GetComponent<ActionBlockEntity>().HideFileLocationButton();
         }
-        
+
         // Set images async.
         StartCoroutine(SetSprite(actionBlockPrefabShowed, actionBlock.ImagePath));
+
+
+        void RefreshHeightOfActionBlock()
+        {
+            actionBlockPrefabShowed.GetComponent<VerticalLayoutGroup>().childForceExpandHeight = false;
+
+            StartCoroutine(RefreshHeightAfterPause());
+
+            IEnumerator RefreshHeightAfterPause() 
+            {
+                yield return new WaitForSeconds(0.1f);
+                actionBlockPrefabShowed.GetComponent<VerticalLayoutGroup>().childForceExpandHeight = true;
+            }
+        }
     }
     
     public void ClearActionBlocks()
