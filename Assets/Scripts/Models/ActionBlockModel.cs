@@ -210,6 +210,7 @@ public class ActionBlockModel : MonoBehaviour
     {
         OnStartChangeActionBlocksVariables();
 
+
         
         string titleLowerCase = actionBlock.Title.ToLower();
 
@@ -478,6 +479,15 @@ public class ActionBlockModel : MonoBehaviour
     private bool AddActionBlockToVariables(ActionBlock actionBlock, bool isAddToBeginning = true)
     {
         string titleLowerCase = actionBlock.Title.ToLower();
+
+        int _maxCountActionBlocksToCreate = 50;
+        
+        if (GetActionBlocks().Count() >= _maxCountActionBlocksToCreate)
+        {
+            _alertController.Show("The limit has been reached.\nMaximum amount of Action-Blocks in demo version is " + _maxCountActionBlocksToCreate + ".");
+
+            return false;
+        }
 
         if (isAddToBeginning)
         {

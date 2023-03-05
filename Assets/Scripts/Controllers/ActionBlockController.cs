@@ -64,22 +64,31 @@ public class ActionBlockController : MonoBehaviour
         HashSet<ActionBlockModel.ActionBlock> actionBlocksToShow = _model.GetActionBlocks().ToHashSet();
 
         string[] directoriesForAutoCreationActionBlocks = _model.GetDirectoriesForAutoCreationActionBlocksFromFile();
+        int countFilesInDirectories = 0;
+        
+        foreach (string currentDirectory in directoriesForAutoCreationActionBlocks) {
+            string[] fileDirectories = _fileManager.GetFileDirectoriesFromFolderWithSubfolders(currentDirectory);
+            
+            foreach (string path in fileDirectories)
+            {
+                countFilesInDirectories++;
+            }
+        }
 
-        foreach (string currentDirectory in directoriesForAutoCreationActionBlocks)
+        if (countFilesInDirectories > _maxCountActionBlocksToCreate) 
         {
-            // CreateActionBlocksFromFolderIncludingSubfolders(directory: currentDirectory);
-            CreateActionBlocksFromFoldersIncludingSubfolders(directory: currentDirectory);
+            _alertController.Show("The number of files in the specified directories exceeds the limit.\nMaximum amount of Action-Blocks in demo version is " + _maxCountActionBlocksToCreate + ".");
+        }
+        else {
+            foreach (string currentDirectory in directoriesForAutoCreationActionBlocks)
+            {
+                // CreateActionBlocksFromFolderIncludingSubfolders(directory: currentDirectory);
+                CreateActionBlocksFromFoldersIncludingSubfolders(directory: currentDirectory);
+            }
         }
 
         SetActionBlocksToShow();
         RefreshActionBlocksOnPage();
-
-        HashSet<ActionBlockModel.ActionBlock> existActionBlocks = _model.GetActionBlocks().ToHashSet();
-
-        if (existActionBlocks.Count() >= _maxCountActionBlocksToCreate) 
-        {
-            _alertController.Show("The limit has been reached.\nMaximum amount of Action-Blocks in demo version is " + _maxCountActionBlocksToCreate + ".");
-        }
     }
 
 
@@ -175,7 +184,7 @@ public class ActionBlockController : MonoBehaviour
 
         if (existActionBlocks.Count() >= _maxCountActionBlocksToCreate) 
         {
-            _alertController.Show("The limit has been reached.\nMaximum amount of Action-Blocks in demo version is " + _maxCountActionBlocksToCreate + ".");
+            _alertController.Show("Limit exceeded.\nMaximum amount of Action-Blocks in demo version is " + _maxCountActionBlocksToCreate + ".");
 
             return false;
         }
@@ -183,13 +192,28 @@ public class ActionBlockController : MonoBehaviour
         bool isCreated = _model.CreateActionBlock(actionBlock, isShowError);
         
         RefreshView();
+
+        if (existActionBlocks.Count() + 1 >= _maxCountActionBlocksToCreate) 
+        {
+            _alertController.Show("The limit has been reached.\nMaximum amount of Action-Blocks in demo version is " + _maxCountActionBlocksToCreate + ".");
+        }
         
         return isCreated;
     }
 
-    public bool CreateActionBlocks(ActionBlockModel.ActionBlock[] actionBlocks, bool isShowError = true)
+    public bool CreateActionBlocks(ActionBlockModel.ActionBlock[] actionBlocksToAdd, bool isShowError = true)
     {
-        bool isCreated = _model.CreateActionBlocks(actionBlocks, isShowError);
+        // HashSet<ActionBlockModel.ActionBlock> existActionBlocks = _model.GetActionBlocks().ToHashSet();
+        // int countActionBlocksAfterCreation = existActionBlocks.Count() + actionBlocksToAdd.Length;
+
+        // if (countActionBlocksAfterCreation >= _maxCountActionBlocksToCreate) 
+        // {
+        //     _alertController.Show("Limit exceeded.\nMaximum amount of Action-Blocks in demo version is " + _maxCountActionBlocksToCreate + ".");
+
+        //     return false;
+        // }
+
+        bool isCreated = _model.CreateActionBlocks(actionBlocksToAdd, isShowError);
         
         RefreshView();
         
