@@ -63,14 +63,6 @@ public class ActionBlockController : MonoBehaviour
         SetActionBlocks(actionBlocksFromFile);
         HashSet<ActionBlockModel.ActionBlock> actionBlocksToShow = _model.GetActionBlocks().ToHashSet();
 
-        string[] directoriesForAutoCreationActionBlocks = _model.GetDirectoriesForAutoCreationActionBlocksFromFile();
-
-        foreach (string currentDirectory in directoriesForAutoCreationActionBlocks)
-        {
-            // CreateActionBlocksFromFolderIncludingSubfolders(directory: currentDirectory);
-            CreateActionBlocksFromFoldersIncludingSubfolders(directory: currentDirectory);
-        }
-
         SetActionBlocksToShow();
         RefreshActionBlocksOnPage();
     }
@@ -333,12 +325,25 @@ public class ActionBlockController : MonoBehaviour
     {
         string userRequest = commandEnteredEvent.Request;
         print("command from user: " + userRequest);
-        if (userRequest.ToLower() == "execute all found results")
+        if (userRequest == "execute all found results")
         {
             foreach (ActionBlockModel.ActionBlock actionBlock in _actionBlocksToShow)
             {
                 ExecuteByTitle(actionBlock.Title);
             }
+        }
+        else if (userRequest == "update")
+        {
+            string[] directoriesForAutoCreationActionBlocks = _model.GetDirectoriesForAutoCreationActionBlocksFromFile();
+
+            foreach (string currentDirectory in directoriesForAutoCreationActionBlocks)
+            {
+                // CreateActionBlocksFromFolderIncludingSubfolders(directory: currentDirectory);
+                CreateActionBlocksFromFoldersIncludingSubfolders(directory: currentDirectory);
+            }
+
+            SetActionBlocksToShow();
+            RefreshActionBlocksOnPage();
         }
     }
 
