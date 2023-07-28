@@ -336,6 +336,8 @@ public class ActionBlockController : MonoBehaviour
         {
             string[] directoriesForAutoCreationActionBlocks = _model.GetDirectoriesForAutoCreationActionBlocksFromFile();
 
+            print(GetCountFilesFromDirectories(directoriesForAutoCreationActionBlocks));
+
             foreach (string currentDirectory in directoriesForAutoCreationActionBlocks)
             {
                 // CreateActionBlocksFromFolderIncludingSubfolders(directory: currentDirectory);
@@ -471,5 +473,19 @@ public class ActionBlockController : MonoBehaviour
         RefreshActionBlocksOnPage();
         
         callbackEnd?.Invoke();
+    }
+
+    private int GetCountFilesFromDirectories(string[] fileDirectories)
+    {
+        int countFilesInDirectories = 0;
+
+        foreach (string directory in fileDirectories)
+        {
+            int countFilesInDirectory = System.IO.Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories).Count();
+
+            countFilesInDirectories += countFilesInDirectory;
+        }
+
+        return countFilesInDirectories;
     }
 }
