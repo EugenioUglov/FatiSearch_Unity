@@ -6,9 +6,7 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using Newtonsoft.Json;
-using Unity.VisualScripting;
 using System.Text.RegularExpressions;
-
 
 public class ActionBlockModel : MonoBehaviour
 {
@@ -24,12 +22,14 @@ public class ActionBlockModel : MonoBehaviour
     
     [Header("Links")] 
     [SerializeField] private FileController _fileController;
-    
-    private string actionBlocksFilePath = "Action-Blocks.json";
-    private string backupFolderPath = "Backup";
+
+    private bool _isCanceled = false;
+    private string _actionBlocksFilePath = "Action-Blocks.json";
+    private string _backupFolderPath = "Backup";
 
     private OrderedDictionary _actionBlockByTitle = new OrderedDictionary();
     private Dictionary<string, HashSet<ActionBlock>> _actionBlocksByTag = new Dictionary<string, HashSet<ActionBlock>>();
+    private StringManager _stringManager = new StringManager();
 
 
     public struct ActionBlock
@@ -49,6 +49,7 @@ public class ActionBlockModel : MonoBehaviour
             this.ImagePath = imagePath;
         }
     }
+
 
     public List<ActionBlock> GetActionBlocks()
     {
@@ -137,10 +138,49 @@ public class ActionBlockModel : MonoBehaviour
         return actionBlocksToShow.ToArray().Reverse().ToArray(); 
     }
 
+    public IEnumerator GetActionBlocksByRequestAsync(string request, Action<ActionBlock[]> onGet = null)
+    {
+        // Search by tags.
+
+        List<ActionBlock> actionBlocksToShow = new List<ActionBlock>();
+
+        Dictionary<ActionBlock, int> priorityByActionBlock =
+            new Dictionary<ActionBlock, int>();
+
+        string[] tags = request.Split(' ');
+
+        foreach (string tag in tags)
+        {
+            yield return null;
+
+            ActionBlock[] actionBlocksByTag = GetActionBlocksByTag(tag).ToArray().Reverse().ToArray();
+
+            foreach (ActionBlock actionBlock in actionBlocksByTag)
+            {
+                if (priorityByActionBlock.ContainsKey(actionBlock))
+                {
+                    priorityByActionBlock[actionBlock] += 1;
+                }
+                else
+                {
+                    priorityByActionBlock[actionBlock] = 1;
+                }
+            }
+        }
+
+        // Sort array from min priority value.
+        foreach (var pair in priorityByActionBlock.OrderBy(pair => pair.Value))
+        {
+            actionBlocksToShow.Add(pair.Key);
+        }
+        
+        onGet(actionBlocksToShow.ToArray().Reverse().ToArray()); 
+    }
+
     public ActionBlock[] GetActionBlocksFromFile()
     {
         ActionBlock[] actionBlocksFromFile = new ActionBlock[]{};
-        string actionBlocksJSONFromFile = _fileController.GetContentFromFile(actionBlocksFilePath);
+        string actionBlocksJSONFromFile = _fileController.GetContentFromFile(_actionBlocksFilePath);
 
         if (string.IsNullOrEmpty(actionBlocksJSONFromFile) == false)
         {
@@ -210,32 +250,23 @@ public class ActionBlockModel : MonoBehaviour
     {
         OnStartChangeActionBlocksVariables();
 
-        
-        string titleLowerCase = actionBlock.Title.ToLower();
+        string titleForActionBlock = actionBlock.Title;
+        print(titleForActionBlock);
 
-        // foreach (DictionaryEntry item in _actionBlockByTitle)
-        // {
-        //     print(item.Key);
-        //     print(item.Value);
-        // }
-        if (IsTitleValid(titleLowerCase) == false)
+        if (IsActionBlockValidToAdd(actionBlock, isShowError) == false)
         {
             return false;
         }
 
-        // string normalizedTitle = GetNormalizedTitle(titleLowerCase);
-
-        string normalizedTitle = titleLowerCase;
-
-        if (_actionBlockByTitle.Contains(normalizedTitle))
+        if (_actionBlockByTitle.Contains(titleForActionBlock.ToLower()))
         {
-            ActionBlock existingActionBlock = GetActionBlockByTitle(normalizedTitle);
+            ActionBlock existingActionBlock = GetActionBlockByTitle(titleForActionBlock.ToLower());
 
-            if (existingActionBlock.Content != actionBlock.Content)
+            if (existingActionBlock.Content.ToLower() != actionBlock.Content.ToLower())
             {
-                normalizedTitle = normalizedTitle + " (" + actionBlock.Content + ")";
+                titleForActionBlock = titleForActionBlock + " (" + actionBlock.Content + ")";
 
-                if (_actionBlockByTitle.Contains(normalizedTitle))
+                if (_actionBlockByTitle.Contains(titleForActionBlock.ToLower()))
                 {
                     return false;
                 }
@@ -243,146 +274,97 @@ public class ActionBlockModel : MonoBehaviour
                 string originalTitleOfExistingActionBlock = existingActionBlock.Title;
                 string newTitleForExistingActionBlock = existingActionBlock.Title + " (" + existingActionBlock.Content + ")"; 
                 existingActionBlock.Title = newTitleForExistingActionBlock;
-                UpdateActionBlock(originalTitleOfExistingActionBlock, existingActionBlock);
+
+                if (_actionBlockByTitle.Contains(newTitleForExistingActionBlock.ToLower()) == false)
+                {
+                    UpdateActionBlock(originalTitleOfExistingActionBlock, existingActionBlock);
+                }
+            }
+            else
+            {
+                return false;
             }
         }
+
+        ActionBlock actionBlockToCreate = actionBlock;
+        actionBlockToCreate.Title = titleForActionBlock;
+        actionBlockToCreate.Tags = GetUpdatedTagsForCreationActionBlock(titleForActionBlock, actionBlockToCreate);
         
-        actionBlock.Title = normalizedTitle;
-        actionBlock.Tags = GetUpdatedTagsForCreationActionBlock(normalizedTitle, actionBlock);
-        
-        AddActionBlockToVariables(actionBlock);
-        OnUpdateActionBlocks();
+        AddActionBlockToVariables(actionBlockToCreate);
 
         return true;
-        
-        
-        bool IsTitleValid(string title)
-        {
-            // If title already exists.
-            if (_actionBlockByTitle.Contains(title))
-            {
-                ActionBlock existingActionBlock = GetActionBlockByTitle(title);
-
-                if (existingActionBlock.Content == actionBlock.Content)
-                {
-                    if (isShowError)
-                    {
-                        _alertController.Show("Action-Block with this title already exists.");
-                    }
-
-                    return false;
-                }
-                else
-                {
-                   return true; 
-                }
-
-                return false;
-            }
-        
-            if (string.IsNullOrEmpty(title))
-            {
-                if (isShowError)
-                {
-                    _alertController.Show("Error! Title is not defined.");
-                }
-                
-                return false;
-            }
-
-            return true;
-        }
     }
 
-    public bool CreateActionBlocks(ActionBlock[] actionBlocks, bool isShowError = true)
+    public bool CreateActionBlocks(ActionBlock[] actionBlocks, bool isShowError = true, Action onActionBlockProcessedCallback = null)
     {
         foreach (ActionBlock actionBlock in actionBlocks)
         {
+            print(actionBlock.Title);
             OnStartChangeActionBlocksVariables();
-
-            
             string titleLowerCase = actionBlock.Title.ToLower();
 
-            // foreach (DictionaryEntry item in _actionBlockByTitle)
-            // {
-            //     print(item.Key);
-            //     print(item.Value);
-            // }
-            if (IsTitleValid(titleLowerCase, actionBlock) == false)
+            if (IsActionBlockValidToAdd(actionBlock, isShowError) == false)
             {
-                return false;
+                onActionBlockProcessedCallback?.Invoke();
+                continue;
             }
 
-            // string normalizedTitle = GetNormalizedTitle(titleLowerCase);
+            string titleForActionBlock = actionBlock.Title;
 
-            string normalizedTitle = titleLowerCase;
 
-            if (_actionBlockByTitle.Contains(normalizedTitle))
+            if (_actionBlockByTitle.Contains(titleLowerCase))
             {
-                ActionBlock existingActionBlock = GetActionBlockByTitle(normalizedTitle);
+                ActionBlock existingActionBlock = GetActionBlockByTitle(titleLowerCase);
 
-                if (existingActionBlock.Content != actionBlock.Content)
+                if (existingActionBlock.Content.ToLower() != actionBlock.Content.ToLower())
                 {
-                    normalizedTitle = normalizedTitle + " (" + actionBlock.Content + ")";
+                    titleForActionBlock = actionBlock.Title + " (" + actionBlock.Content + ")";
 
-                    if (_actionBlockByTitle.Contains(normalizedTitle))
+                    if (_actionBlockByTitle.Contains(titleForActionBlock.ToLower()))
                     {
-                       continue;
+                        onActionBlockProcessedCallback?.Invoke();
+                        continue;
                     }
 
                     string originalTitleOfExistingActionBlock = existingActionBlock.Title;
                     string newTitleForExistingActionBlock = existingActionBlock.Title + " (" + existingActionBlock.Content + ")"; 
                     existingActionBlock.Title = newTitleForExistingActionBlock;
-                    UpdateActionBlock(originalTitleOfExistingActionBlock, existingActionBlock);
+                    if (_actionBlockByTitle.Contains(newTitleForExistingActionBlock.ToLower()) == false)
+                    {
+                        UpdateActionBlock(originalTitleOfExistingActionBlock, existingActionBlock);
+                    }
                 }
             }
             
             ActionBlock actionBlockToCreate = actionBlock;
-            actionBlockToCreate.Title = normalizedTitle;
-            actionBlockToCreate.Tags = GetUpdatedTagsForCreationActionBlock(normalizedTitle, actionBlockToCreate);
+            actionBlockToCreate.Title = titleForActionBlock;
+            actionBlockToCreate.Tags = GetUpdatedTagsForCreationActionBlock(titleForActionBlock, actionBlockToCreate);
             AddActionBlockToVariables(actionBlockToCreate);
-        }
 
-        OnUpdateActionBlocks();
+            onActionBlockProcessedCallback?.Invoke();
+        }
 
         return true;
-        
-        bool IsTitleValid(string title, ActionBlock actionBlockToAdd)
+    }
+
+    public IEnumerator CreateActionBlocksAsync(ActionBlock[] actionBlocks, bool isShowError = true, Action onActionBlockProcessedCallback = null, Action onEnd = null)
+    {
+        foreach (ActionBlock actionBlock in actionBlocks)
         {
-            // If title already exists.
-            if (_actionBlockByTitle.Contains(title))
+            yield return null;
+
+            if (_isCanceled) 
             {
-                ActionBlock existingActionBlock = GetActionBlockByTitle(title);
+                _isCanceled = false;
+                yield break;
+            } 
 
-                if (existingActionBlock.Content == actionBlockToAdd.Content)
-                {
-                    if (isShowError)
-                    {
-                        _alertController.Show("Action-Block with this title already exists.");
-                    }
 
-                    return false;
-                }
-                else
-                {
-                   return true; 
-                }
-
-                return false;
-            }
-        
-            if (string.IsNullOrEmpty(title))
-            {
-                if (isShowError)
-                {
-                    _alertController.Show("Error! Title is not defined.");
-                }
-                
-                return false;
-            }
-
-            return true;
+            CreateActionBlock(actionBlock, isShowError);
+            onActionBlockProcessedCallback?.Invoke();
         }
+
+        onEnd?.Invoke();
     }
 
     public bool UpdateActionBlock(string originalTitle, ActionBlock actionBlock)
@@ -392,7 +374,7 @@ public class ActionBlockModel : MonoBehaviour
         string originalTitleLowerCase = originalTitle.ToLower();
         string newTitle = actionBlock.Title;
 
-        if (IsTitleValid(originalTitleLowerCase, newTitle) == false)
+        if (IsActionBlockValidToAdd(actionBlock, isShowError: true) == false)
         {
             return false;
         }
@@ -402,161 +384,59 @@ public class ActionBlockModel : MonoBehaviour
         _actionBlockByTitle.Remove(originalTitleLowerCase);
         AddActionBlockToVariables(actionBlock);
         UpdateIndexActionBlockByTags();
-        
-        print("Action-BLock " + actionBlock.Title + " has been updated");
-        
-        OnUpdateActionBlocks();
 
         return true;
-        
-        bool IsTitleValid(string originalTitle, string newTitle)
-        {
-            if (originalTitle != newTitle)
-            {
-                // If title already exists.
-                if (_actionBlockByTitle.Contains(newTitle))
-                {
-                    _alertController.Show("Action-Block with this title already exists: " + newTitle);
-                    return false;
-                }
-                
-                if (string.IsNullOrEmpty(newTitle))
-                {
-                    _alertController.Show("Error! Title is not defined.");
-                    return false;
-                }
-            }
-            
-            return true;
-        }
     }
-
 
     public void DeleteActionBlock(ActionBlock actionBlock)
     {
         OnStartChangeActionBlocksVariables();
         _actionBlockByTitle.Remove(actionBlock.Title.ToLower());
         UpdateIndexActionBlockByTags();
-        OnUpdateActionBlocks();
+    }
+
+    public void DeleteAllActionBlocks()
+    {
+        OnStartChangeActionBlocksVariables();
+        _actionBlockByTitle.Clear();
     }
     
-    private void UpdateIndexActionBlockByTags()
+    public IEnumerator GetFilesFromDirectoriesAsync(string[] fileDirectories, Action<string> onGetFile = null, Action<string[]> onEnd = null)
     {
-        _actionBlocksByTag.Clear();
+        List<string> files = new List<string>();
 
-        ActionBlock[] actionBlocks = GetActionBlocks().ToArray();
-
-        foreach (var actionBlock in actionBlocks)
+        foreach (string directory in fileDirectories)
         {
-            // Add Action-Blocks by tag.
-            // Separated elements by ",".
-            foreach (string tagPhrase in actionBlock.Tags)
+            foreach(var file in Directory.EnumerateFiles(directory, "*.*", SearchOption.AllDirectories)) 
             {
-                string[] wordsFromTag = tagPhrase.Split(' ');
-
-
-                // Separated elements by " ".
-                foreach (string tagWord in wordsFromTag)
-                {
-                    // Skip empty symbols.
-                    if (string.IsNullOrEmpty(tagWord)) continue;
-
-                    string tagWordLowCase = tagWord.ToLower();
-
-                    // Create new List for tags if doesn't exist yes.
-                    if (_actionBlocksByTag.TryGetValue(tagWordLowCase, out HashSet<ActionBlock> value1) == false)
-                    {
-                        _actionBlocksByTag[tagWordLowCase] = new HashSet<ActionBlock>() { };
-                    }
-
-                    _actionBlocksByTag[tagWordLowCase].Add(actionBlock);
-                }
-            }
-        }
-    }
-
-    private bool AddActionBlockToVariables(ActionBlock actionBlock, bool isAddToBeginning = true)
-    {
-        string titleLowerCase = actionBlock.Title.ToLower();
-
-        if (isAddToBeginning)
-        {
-            // Insert a new key to the beginning of the OrderedDictionary
-            _actionBlockByTitle.Insert(0, titleLowerCase, actionBlock);
-        }
-        else
-        {
-            _actionBlockByTitle.Add(titleLowerCase, actionBlock);
-        }
-
-        // Add Action-Blocks by tag.
-        // Separated elements by ",".
-        foreach (string tagPhrase in actionBlock.Tags)
-        {
-            string[] wordsFromTag = tagPhrase.Split(' ');
-            
-            // Separated elements by " ".
-            foreach (string tagWord in wordsFromTag)
-            {
-                // Skip empty symbols.
-                if (tagWord == "") continue;
+                yield return null;
                 
-                string tagWordLowCase = tagWord.ToLower();
-                
-                // Create new List for tags if doesn't exist yes.
-                if (_actionBlocksByTag.TryGetValue(tagWordLowCase, out HashSet<ActionBlock> value1) == false) {
-                    _actionBlocksByTag[tagWordLowCase] = new HashSet<ActionBlock>(){};
-                }
-                
-                _actionBlocksByTag[tagWordLowCase].Add(actionBlock);
+                files.Add(file);
+
+                onGetFile?.Invoke(file);
             }
         }
 
-        return true;
+        onEnd?.Invoke(files.ToArray());
     }
 
-
-    
-    private void OnUpdateActionBlocks()
+    public void CancelProcess()
     {
-        Save();
-    }
-
-    private void OnStartChangeActionBlocksVariables()
-    {
-
+        _isCanceled = true;
     }
     
-    private void Save()
+    public void SaveToFile()
     {
         ActionBlock[] actionBlocks = GetActionBlocks().ToArray();
         string actionBlocksJSON = JsonConvert.SerializeObject(actionBlocks);
-        _fileController.Save(actionBlocksFilePath, actionBlocksJSON);
+        _fileController.Save(_actionBlocksFilePath, actionBlocksJSON);
     }
-    
-    private string GetTextWithoutSpecialSymbols(string textToCheck)
-    {
-        return Regex.Replace(textToCheck, @"[^0-9a-zA-Z]", " ");
-        
-        /*
-        // 2 Way
-        StringBuilder sb = new StringBuilder();
-        
-        foreach (char c in str) {
-            if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) {
-                sb.Append(c);
-            }
-        }
-        
-        return sb.ToString();
-        */
-    }
-    
-    
+
+
     private List<string> GetUpdatedTagsForCreationActionBlock(string originalTitle, ActionBlock actionBlock)
     {
         string titleLowerCase = actionBlock.Title.ToLower();
-        string titleWithoutSpecialSymbols = GetTextWithoutSpecialSymbols(actionBlock.Title.ToLower());
+        string titleWithoutSpecialSymbols = _stringManager.GetTextWithoutSpecialSymbols(actionBlock.Title.ToLower());
         List<string> tags = actionBlock.Tags;
             
         // Add tags from title words.
@@ -639,10 +519,128 @@ public class ActionBlockModel : MonoBehaviour
         ActionBlock[] actionBlocks = GetActionBlocks().ToArray();
         string actionBlocksJSON = JsonConvert.SerializeObject(actionBlocks);
 
-        CreateFolderIfMissing(backupFolderPath);
+        CreateFolderIfMissing(_backupFolderPath);
         
-        _fileController.Save(backupFolderPath + "/" + "Action-Blocks_" + 
+        _fileController.Save(_backupFolderPath + "/" + "Action-Blocks_" + 
                              DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".json", 
             actionBlocksJSON);
+    }
+
+    private void OnStartChangeActionBlocksVariables()
+    {
+
+    }
+
+    private bool IsActionBlockValidToAdd(ActionBlock actionBlockToAdd,  bool isShowError = true)
+    {
+        // If title already exists then check also content, if content different then Action-Block valid.
+        if (_actionBlockByTitle.Contains(actionBlockToAdd.Title))
+        {
+            ActionBlock existingActionBlock = GetActionBlockByTitle(actionBlockToAdd.Title);
+
+            if (existingActionBlock.Content == actionBlockToAdd.Content)
+            {
+                if (isShowError)
+                {
+                    _alertController.Show("Action-Block with this title already exists.");
+                }
+
+                return false;
+            }
+            else
+            {
+                return true; 
+            }
+
+            return false;
+        }
+    
+        // If title is empty then Action-Block is invalid.
+        if (string.IsNullOrEmpty(actionBlockToAdd.Title))
+        {
+            if (isShowError)
+            {
+                _alertController.Show("Error! Title is not defined.");
+            }
+            
+            return false;
+        }
+
+        return true;
+    }
+    
+    private void UpdateIndexActionBlockByTags()
+    {
+        _actionBlocksByTag.Clear();
+
+        ActionBlock[] actionBlocks = GetActionBlocks().ToArray();
+
+        foreach (var actionBlock in actionBlocks)
+        {
+            // Add Action-Blocks by tag.
+            // Separated elements by ",".
+            foreach (string tagPhrase in actionBlock.Tags)
+            {
+                string[] wordsFromTag = tagPhrase.Split(' ');
+
+
+                // Separated elements by " ".
+                foreach (string tagWord in wordsFromTag)
+                {
+                    // Skip empty symbols.
+                    if (string.IsNullOrEmpty(tagWord)) continue;
+
+                    string tagWordLowCase = tagWord.ToLower();
+
+                    // Create new List for tags if doesn't exist yes.
+                    if (_actionBlocksByTag.TryGetValue(tagWordLowCase, out HashSet<ActionBlock> value1) == false)
+                    {
+                        _actionBlocksByTag[tagWordLowCase] = new HashSet<ActionBlock>() { };
+                    }
+
+                    _actionBlocksByTag[tagWordLowCase].Add(actionBlock);
+                }
+            }
+        }
+    }
+
+    private bool AddActionBlockToVariables(ActionBlock actionBlock, bool isAddToBeginning = true)
+    {
+        string titleLowerCase = actionBlock.Title.ToLower();
+
+        if (isAddToBeginning)
+        {
+            // Insert a new key to the beginning of the OrderedDictionary
+            _actionBlockByTitle.Insert(0, titleLowerCase, actionBlock);
+        }
+        else
+        {
+            _actionBlockByTitle.Add(titleLowerCase, actionBlock);
+        }
+
+        // Add Action-Blocks by tag.
+        // Separated elements by ",".
+        foreach (string tagPhrase in actionBlock.Tags)
+        {
+            string[] wordsFromTag = tagPhrase.Split(' ');
+            
+            // Separated elements by " ".
+            foreach (string tagWord in wordsFromTag)
+            {
+                // Skip empty symbols.
+                if (tagWord == "") continue;
+                
+                string tagWordLowCase = tagWord.ToLower();
+                
+                // Create new List for tags if doesn't exist yes.
+                if (_actionBlocksByTag.TryGetValue(tagWordLowCase, out HashSet<ActionBlock> value1) == false) {
+                    _actionBlocksByTag[tagWordLowCase] = new HashSet<ActionBlock>(){};
+                }
+                
+                _actionBlocksByTag[tagWordLowCase].Add(actionBlock);
+            }
+        }
+
+        return true;
     }
 }

@@ -42,7 +42,6 @@ public class CommandView : MonoBehaviour
         
     }
 
-
     public void SetFocus()
     {
         _inputFieldTMP.ActivateInputField();

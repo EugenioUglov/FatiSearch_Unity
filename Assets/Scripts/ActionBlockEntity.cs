@@ -1,9 +1,5 @@
-using System.Collections;
-using System.IO;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Networking;
-using UnityEngine.UI;
 
 public class ActionBlockEntity : MonoBehaviour
 {
@@ -12,7 +8,6 @@ public class ActionBlockEntity : MonoBehaviour
     [SerializeField] private GameObject _fileLocationButtonGameObject;
     public GameObject Image;
 
-  
     
     public string GetTitle()
     {

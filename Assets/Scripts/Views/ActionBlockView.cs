@@ -32,7 +32,8 @@ public class ActionBlockView : MonoBehaviour
     
     private float _topScrollbarValue = 1;
     private float _bottomScrollbarValue = 0;
-    private GameObject loadingTextPrefabShowed;
+    private bool _isLoadingTextCreated = false;
+    private GameObject _loadingTextPrefabShowed;
     
     private void Update()
     {
@@ -73,13 +74,14 @@ public class ActionBlockView : MonoBehaviour
 
     public void AddActionBlock(ActionBlockModel.ActionBlock actionBlock)
     {
-        print("Add action-block");
+        // print("Add action-block");
 
         GameObject actionBlockPrefabShowed = Instantiate(_actionBlockPrefab, 
             _scrollViewContent.transform, false) as GameObject;
 
         _actionBlocksPrefabsShowed.Add(actionBlockPrefabShowed);
         actionBlockPrefabShowed.GetComponent<ActionBlockEntity>().SetTitle(actionBlock.Title);
+
 
         RefreshHeightOfActionBlock();
             
@@ -102,7 +104,11 @@ public class ActionBlockView : MonoBehaviour
             IEnumerator RefreshHeightAfterPause() 
             {
                 yield return new WaitForSeconds(0.1f);
-                actionBlockPrefabShowed.GetComponent<VerticalLayoutGroup>().childForceExpandHeight = true;
+
+                if (actionBlockPrefabShowed != null)
+                {
+                    actionBlockPrefabShowed.GetComponent<VerticalLayoutGroup>().childForceExpandHeight = true;
+                }
             }
         }
     }
@@ -144,9 +150,14 @@ public class ActionBlockView : MonoBehaviour
         ImagePathInputField.GetComponent<TMP_InputField>().text = "";
     }
 
-    public string ShowCountTextFoundActionBlocks(int count)
+    public string GetSearchResultText()
+    {   
+        return _foundResultsText.text;
+    }
+
+    public string SetSearchResultText(string newText)
     {
-        _foundResultsText.text = "Found " + count + " results";
+        _foundResultsText.text = newText;
         
         return _foundResultsText.text;
     }
@@ -314,14 +325,19 @@ public class ActionBlockView : MonoBehaviour
 
     public void AddLoadingText()
     {
-        loadingTextPrefabShowed = Instantiate(_loadingTextPrefab, 
+        if (_isLoadingTextCreated) return;
+        
+        _isLoadingTextCreated = true;
+
+        _loadingTextPrefabShowed = Instantiate(_loadingTextPrefab, 
             _scrollViewContent.transform, false) as GameObject;
-            print(loadingTextPrefabShowed.name);
     }
 
     public void DestroyLoadingText()
     {
-        Destroy(loadingTextPrefabShowed);
+        Destroy(_loadingTextPrefabShowed);
+        
+        _isLoadingTextCreated = false;
     }
 }
 

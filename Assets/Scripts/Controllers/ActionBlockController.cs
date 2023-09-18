@@ -21,6 +21,7 @@ public class ActionBlockController : MonoBehaviour
     [SerializeField] private BottomMessageController _bottomMessageController;
     [SerializeField] private PageService _pageService;
     [SerializeField] private FileManager _fileManager;
+    [SerializeField] private LoaderFullscreenService _loaderFullscreenService;
 
     [Header("UI")]
     [SerializeField] private TextMeshProUGUI _centralLogText;
@@ -31,8 +32,11 @@ public class ActionBlockController : MonoBehaviour
     private int _countShowedActionBlocks = 0;
     private bool _isMouseButtonLeftDown = false;
     private bool _isLoadingActionBlocks = false;
+    private int _countProcessedFilesFromDirectories = 0;
+    private int _countFilesFromDirectories = 0;
+    private int _countDirectoriesForAutoCreationActionBlocks = 0;
 
-    
+
     private void Update()
     {
         if (Input.GetMouseButton(0))
@@ -65,30 +69,6 @@ public class ActionBlockController : MonoBehaviour
 
         SetActionBlocksToShow();
         RefreshActionBlocksOnPage();
-    }
-
-
-
-    private void CreateActionBlocksFromFolderIncludingSubfolders(string directory)
-    {
-        string[] fileDirectories = _fileManager.GetFileDirectoriesFromFolderWithSubfolders(directory);
-
-        foreach (string currentDirectory in fileDirectories)
-        {
-            CreateActionBlockByPath(path: currentDirectory, isShowError: false);
-        }
-    }
-
-    private void CreateActionBlocksFromFoldersIncludingSubfolders(string directory)
-    {
-        string[] fileDirectories = _fileManager.GetFileDirectoriesFromFolderWithSubfolders(directory);
-
-        CreateActionBlocksByPaths(paths: fileDirectories, isShowError: false);
-
-        // foreach (string currentDirectory in fileDirectories)
-        // {
-        //     CreateActionBlockByPath(path: currentDirectory, isShowError: false);
-        // }
     }
 
     public void OnStartLoadingActionBlocksToShow()
@@ -128,8 +108,7 @@ public class ActionBlockController : MonoBehaviour
         
         ActionBlockModel.ActionBlock[] actionBlocksToShowArray = _actionBlocksToShow.ToArray();
         int countShowedAtTime = 0;
-        
-        _searchController.HidePage();
+
         OnStartLoadingActionBlocksToShow();
 
         for (var i = 0; i < actionBlocksToShowArray.Length; i++)
@@ -145,7 +124,7 @@ public class ActionBlockController : MonoBehaviour
             countShowedAtTime++;
         }
 
-        _searchController.ShowPage();
+
         OnActionBlocksShowed(_actionBlocksToShow.Count.ToString());
     }
 
@@ -157,7 +136,7 @@ public class ActionBlockController : MonoBehaviour
     public bool CreateActionBlock(ActionBlockModel.ActionBlock actionBlock, bool isShowError = true)
     {
         bool isCreated = _model.CreateActionBlock(actionBlock, isShowError);
-        
+        _model.SaveToFile();
         RefreshView();
         
         return isCreated;
@@ -165,28 +144,71 @@ public class ActionBlockController : MonoBehaviour
 
     public bool CreateActionBlocks(ActionBlockModel.ActionBlock[] actionBlocks, bool isShowError = true)
     {
-        bool isCreated = _model.CreateActionBlocks(actionBlocks, isShowError);
+        StartCoroutine(_model.CreateActionBlocksAsync(
+            actionBlocks, 
+            isShowError, 
+            onActionBlockProcessedCallback: OnAddActionBlock, 
+            onEnd: ()=> {
+                _model.SaveToFile();
+                SetActionBlocksToShow();
+                RefreshActionBlocksOnPage();
+                _loaderFullscreenService.Hide();
+                _loaderFullscreenService.SetText("");
+            }
+        ));
         
+        void OnAddActionBlock() 
+        {
+            StartCoroutine(AddFileProcessedStatusAsync());
+            // _countProcessedFilesFromDirectories++;
+            // _loaderFullscreenService.SetText(_countProcessedFilesFromDirectories + " / " + _countFilesFromDirectories + " files are processed");
+            // print(_countProcessedFilesFromDirectories + " / " + _countFilesFromDirectories + " files are processed");
+        }
+
         RefreshView();
         
-        return isCreated;
+        return true;
     }
 
     public bool CreateActionBlockByPath(string path, bool isShowError = true)
     {
-        string fileName = Path.GetFileNameWithoutExtension(path);
-        String[] foldersOfPath = path.Split('\\');
+        UserSettings settings = new UserSettings();
         List<string> tags = new List<string>();
+        string fileName = Path.GetFileNameWithoutExtension(path);
+        string[] foldersOfPath = path.Split('\\');
+        string titleActionBlock = fileName;
+        SettingsData settingsData = settings.GetSettings();
                 
+        if (Convert.ToBoolean(settingsData.IsDirectoryInTitle)) 
+        {
+            titleActionBlock += " (";    
+        }
+
         for (int i = 0; i < foldersOfPath.Length - 1; i++)
         {
             // Add to tags folder names from path of a file.
             
             tags.Add(foldersOfPath[i]);
+
+            if (Convert.ToBoolean(settingsData.IsDirectoryInTitle)) 
+            {
+                if (i > 0) 
+                {
+                    titleActionBlock += "\\";
+                }
+
+                titleActionBlock += foldersOfPath[i];
+            }
         }
 
+        if (Convert.ToBoolean(settingsData.IsDirectoryInTitle)) 
+        {
+            titleActionBlock += ")";    
+        }
+        
+
         ActionBlockModel.ActionBlock actionBlock = 
-        new ActionBlockModel.ActionBlock(fileName, ActionBlockModel.ActionEnum.OpenPath, 
+        new ActionBlockModel.ActionBlock(titleActionBlock, ActionBlockModel.ActionEnum.OpenPath, 
             path, tags);
         
         CreateActionBlock(actionBlock, isShowError);
@@ -196,41 +218,25 @@ public class ActionBlockController : MonoBehaviour
 
     public bool CreateActionBlocksByPaths(string[] paths, bool isShowError = true)
     {
-        List<ActionBlockModel.ActionBlock> actionBlocks = new List<ActionBlockModel.ActionBlock>();
-
-        foreach (string path in paths)
-        {
-            string fileName = Path.GetFileNameWithoutExtension(path);
-            String[] foldersOfPath = path.Split('\\');
-            List<string> tags = new List<string>();
-                    
-            for (int i = 0; i < foldersOfPath.Length - 1; i++)
-            {
-                // Add to tags folder names from path of a file.
-                
-                tags.Add(foldersOfPath[i]);
+        StartCoroutine(GetActionBlocksByPathsAsync(
+            paths, 
+            onActionBlockReady: (actionBlock) => {
+                print(actionBlock.Title);
+            },
+            onActionBlocksReady: (actionBlocks) => {
+                CreateActionBlocks(actionBlocks.ToArray(), isShowError);
             }
-
-            ActionBlockModel.ActionBlock actionBlock = 
-            new ActionBlockModel.ActionBlock(fileName, ActionBlockModel.ActionEnum.OpenPath, 
-                path, tags);
-
-            actionBlocks.Add(actionBlock);
-        }
-
-        
-        CreateActionBlocks(actionBlocks.ToArray(), isShowError);
+        ));
 
         return true;
     }
 
-
-    
     public bool UpdateActionBlock(string title, ActionBlockModel.ActionBlock actionBlock)
     {
         bool isUpdated = _model.UpdateActionBlock(title, actionBlock);
         if (isUpdated == false) return isUpdated;
         
+        _model.SaveToFile();
         RefreshView();
         
         return isUpdated;
@@ -239,9 +245,11 @@ public class ActionBlockController : MonoBehaviour
     public void DeleteActionBlock(ActionBlockModel.ActionBlock actionBlock)
     {
         _model.DeleteActionBlock(actionBlock);
+        _model.SaveToFile();
         HashSet<ActionBlockModel.ActionBlock> actionBlocksToShow = _model.GetActionBlocks().ToHashSet();
         SetActionBlocksToShow(actionBlocksToShow);
         RefreshActionBlocksOnPage();
+        RefreshView();
     }
 
     public bool ExecuteByTitle(string title)
@@ -272,13 +280,19 @@ public class ActionBlockController : MonoBehaviour
         }
         
         _view.ClearActionBlocks();
-        
-        _view.ShowCountTextFoundActionBlocks(newActionBlocksToShow.Count);
+        _view.SetSearchResultText("Found " + newActionBlocksToShow.Count() + " resuts");
         
         _countShowedActionBlocks = 0;
         _actionBlocksToShow = newActionBlocksToShow;
         _view.ScrollToTop();
+    }
 
+    public void OnCancelCreateActionBlocksByDirectories()
+    {
+        _loaderFullscreenService.OnCancel(
+            onCancel: () => {
+                _loaderFullscreenService.Hide();
+            });
     }
     
     
@@ -323,8 +337,8 @@ public class ActionBlockController : MonoBehaviour
 
     private void OnCommandEntered(CommandEnteredEvent commandEnteredEvent)
     {
-        string userRequest = commandEnteredEvent.Request;
-        print("command from user: " + userRequest);
+        string userRequest = commandEnteredEvent.Request.ToLower();
+
         if (userRequest == "execute all found results")
         {
             foreach (ActionBlockModel.ActionBlock actionBlock in _actionBlocksToShow)
@@ -334,18 +348,13 @@ public class ActionBlockController : MonoBehaviour
         }
         else if (userRequest == "update")
         {
-            string[] directoriesForAutoCreationActionBlocks = _model.GetDirectoriesForAutoCreationActionBlocksFromFile();
-
-            print(GetCountFilesFromDirectories(directoriesForAutoCreationActionBlocks));
-
-            foreach (string currentDirectory in directoriesForAutoCreationActionBlocks)
-            {
-                // CreateActionBlocksFromFolderIncludingSubfolders(directory: currentDirectory);
-                CreateActionBlocksFromFoldersIncludingSubfolders(directory: currentDirectory);
-            }
-
-            SetActionBlocksToShow();
-            RefreshActionBlocksOnPage();
+            CreateActionBlocksByDirectoriesAndShow();
+        }
+        else if (userRequest == "delete all action-blocks")
+        {
+            _model.DeleteAllActionBlocks();
+            RefreshView();
+            _model.SaveToFile();
         }
     }
 
@@ -353,18 +362,28 @@ public class ActionBlockController : MonoBehaviour
     {
         string userRequest = valueChangedInInputFieldSearchEvent.Request;
         HashSet<ActionBlockModel.ActionBlock> actionBlocksToShow = _model.GetActionBlocks().ToHashSet();
-        
+        _view.ClearActionBlocks();
+        _view.AddLoadingText();
+
         if (userRequest == "")
         {
             actionBlocksToShow = _model.GetActionBlocks().ToHashSet();
+            SetActionBlocksToShow(actionBlocksToShow);
+            RefreshActionBlocksOnPage();
+            _view.DestroyLoadingText();
         }
         else
         {
-            actionBlocksToShow = _model.GetActionBlocksByRequest(userRequest).ToHashSet();
+            // actionBlocksToShow = _model.GetActionBlocksByRequest(userRequest).ToHashSet();
+            StartCoroutine(_model.GetActionBlocksByRequestAsync(
+                userRequest, 
+                onGet: (actionBlocksToShow) => {
+                    SetActionBlocksToShow(actionBlocksToShow.ToHashSet());
+                    RefreshActionBlocksOnPage();
+                    _view.DestroyLoadingText();
+                }
+            ));
         }
-        
-        SetActionBlocksToShow(actionBlocksToShow);
-        RefreshActionBlocksOnPage();
     }
     
     private void ExecuteByActionBlock(ActionBlockModel.ActionBlock actionBlock)
@@ -475,17 +494,93 @@ public class ActionBlockController : MonoBehaviour
         callbackEnd?.Invoke();
     }
 
-    private int GetCountFilesFromDirectories(string[] fileDirectories)
+    private bool CreateActionBlocksByDirectoriesAndShow()
     {
-        int countFilesInDirectories = 0;
+        _countProcessedFilesFromDirectories = 0;
+        int countFilesInDirectory = 0;
 
-        foreach (string directory in fileDirectories)
+        _loaderFullscreenService.SetText("Preparing files for auto creation Action-Blocks");
+        _loaderFullscreenService.Show(onCancel: () => {
+            _model.CancelProcess();
+            _loaderFullscreenService.Hide();
+        });
+
+        StartCoroutine(GetDirectoriesForAutoCreationActionBlocksFromFileAsync(
+            onDirectoriesReceived: (directoriesForAutoCreationActionBlocks) => {
+                _countDirectoriesForAutoCreationActionBlocks = directoriesForAutoCreationActionBlocks.Length;
+
+                if (_countDirectoriesForAutoCreationActionBlocks == 0)
+                {
+                    return;
+                }
+
+                StartCoroutine(_model.GetFilesFromDirectoriesAsync(
+                    directoriesForAutoCreationActionBlocks, 
+                    onGetFile: (file) => {
+                        countFilesInDirectory++;
+                        _loaderFullscreenService.SetText("Preparing files for auto creation Action-Blocks | Count files processed: " + countFilesInDirectory);
+                    },
+                    onEnd: (receivedFiles) => {
+                        _countFilesFromDirectories = receivedFiles.Count(); 
+                        CreateActionBlocksByPaths(paths: receivedFiles, isShowError: false);
+
+                        // _loaderFullscreenService.SetText(_countProcessedFilesFromDirectories + " / " + _countFilesFromDirectories + " files are processed");
+                        // _loaderFullscreenService.Show(onCancel: () => {
+                        //     _model.CancelProcess();
+                        //     _loaderFullscreenService.Hide();
+                        // });
+                    }
+                )); 
+            }
+        ));
+
+        return true;
+    }
+
+    private IEnumerator GetDirectoriesForAutoCreationActionBlocksFromFileAsync(Action<string[]> onDirectoriesReceived)
+    {
+        yield return null;
+        string[] directoriesForAutoCreationActionBlocks = _model.GetDirectoriesForAutoCreationActionBlocksFromFile();
+        onDirectoriesReceived(directoriesForAutoCreationActionBlocks);
+    }
+
+    private IEnumerator AddFileProcessedStatusAsync()
+    {
+        yield return new WaitForSeconds(0.01f);
+        _countProcessedFilesFromDirectories++;
+        _loaderFullscreenService.SetText(_countProcessedFilesFromDirectories + " / " + _countFilesFromDirectories + " files are processed");
+    }
+
+    private IEnumerator GetActionBlocksByPathsAsync(string[] paths, Action<ActionBlockModel.ActionBlock> onActionBlockReady = null, Action<List<ActionBlockModel.ActionBlock>> onActionBlocksReady = null)
+    {
+        List<ActionBlockModel.ActionBlock> actionBlocks = new List<ActionBlockModel.ActionBlock>();
+
+        foreach (string path in paths)
         {
-            int countFilesInDirectory = System.IO.Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories).Count();
+            yield return null;
 
-            countFilesInDirectories += countFilesInDirectory;
+            print("path processed:");
+            print(path);
+
+            string fileName = Path.GetFileNameWithoutExtension(path);
+            string[] foldersOfPath = path.Split('\\');
+            List<string> tags = new List<string>();
+                    
+            for (int i = 0; i < foldersOfPath.Length - 1; i++)
+            {
+                // Add to tags folder names from path of a file.
+                
+                tags.Add(foldersOfPath[i]);
+            }
+
+            ActionBlockModel.ActionBlock actionBlock = 
+            new ActionBlockModel.ActionBlock(fileName, ActionBlockModel.ActionEnum.OpenPath, 
+                path, tags);
+
+            actionBlocks.Add(actionBlock);
+            onActionBlockReady?.Invoke(actionBlock);
         }
 
-        return countFilesInDirectories;
+        onActionBlocksReady?.Invoke(actionBlocks);
     }
 }
