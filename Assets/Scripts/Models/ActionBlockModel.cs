@@ -251,7 +251,6 @@ public class ActionBlockModel : MonoBehaviour
         OnStartChangeActionBlocksVariables();
 
         string titleForActionBlock = actionBlock.Title;
-        print(titleForActionBlock);
 
         if (IsActionBlockValidToAdd(actionBlock, isShowError) == false)
         {

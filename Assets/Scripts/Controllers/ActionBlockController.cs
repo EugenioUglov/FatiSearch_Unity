@@ -172,44 +172,7 @@ public class ActionBlockController : MonoBehaviour
 
     public bool CreateActionBlockByPath(string path, bool isShowError = true)
     {
-        UserSettings settings = new UserSettings();
-        List<string> tags = new List<string>();
-        string fileName = Path.GetFileNameWithoutExtension(path);
-        string[] foldersOfPath = path.Split('\\');
-        string titleActionBlock = fileName;
-        SettingsData settingsData = settings.GetSettings();
-                
-        if (Convert.ToBoolean(settingsData.IsDirectoryInTitle)) 
-        {
-            titleActionBlock += " (";    
-        }
-
-        for (int i = 0; i < foldersOfPath.Length - 1; i++)
-        {
-            // Add to tags folder names from path of a file.
-            
-            tags.Add(foldersOfPath[i]);
-
-            if (Convert.ToBoolean(settingsData.IsDirectoryInTitle)) 
-            {
-                if (i > 0) 
-                {
-                    titleActionBlock += "\\";
-                }
-
-                titleActionBlock += foldersOfPath[i];
-            }
-        }
-
-        if (Convert.ToBoolean(settingsData.IsDirectoryInTitle)) 
-        {
-            titleActionBlock += ")";    
-        }
-        
-
-        ActionBlockModel.ActionBlock actionBlock = 
-        new ActionBlockModel.ActionBlock(titleActionBlock, ActionBlockModel.ActionEnum.OpenPath, 
-            path, tags);
+        ActionBlockModel.ActionBlock actionBlock = GetActionBlockObject(path);
         
         CreateActionBlock(actionBlock, isShowError);
 
@@ -562,25 +525,57 @@ public class ActionBlockController : MonoBehaviour
             print("path processed:");
             print(path);
 
-            string fileName = Path.GetFileNameWithoutExtension(path);
-            string[] foldersOfPath = path.Split('\\');
-            List<string> tags = new List<string>();
-                    
-            for (int i = 0; i < foldersOfPath.Length - 1; i++)
-            {
-                // Add to tags folder names from path of a file.
-                
-                tags.Add(foldersOfPath[i]);
-            }
-
-            ActionBlockModel.ActionBlock actionBlock = 
-            new ActionBlockModel.ActionBlock(fileName, ActionBlockModel.ActionEnum.OpenPath, 
-                path, tags);
+            ActionBlockModel.ActionBlock actionBlock = GetActionBlockObject(path);
 
             actionBlocks.Add(actionBlock);
             onActionBlockReady?.Invoke(actionBlock);
         }
 
         onActionBlocksReady?.Invoke(actionBlocks);
+    }
+
+
+    private ActionBlockModel.ActionBlock GetActionBlockObject(string path)
+    {
+        UserSettings settings = new UserSettings();
+        List<string> tags = new List<string>();
+        string fileName = Path.GetFileNameWithoutExtension(path);
+        string[] foldersOfPath = path.Split('\\');
+        string titleActionBlock = fileName;
+        SettingsData settingsData = settings.GetSettings();
+                
+        if (Convert.ToBoolean(settingsData.IsDirectoryInTitle)) 
+        {
+            titleActionBlock += " (";    
+        }
+
+        for (int i = 0; i < foldersOfPath.Length - 1; i++)
+        {
+            // Add to tags folder names from path of a file.
+            
+            tags.Add(foldersOfPath[i]);
+
+            if (Convert.ToBoolean(settingsData.IsDirectoryInTitle)) 
+            {
+                if (i > 0) 
+                {
+                    titleActionBlock += "\\";
+                }
+
+                titleActionBlock += foldersOfPath[i];
+            }
+        }
+
+        if (Convert.ToBoolean(settingsData.IsDirectoryInTitle)) 
+        {
+            titleActionBlock += ")";    
+        }
+        
+
+        ActionBlockModel.ActionBlock actionBlock = 
+        new ActionBlockModel.ActionBlock(titleActionBlock, ActionBlockModel.ActionEnum.OpenPath, 
+            path, tags);
+
+        return actionBlock;
     }
 }
