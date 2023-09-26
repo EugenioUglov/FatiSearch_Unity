@@ -21,6 +21,10 @@ public class Main : MonoBehaviour
         }
         else if (settingsData.Theme == "dark")
         {
+            Camera.main.backgroundColor = new Color32(70, 70, 70, 0);
+        }
+        else if (settingsData.Theme == "darkest")
+        {
             Camera.main.backgroundColor = new Color32(48, 48, 48, 0);
         }
         _dragAndDropController.Init();

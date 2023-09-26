@@ -6528,7 +6528,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.1882353, g: 0.18667673, b: 0.18867922, a: 0}
+  m_BackGroundColor: {r: 0.3679245, g: 0.3679245, b: 0.3679245, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -12550,6 +12550,7 @@ MonoBehaviour:
   _searchController: {fileID: 2008285829}
   _alertController: {fileID: 2008285832}
   _bottomMessageController: {fileID: 2008285835}
+  _commandController: {fileID: 2008285841}
   _pageService: {fileID: 2008285825}
   _fileManager: {fileID: 2008285840}
   _loaderFullscreenService: {fileID: 2008285820}
@@ -12691,7 +12692,7 @@ MonoBehaviour:
   ContentInputField: {fileID: 3859740}
   TagsInputField: {fileID: 1658461812}
   ImagePathInputField: {fileID: 807966809}
-  _actionBlockPrefab: {fileID: 2058610361709996432, guid: f1801d3c98791ae4a9650086e3ef15ee, type: 3}
+  _actionBlockPrefab: {fileID: 8564800006806701245, guid: 9afe249f1f8f0c94f9270486fc6b5af4, type: 3}
   _loadingTextPrefab: {fileID: 2562481789765908907, guid: ecec6bde5962b074796c9b97b40363e4, type: 3}
   _scrollViewContent: {fileID: 1906725998}
   _searchPage: {fileID: 1426625002}

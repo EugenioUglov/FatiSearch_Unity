@@ -19,6 +19,11 @@ public class CommandController : MonoBehaviour
         OnEnterInputField();
     }
 
+    public void ClearInputField()
+    {
+        _view.ClearInputField();
+    }
+
     private void OnKeyDown(KeyClickedEvent keyClickedEvent)
     {
         if (_pageService.PageState == PageService.PageStateEnum.SearchPage && _view.IsSelected())

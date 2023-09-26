@@ -31,6 +31,11 @@ public class CommandView : MonoBehaviour
         return text;
     }
 
+    public void ClearInputField()
+    {
+        _inputFieldTMP.text = "";
+    }
+
     public bool IsSelected()
     {
         return _inputFieldTMP.isFocused;

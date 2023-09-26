@@ -19,6 +19,7 @@ public class ActionBlockController : MonoBehaviour
     [SerializeField] private SearchController _searchController;
     [SerializeField] private AlertController _alertController;
     [SerializeField] private BottomMessageController _bottomMessageController;
+    [SerializeField] private CommandController _commandController;
     [SerializeField] private PageService _pageService;
     [SerializeField] private FileManager _fileManager;
     [SerializeField] private LoaderFullscreenService _loaderFullscreenService;
@@ -304,6 +305,8 @@ public class ActionBlockController : MonoBehaviour
 
         if (userRequest == "execute all found results")
         {
+            OnRequestExecuted();
+
             foreach (ActionBlockModel.ActionBlock actionBlock in _actionBlocksToShow)
             {
                 ExecuteByTitle(actionBlock.Title);
@@ -311,13 +314,20 @@ public class ActionBlockController : MonoBehaviour
         }
         else if (userRequest == "update")
         {
+            OnRequestExecuted();
             CreateActionBlocksByDirectoriesAndShow();
         }
         else if (userRequest == "delete all action-blocks")
         {
+            OnRequestExecuted();
             _model.DeleteAllActionBlocks();
             RefreshView();
             _model.SaveToFile();
+        }
+
+        void OnRequestExecuted()
+        {
+            _commandController.ClearInputField();
         }
     }
 
