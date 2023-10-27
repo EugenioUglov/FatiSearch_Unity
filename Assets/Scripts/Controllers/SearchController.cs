@@ -92,6 +92,7 @@ namespace Controllers
 
         private void OnValueInputFieldChanged(string text)
         {
+            print("Value is changed to: " + text);
             ValueChangedInInputFieldSearchEvent valueChangedInInputFieldSearchEvent = new ValueChangedInInputFieldSearchEvent();
             valueChangedInInputFieldSearchEvent.Request = text;
             EventAggregator.Invoke<ValueChangedInInputFieldSearchEvent>(valueChangedInInputFieldSearchEvent);

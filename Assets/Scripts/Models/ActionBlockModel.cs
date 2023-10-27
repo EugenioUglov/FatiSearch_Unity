@@ -24,7 +24,7 @@ public class ActionBlockModel : MonoBehaviour
     [SerializeField] private FileController _fileController;
 
     private bool _isCanceled = false;
-    private string _actionBlocksFilePath = "Action-Blocks.json";
+    private string _actionBlocksFilePath = @"Admin\Action-Blocks.json";
     private string _backupFolderPath = "Backup";
 
     private OrderedDictionary _actionBlockByTitle = new OrderedDictionary();
@@ -77,7 +77,7 @@ public class ActionBlockModel : MonoBehaviour
         }
         catch
         {
-             Debug.Log("ActionBlock by title \"" + titleLowerCase + "\" is not found");
+            Debug.Log("ActionBlock by title \"" + titleLowerCase + "\" is not found");
         }
 
         return actionBlock;
@@ -201,7 +201,7 @@ public class ActionBlockModel : MonoBehaviour
 
     public string[] GetDirectoriesForAutoCreationActionBlocksFromFile()
     {
-        string filePath = "DirectoriesForAutoCreationActionBlocks.json";
+        string filePath = @"Admin\DirectoriesForAutoCreationActionBlocks.json";
 
         string[] directoriesFromFile = new string[]{};
         string directoriesJSONFromFile = _fileController.GetContentFromFile(filePath);
@@ -257,6 +257,7 @@ public class ActionBlockModel : MonoBehaviour
             return false;
         }
 
+
         if (_actionBlockByTitle.Contains(titleForActionBlock.ToLower()))
         {
             ActionBlock existingActionBlock = GetActionBlockByTitle(titleForActionBlock.ToLower());
@@ -287,8 +288,8 @@ public class ActionBlockModel : MonoBehaviour
 
         ActionBlock actionBlockToCreate = actionBlock;
         actionBlockToCreate.Title = titleForActionBlock;
-        actionBlockToCreate.Tags = GetUpdatedTagsForCreationActionBlock(titleForActionBlock, actionBlockToCreate);
-        
+        actionBlockToCreate.Tags = GetTagsWithActionBlockTitle(titleForActionBlock, actionBlockToCreate);
+        actionBlockToCreate.Tags = GetNormalizedTags(actionBlockToCreate.Tags);
         AddActionBlockToVariables(actionBlockToCreate);
 
         return true;
@@ -337,7 +338,8 @@ public class ActionBlockModel : MonoBehaviour
             
             ActionBlock actionBlockToCreate = actionBlock;
             actionBlockToCreate.Title = titleForActionBlock;
-            actionBlockToCreate.Tags = GetUpdatedTagsForCreationActionBlock(titleForActionBlock, actionBlockToCreate);
+            actionBlockToCreate.Tags = GetTagsWithActionBlockTitle(titleForActionBlock, actionBlockToCreate);
+            actionBlockToCreate.Tags = GetNormalizedTags(actionBlockToCreate.Tags);
             AddActionBlockToVariables(actionBlockToCreate);
 
             onActionBlockProcessedCallback?.Invoke();
@@ -378,8 +380,11 @@ public class ActionBlockModel : MonoBehaviour
             return false;
         }
 
-        actionBlock.Tags = GetUpdatedTagsForCreationActionBlock(originalTitleLowerCase, actionBlock);
-
+        if (string.Equals(originalTitle, actionBlock.Title) == false)
+        {
+            actionBlock.Tags = GetTagsWithActionBlockTitle(originalTitleLowerCase, actionBlock);
+        }
+        actionBlock.Tags = GetNormalizedTags(actionBlock.Tags);
         _actionBlockByTitle.Remove(originalTitleLowerCase);
         AddActionBlockToVariables(actionBlock);
         UpdateIndexActionBlockByTags();
@@ -390,6 +395,23 @@ public class ActionBlockModel : MonoBehaviour
     public void DeleteActionBlock(ActionBlock actionBlock)
     {
         OnStartChangeActionBlocksVariables();
+        int isFromIndexedFilesFolder = actionBlock.Content.IndexOf("Admin\\IndexedFiles");
+
+        if (isFromIndexedFilesFolder >= 0)
+        {
+            try {
+                // Check if file exists with its full path
+                if (File.Exists(actionBlock.Content)) 
+                {
+                    // If file found, delete it
+                    File.Delete(actionBlock.Content);
+                    Console.WriteLine("File deleted.");
+                } else Console.WriteLine("File not found");
+            } catch (IOException ioExp) {
+                Console.WriteLine(ioExp.Message);
+            }
+        }
+        
         _actionBlockByTitle.Remove(actionBlock.Title.ToLower());
         UpdateIndexActionBlockByTags();
     }
@@ -419,6 +441,23 @@ public class ActionBlockModel : MonoBehaviour
         onEnd?.Invoke(files.ToArray());
     }
 
+    public IEnumerator GetFilesFromDirectoryAsync(string directory, Action<string> onGetFile = null, Action<string[]> onEnd = null)
+    {
+        List<string> files = new List<string>();
+
+        foreach(var file in Directory.EnumerateFiles(directory, "*.*", SearchOption.AllDirectories)) 
+        {
+            yield return null;
+            
+            files.Add(file);
+
+            onGetFile?.Invoke(file);
+        }
+        
+
+        onEnd?.Invoke(files.ToArray());
+    }
+
     public void CancelProcess()
     {
         _isCanceled = true;
@@ -432,7 +471,7 @@ public class ActionBlockModel : MonoBehaviour
     }
 
 
-    private List<string> GetUpdatedTagsForCreationActionBlock(string originalTitle, ActionBlock actionBlock)
+    private List<string> GetTagsWithActionBlockTitle(string originalTitle, ActionBlock actionBlock)
     {
         string titleLowerCase = actionBlock.Title.ToLower();
         string titleWithoutSpecialSymbols = _stringManager.GetTextWithoutSpecialSymbols(actionBlock.Title.ToLower());
@@ -441,12 +480,10 @@ public class ActionBlockModel : MonoBehaviour
         // Add tags from title words.
         AddTitleToTag();
 
-        if (string.Equals(titleLowerCase, titleWithoutSpecialSymbols) == false && originalTitle != actionBlock.Title)
+        if (string.Equals(titleLowerCase, titleWithoutSpecialSymbols) == false)
         {
             AddTitleWithoutSpecialSymbolsToTag();
         }
-        
-        NormalizeTags();
         
         void AddTitleToTag()
         {
@@ -476,25 +513,25 @@ public class ActionBlockModel : MonoBehaviour
             tags.Add(titleWithoutSpecialSymbols);
         }
 
-        void NormalizeTags()
-        {
-            List<string> newTags = new List<string>();
-                
-            foreach (string tag in tags)
-            {
-                // Delete empty spaces from sides of tags.
-                string tagTrimmed = tag.Trim();
-                
-                if (string.IsNullOrEmpty(tagTrimmed) == false)
-                {
-                    newTags.Add(tagTrimmed);
-                }
-            }
+        return tags;
+    }
 
-            tags = newTags;
+    private List<string> GetNormalizedTags(List<string> tags)
+    {
+        List<string> normalizedTags = new List<string>();
+            
+        foreach (string tag in tags)
+        {
+            // Delete empty spaces from sides of tags.
+            string tagTrimmed = tag.Trim();
+            
+            if (string.IsNullOrEmpty(tagTrimmed) == false)
+            {
+                normalizedTags.Add(tagTrimmed);
+            }
         }
 
-        return tags;
+        return normalizedTags;
     }
     
     private void CreateFolderIfMissing(string path)

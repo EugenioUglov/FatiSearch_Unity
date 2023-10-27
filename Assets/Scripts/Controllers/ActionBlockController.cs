@@ -125,7 +125,6 @@ public class ActionBlockController : MonoBehaviour
             countShowedAtTime++;
         }
 
-
         OnActionBlocksShowed(_actionBlocksToShow.Count.ToString());
     }
 
@@ -147,7 +146,7 @@ public class ActionBlockController : MonoBehaviour
     {
         StartCoroutine(_model.CreateActionBlocksAsync(
             actionBlocks, 
-            isShowError, 
+            isShowError,
             onActionBlockProcessedCallback: OnAddActionBlock, 
             onEnd: ()=> {
                 _model.SaveToFile();
@@ -185,7 +184,7 @@ public class ActionBlockController : MonoBehaviour
         StartCoroutine(GetActionBlocksByPathsAsync(
             paths, 
             onActionBlockReady: (actionBlock) => {
-                print(actionBlock.Title);
+                // print("Action-Block ready: " + actionBlock.Title);
             },
             onActionBlocksReady: (actionBlocks) => {
                 CreateActionBlocks(actionBlocks.ToArray(), isShowError);
@@ -238,6 +237,7 @@ public class ActionBlockController : MonoBehaviour
 
     public void SetActionBlocksToShow(HashSet<ActionBlockModel.ActionBlock> newActionBlocksToShow = null)
     {
+        _view.ScrollToTop();
         if (newActionBlocksToShow == null)
         {
             newActionBlocksToShow = _model.GetActionBlocks().ToHashSet();
@@ -347,15 +347,21 @@ public class ActionBlockController : MonoBehaviour
         }
         else
         {
-            // actionBlocksToShow = _model.GetActionBlocksByRequest(userRequest).ToHashSet();
-            StartCoroutine(_model.GetActionBlocksByRequestAsync(
-                userRequest, 
-                onGet: (actionBlocksToShow) => {
-                    SetActionBlocksToShow(actionBlocksToShow.ToHashSet());
-                    RefreshActionBlocksOnPage();
-                    _view.DestroyLoadingText();
-                }
-            ));
+            // Not async.
+            actionBlocksToShow = _model.GetActionBlocksByRequest(userRequest).ToHashSet(); 
+            SetActionBlocksToShow(actionBlocksToShow.ToHashSet());
+            RefreshActionBlocksOnPage();
+            _view.DestroyLoadingText();
+            //
+
+            // StartCoroutine(_model.GetActionBlocksByRequestAsync(
+            //     userRequest, 
+            //     onGet: (actionBlocksToShow) => {
+            //         SetActionBlocksToShow(actionBlocksToShow.ToHashSet());
+            //         RefreshActionBlocksOnPage();
+            //         _view.DestroyLoadingText();
+            //     }
+            // ));
         }
     }
     
@@ -405,6 +411,8 @@ public class ActionBlockController : MonoBehaviour
     
     private void OnScrollbarValueChange(float value)
     {
+        if (value < 0) return;
+
         if (_isLoadingActionBlocks == false && value <= 0.004f)
         {
             if (_actionBlocksToShow.Count <= _countShowedActionBlocks)
@@ -416,10 +424,10 @@ public class ActionBlockController : MonoBehaviour
 
             
             bool isMouseButtonLeftDownOnStartRefreshActionBlocks = _isMouseButtonLeftDown;
-            _view.BlockScrollCapability();
+            
             _view.AddLoadingText();
             
-
+            _view.BlockScrollCapability();
             StartCoroutine(RefreshActionBlocksAfterPause(0.1f, OnRefreshed));
 
             void OnRefreshed()
@@ -458,7 +466,7 @@ public class ActionBlockController : MonoBehaviour
     private IEnumerator RefreshActionBlocksAfterPause(float pauseSec, Action callbackEnd = null)
     {
         yield return new WaitForSeconds(pauseSec);
-        _view.ScrollToBottom();
+        // _view.ScrollToBottom();
         yield return new WaitForSeconds(pauseSec);
 
         
@@ -510,6 +518,44 @@ public class ActionBlockController : MonoBehaviour
         return true;
     }
 
+    public void CreateActionBlocksFromFolderToIndex(string[] directoriesForAutoCreationActionBlocks)
+    {
+        _countProcessedFilesFromDirectories = 0;
+        int countFilesInDirectory = 0;
+
+        _loaderFullscreenService.SetText("Preparing files for auto creation Action-Blocks");
+        _loaderFullscreenService.Show(onCancel: () => {
+            _model.CancelProcess();
+            _loaderFullscreenService.Hide();
+        });
+
+
+        _countDirectoriesForAutoCreationActionBlocks = directoriesForAutoCreationActionBlocks.Length;
+
+        if (_countDirectoriesForAutoCreationActionBlocks == 0)
+        {
+            return;
+        }
+
+        StartCoroutine(_model.GetFilesFromDirectoriesAsync(
+            directoriesForAutoCreationActionBlocks, 
+            onGetFile: (file) => {
+                countFilesInDirectory++;
+                _loaderFullscreenService.SetText("Preparing files for auto creation Action-Blocks | Count files processed: " + countFilesInDirectory);
+            },
+            onEnd: (receivedFiles) => {
+                _countFilesFromDirectories = receivedFiles.Count(); 
+                CreateActionBlocksByPaths(paths: receivedFiles, isShowError: false);
+
+                // _loaderFullscreenService.SetText(_countProcessedFilesFromDirectories + " / " + _countFilesFromDirectories + " files are processed");
+                // _loaderFullscreenService.Show(onCancel: () => {
+                //     _model.CancelProcess();
+                //     _loaderFullscreenService.Hide();
+                // });
+            }
+        )); 
+    }
+
     private IEnumerator GetDirectoriesForAutoCreationActionBlocksFromFileAsync(Action<string[]> onDirectoriesReceived)
     {
         yield return null;
@@ -531,9 +577,6 @@ public class ActionBlockController : MonoBehaviour
         foreach (string path in paths)
         {
             yield return null;
-
-            print("path processed:");
-            print(path);
 
             ActionBlockModel.ActionBlock actionBlock = GetActionBlockObject(path);
 

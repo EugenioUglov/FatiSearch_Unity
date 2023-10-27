@@ -45,6 +45,7 @@ public class ActionBlockView : MonoBehaviour
 
     public void ShowActionBlocks(HashSet<ActionBlockModel.ActionBlock> actionBlocks)
     {
+        print("Show action-blocks");
         _searchPage.SetActive(false);
 
         ClearActionBlocks();
@@ -74,7 +75,7 @@ public class ActionBlockView : MonoBehaviour
 
     public void AddActionBlock(ActionBlockModel.ActionBlock actionBlock)
     {
-        // print("Add action-block");
+        print("Add action-block");
 
         GameObject actionBlockPrefabShowed = Instantiate(_actionBlockPrefab, 
             _scrollViewContent.transform, false) as GameObject;

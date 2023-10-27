@@ -52,10 +52,10 @@ namespace Views
 
         public void FocusInputField()
         {
-            if (_inputFieldTMP.isFocused)
-            {
-                return;
-            }
+            // if (_inputFieldTMP.isFocused)
+            // {
+            //     return;
+            // }
             
             _inputFieldTMP.Select();
             _inputFieldTMP.ActivateInputField();

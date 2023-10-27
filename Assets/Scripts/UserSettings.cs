@@ -17,7 +17,7 @@ public class SettingsData {
 
 public class UserSettings : MonoBehaviour
 {
-    private string _settingsFilePath = "Settings.json";
+    private string _settingsFilePath = @"Admin\Settings.json";
 
 
     public SettingsData GetSettings()
@@ -41,5 +41,22 @@ public class UserSettings : MonoBehaviour
         }
 
         return settingsFromFile;
+    }
+
+    public void ApplySettings() 
+    {
+        SettingsData settingsData = GetSettings();
+        if (settingsData.Theme == "light")
+        {
+            Camera.main.backgroundColor = new Color32(180, 180, 180, 225);
+        }
+        else if (settingsData.Theme == "dark")
+        {
+            Camera.main.backgroundColor = new Color32(70, 70, 70, 0);
+        }
+        else if (settingsData.Theme == "darkest")
+        {
+            Camera.main.backgroundColor = new Color32(48, 48, 48, 0);
+        }
     }
 }
