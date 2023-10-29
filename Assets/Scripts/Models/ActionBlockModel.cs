@@ -19,6 +19,19 @@ public class ActionBlockModel : MonoBehaviour
         public const string SelectPath = "SelectPath";
         public const string ShowInfo = "ShowInfo";
     }
+
+    public static class ImagePath
+    {
+        private const string directoryWithImages = @"Admin\Images\FileType\";
+        public const string ExcelFile = directoryWithImages + "Excel-file.png";
+        public const string ExeFile = directoryWithImages + "Exe-file.png";
+        public const string ImageFile = directoryWithImages + "Image-file.png";
+        public const string LinkFile = directoryWithImages + "Link-file.png";
+        public const string VideoFile = directoryWithImages + "Video-file.png";
+        public const string WordFile = directoryWithImages + "Word-file.png";
+        public const string Folder = directoryWithImages + "Folder.png";
+
+    }
     
     [Header("Links")] 
     [SerializeField] private FileController _fileController;
@@ -286,11 +299,63 @@ public class ActionBlockModel : MonoBehaviour
             }
         }
 
+
+
         ActionBlock actionBlockToCreate = actionBlock;
         actionBlockToCreate.Title = titleForActionBlock;
         actionBlockToCreate.Tags = GetTagsWithActionBlockTitle(titleForActionBlock, actionBlockToCreate);
         actionBlockToCreate.Tags = GetNormalizedTags(actionBlockToCreate.Tags);
+
+        if (string.IsNullOrEmpty(actionBlock.ImagePath))
+        {
+            actionBlockToCreate.ImagePath = GetImagePathByFirectory(actionBlock.Content);
+        }
+
         AddActionBlockToVariables(actionBlockToCreate);
+
+        string GetImagePathByFirectory(string directory)
+        {
+            string extension = Path.GetExtension(directory);
+
+            if (String.IsNullOrEmpty(extension)) {
+                return ImagePath.Folder;
+            }
+            else {
+                if (extension.ToLower().Equals(".exe"))
+                {
+                    return ImagePath.ExeFile;
+                }
+                else if (extension.ToLower().Equals(".avi") || extension.ToLower().Equals(".mp4") || extension.ToLower().Equals(".mov") || extension.ToLower().Equals(".wmv") || extension.ToLower().Equals(".mkv"))
+                {
+                    return ImagePath.VideoFile;
+                }
+                else if (extension.ToLower().Equals(".jpeg") || extension.ToLower().Equals(".jpg") || extension.ToLower().Equals(".png") || extension.ToLower().Equals(".svg") || extension.ToLower().Equals(".ai") || extension.ToLower().Equals(".psd") || extension.ToLower().Equals(".bmp") || extension.ToLower().Equals(".tif") || extension.ToLower().Equals(".tiff") || extension.ToLower().Equals(".raw"))
+                {
+                    return ImagePath.ImageFile;
+                }
+                else if (extension.ToLower().Equals(".doc") || extension.ToLower().Equals(".docx"))
+                {
+                    return ImagePath.WordFile;
+                }
+                else if (extension.ToLower().Equals(".csv") || extension.ToLower().Equals(".xls") || extension.ToLower().Equals(".xlsx") || extension.ToLower().Equals(".xml"))
+                {
+                    return ImagePath.ExcelFile;
+                }
+                else if (IsValidUrl(directory.ToLower()))
+                {
+                    return ImagePath.LinkFile;
+                }
+            }
+
+            return "";
+        }
+
+        bool IsValidUrl(string url)
+        {
+            string pattern = @"^(https?|ftp)://[^\s/$.?#].[^\s]*$";
+            Regex regex = new Regex(pattern, RegexOptions.IgnoreCase);
+            return regex.IsMatch(url);
+        }
 
         return true;
     }
