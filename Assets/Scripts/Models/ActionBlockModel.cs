@@ -29,6 +29,8 @@ public class ActionBlockModel : MonoBehaviour
         public const string LinkFile = directoryWithImages + "Link-file.png";
         public const string VideoFile = directoryWithImages + "Video-file.png";
         public const string WordFile = directoryWithImages + "Word-file.png";
+        public const string TextFile = directoryWithImages + "Text-file.png";
+        public const string PdfFile = directoryWithImages + "Pdf-file.png";
         public const string Folder = directoryWithImages + "Folder.png";
 
     }
@@ -325,6 +327,10 @@ public class ActionBlockModel : MonoBehaviour
                 {
                     return ImagePath.ExeFile;
                 }
+                else if (extension.ToLower().Equals(".txt") || extension.ToLower().Equals(".md") || extension.ToLower().Equals(".ini"))
+                {
+                    return ImagePath.TextFile;
+                }
                 else if (extension.ToLower().Equals(".avi") || extension.ToLower().Equals(".mp4") || extension.ToLower().Equals(".mov") || extension.ToLower().Equals(".wmv") || extension.ToLower().Equals(".mkv"))
                 {
                     return ImagePath.VideoFile;
@@ -336,6 +342,10 @@ public class ActionBlockModel : MonoBehaviour
                 else if (extension.ToLower().Equals(".doc") || extension.ToLower().Equals(".docx"))
                 {
                     return ImagePath.WordFile;
+                }
+                else if (extension.ToLower().Equals(".pdf"))
+                {
+                    return ImagePath.PdfFile;
                 }
                 else if (extension.ToLower().Equals(".csv") || extension.ToLower().Equals(".xls") || extension.ToLower().Equals(".xlsx") || extension.ToLower().Equals(".xml"))
                 {
