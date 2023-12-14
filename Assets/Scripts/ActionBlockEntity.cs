@@ -18,7 +18,7 @@ public class ActionBlockEntity : MonoBehaviour
     {
         //_titleGameObject.GetComponent<TextMeshProUGUI>().color = new Color(186,89,89,255);
         // Set color red.
-        _titleGameObject.GetComponent<TextMeshProUGUI>().color = new Color32(255, 38, 0, 255);
+        _titleGameObject.GetComponent<TextMeshProUGUI>().color = new Color32(231, 54, 23, 255);
     }
     
     public void SetTitle(string title)

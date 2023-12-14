@@ -13,10 +13,10 @@ public class DragAndDropController : MonoBehaviour
 
    public void Init()
    {
-      _dragAndDropService.CallbackGetDroppedFilesPaths = OnGetDroppedFilesPaths;
+      _dragAndDropService.CallbackGetDroppedFilesPaths = OnGetDroppedFilePaths;
    }
    
-   private void OnGetDroppedFilesPaths(string[] paths)
+   private void OnGetDroppedFilePaths(string[] paths)
    {
       foreach (string path in paths)
       {

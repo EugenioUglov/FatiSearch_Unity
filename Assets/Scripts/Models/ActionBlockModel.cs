@@ -310,12 +310,12 @@ public class ActionBlockModel : MonoBehaviour
 
         if (string.IsNullOrEmpty(actionBlock.ImagePath))
         {
-            actionBlockToCreate.ImagePath = GetImagePathByFirectory(actionBlock.Content);
+            actionBlockToCreate.ImagePath = GetImagePathByDirectory(actionBlock.Content);
         }
 
         AddActionBlockToVariables(actionBlockToCreate);
 
-        string GetImagePathByFirectory(string directory)
+        string GetImagePathByDirectory(string directory)
         {
             string extension = Path.GetExtension(directory);
 
@@ -351,7 +351,7 @@ public class ActionBlockModel : MonoBehaviour
                 {
                     return ImagePath.ExcelFile;
                 }
-                else if (IsValidUrl(directory.ToLower()))
+                else if (extension.ToLower().Equals(".url"))
                 {
                     return ImagePath.LinkFile;
                 }

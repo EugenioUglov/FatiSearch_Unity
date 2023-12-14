@@ -32,6 +32,16 @@ namespace Controllers
             }
         }
 
+        public void FocusInputField()
+        {
+            _view.FocusInputField();
+        }
+
+        public bool IsSelectedInputField()
+        {
+            return _view.IsSelected();
+        }
+
         public void Init()
         {
             _view.BindChangeInputFieldValue(OnValueInputFieldChanged);

@@ -2658,13 +2658,13 @@ RectTransform:
   m_Children:
   - {fileID: 1166595303}
   m_Father: {fileID: 2046097417}
-  m_RootOrder: 7
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 0, y: -36.13037}
+  m_AnchoredPosition: {x: 0, y: 10}
   m_SizeDelta: {x: 309.8855, y: 45.65}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &435975434
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3059,7 +3059,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2046097417}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -4837,7 +4837,7 @@ RectTransform:
   m_Children:
   - {fileID: 872949416}
   m_Father: {fileID: 2046097417}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -6739,11 +6739,11 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2046097417}
-  m_RootOrder: 8
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -11.4, y: 0}
+  m_AnchoredPosition: {x: -11.400024, y: 0}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &993330279
@@ -6766,7 +6766,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: v3
+  m_text: v6
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -6829,7 +6829,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 157.51678, y: 29.476665, z: -2.4389985, w: 3.44664}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -8475,7 +8475,7 @@ RectTransform:
   m_Children:
   - {fileID: 16762975}
   m_Father: {fileID: 2046097417}
-  m_RootOrder: 3
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
@@ -11984,7 +11984,7 @@ RectTransform:
   m_Children:
   - {fileID: 207921549}
   m_Father: {fileID: 2046097417}
-  m_RootOrder: 6
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -12618,7 +12618,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.000022888184, y: 0.000061035156}
+  m_AnchoredPosition: {x: 0.000022888184, y: 0}
   m_SizeDelta: {x: -0.00060272217, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1906726000
@@ -13279,6 +13279,7 @@ MonoBehaviour:
   _actionBlockController: {fileID: 2008285818}
   _dragAndDropController: {fileID: 2008285831}
   _searchController: {fileID: 2008285829}
+  _commandController: {fileID: 2008285841}
 --- !u!114 &2008285823
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13766,7 +13767,7 @@ MonoBehaviour:
   m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 595.9, y: 769}
+  m_ReferenceResolution: {x: 596, y: 769}
   m_ScreenMatchMode: 1
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
@@ -13809,13 +13810,13 @@ RectTransform:
   - {fileID: 1327070041}
   - {fileID: 679433807}
   - {fileID: 1426625003}
-  - {fileID: 1208508818}
   - {fileID: 547541390}
   - {fileID: 818442481}
   - {fileID: 1775221728}
   - {fileID: 435975433}
   - {fileID: 993330278}
   - {fileID: 2063467020}
+  - {fileID: 1208508818}
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -13858,7 +13859,7 @@ RectTransform:
   - {fileID: 1147616112}
   - {fileID: 1157471567}
   m_Father: {fileID: 2046097417}
-  m_RootOrder: 9
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}

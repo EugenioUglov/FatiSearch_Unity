@@ -39,7 +39,6 @@ public class CommandView : MonoBehaviour
     public bool IsSelected()
     {
         return _inputFieldTMP.isFocused;
-        
     }
 
     public void OnEnterInputField()

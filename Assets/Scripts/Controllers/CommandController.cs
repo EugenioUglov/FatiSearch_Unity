@@ -13,6 +13,10 @@ public class CommandController : MonoBehaviour
         EventAggregator.AddListener<KeyClickedEvent>(this, OnKeyDown);
     }
 
+    public bool IsSelectedInputField()
+    {
+        return _view.IsSelected();
+    }
 
     public void OnClickEnterButton()
     {

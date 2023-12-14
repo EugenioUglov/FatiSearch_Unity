@@ -75,8 +75,6 @@ public class ActionBlockView : MonoBehaviour
 
     public void AddActionBlock(ActionBlockModel.ActionBlock actionBlock)
     {
-        print("Add action-block");
-
         GameObject actionBlockPrefabShowed = Instantiate(_actionBlockPrefab, 
             _scrollViewContent.transform, false) as GameObject;
 
@@ -92,8 +90,18 @@ public class ActionBlockView : MonoBehaviour
             actionBlockPrefabShowed.GetComponent<ActionBlockEntity>().HideFileLocationButton();
         }
 
+        string imagePath = actionBlock.ImagePath;
+
+        if (imagePath.Length > 0)
+        {
+            if (imagePath.Substring(0, imagePath.IndexOf("\\")).Equals("Admin"))
+            {
+                imagePath = Directory.GetCurrentDirectory() + "\\" + imagePath;
+            }
+        }
+
         // Set images async.
-        StartCoroutine(SetSprite(actionBlockPrefabShowed, actionBlock.ImagePath));
+        StartCoroutine(SetSprite(actionBlockPrefabShowed, imagePath));
 
 
         void RefreshHeightOfActionBlock()

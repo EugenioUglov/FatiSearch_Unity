@@ -13,11 +13,11 @@ public class Main : MonoBehaviour
     [SerializeField] private ActionBlockController _actionBlockController;
     [SerializeField] private DragAndDropController _dragAndDropController;
     [SerializeField] private SearchController _searchController;
+    [SerializeField] private CommandController _commandController;
     
     
     void Start()
     {
-
         UserSettings userSettings = new UserSettings();
         userSettings.ApplySettings();
 
@@ -27,6 +27,14 @@ public class Main : MonoBehaviour
         
 
         IndexingFilesFromFilesToIndexDirectory();
+    }
+
+    void Update()
+    {
+        if (_searchController.IsSelectedInputField() == false && _commandController.IsSelectedInputField() == false)
+        {
+            _searchController.FocusInputField();
+        }
     }
 
     private void IndexingFilesFromFilesToIndexDirectory()
