@@ -29,13 +29,13 @@ public class Main : MonoBehaviour
         IndexingFilesFromFilesToIndexDirectory();
     }
 
-    void Update()
-    {
-        if (_searchController.IsSelectedInputField() == false && _commandController.IsSelectedInputField() == false)
-        {
-            _searchController.FocusInputField();
-        }
-    }
+    // void Update()
+    // {
+    //     if (_searchController.IsSelectedInputField() == false && _commandController.IsSelectedInputField() == false)
+    //     {
+    //         _searchController.FocusInputField();
+    //     }
+    // }
 
     private void IndexingFilesFromFilesToIndexDirectory()
     {

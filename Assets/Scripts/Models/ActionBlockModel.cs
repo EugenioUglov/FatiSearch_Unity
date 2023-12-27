@@ -7,6 +7,7 @@ using System.Linq;
 using UnityEngine;
 using Newtonsoft.Json;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 public class ActionBlockModel : MonoBehaviour
 {
@@ -469,23 +470,48 @@ public class ActionBlockModel : MonoBehaviour
 
     public void DeleteActionBlock(ActionBlock actionBlock)
     {
-        OnStartChangeActionBlocksVariables();
-        int isFromIndexedFilesFolder = actionBlock.Content.IndexOf("Admin\\IndexedFiles");
 
-        if (isFromIndexedFilesFolder >= 0)
-        {
+        
+        DialogResult res = MessageBox.Show("Do you want to delete also the original file?", "Confirmation", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Information);
+        if (res == DialogResult.Yes) {
             try {
                 // Check if file exists with its full path
                 if (File.Exists(actionBlock.Content)) 
                 {
                     // If file found, delete it
                     File.Delete(actionBlock.Content);
-                    Console.WriteLine("File deleted.");
-                } else Console.WriteLine("File not found");
+                } 
+                else {
+                    MessageBox.Show("File not found.");
+                }
             } catch (IOException ioExp) {
+                MessageBox.Show("Error.");
                 Console.WriteLine(ioExp.Message);
             }
         }
+        else if (res == DialogResult.Cancel) {
+            return;
+        }
+
+        
+        OnStartChangeActionBlocksVariables();
+
+        // int isFromIndexedFilesFolder = actionBlock.Content.IndexOf("Admin\\IndexedFiles");
+
+        // if (isFromIndexedFilesFolder >= 0)
+        // {
+        //     try {
+        //         // Check if file exists with its full path
+        //         if (File.Exists(actionBlock.Content)) 
+        //         {
+        //             // If file found, delete it
+        //             File.Delete(actionBlock.Content);
+        //             Console.WriteLine("File deleted.");
+        //         } else Console.WriteLine("File not found");
+        //     } catch (IOException ioExp) {
+        //         Console.WriteLine(ioExp.Message);
+        //     }
+        // }
         
         _actionBlockByTitle.Remove(actionBlock.Title.ToLower());
         UpdateIndexActionBlockByTags();
