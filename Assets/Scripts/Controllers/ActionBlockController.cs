@@ -28,6 +28,7 @@ public class ActionBlockController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _centralLogText;
     
     
+    private string _userRequest = "";
     private HashSet<ActionBlockModel.ActionBlock> _actionBlocksToShow;
     private int _maxCountActionBlocksToShowAtTime = 10;
     private int _countShowedActionBlocks = 0;
@@ -301,9 +302,9 @@ public class ActionBlockController : MonoBehaviour
 
     private void OnCommandEntered(CommandEnteredEvent commandEnteredEvent)
     {
-        string userRequest = commandEnteredEvent.Request.ToLower();
+        string commandRequest = commandEnteredEvent.Request.ToLower();
 
-        if (userRequest == "execute all found results")
+        if (commandRequest == "execute all found results")
         {
             OnRequestExecuted();
 
@@ -312,12 +313,43 @@ public class ActionBlockController : MonoBehaviour
                 ExecuteByTitle(actionBlock.Title);
             }
         }
-        else if (userRequest == "update")
+        else if (commandRequest == "update")
         {
             OnRequestExecuted();
             CreateActionBlocksByDirectoriesAndShow();
         }
-        else if (userRequest == "delete all action-blocks")
+        else if (commandRequest.Contains("exact tags"))
+        {
+            OnRequestExecuted();
+
+            string[] tagsFromRequest = _userRequest.Split(' ');
+            HashSet<ActionBlockModel.ActionBlock> _actionBlocksByExactTagsToShow = new HashSet<ActionBlockModel.ActionBlock>();
+            
+            foreach (var actionBlock in _actionBlocksToShow)
+            {
+                // In all tags of request.
+                foreach (var tagFromReqeust in tagsFromRequest)
+                {
+                    // In all tags of Action Block.
+                    foreach (string tagFromActionBlock in actionBlock.Tags)
+                    {
+                        if (tagFromReqeust == tagFromActionBlock)
+                        {
+                            _actionBlocksByExactTagsToShow.Add(actionBlock);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            SetActionBlocksToShow(_actionBlocksByExactTagsToShow.ToHashSet());
+
+
+            RefreshActionBlocksOnPage();
+            _view.DestroyLoadingText();
+
+        }
+        else if (commandRequest == "delete all action-blocks")
         {
             OnRequestExecuted();
             _model.DeleteAllActionBlocks();
@@ -334,6 +366,7 @@ public class ActionBlockController : MonoBehaviour
     private void OnValueChangedInInputFieldSearch(ValueChangedInInputFieldSearchEvent valueChangedInInputFieldSearchEvent)
     {
         string userRequest = valueChangedInInputFieldSearchEvent.Request;
+        _userRequest = userRequest;
         HashSet<ActionBlockModel.ActionBlock> actionBlocksToShow = _model.GetActionBlocks().ToHashSet();
         _view.ClearActionBlocks();
         _view.AddLoadingText();

@@ -193,6 +193,45 @@ public class ActionBlockModel : MonoBehaviour
         onGet(actionBlocksToShow.ToArray().Reverse().ToArray()); 
     }
 
+    // public ActionBlock[] GetActionBlocksWithExactTagsByRequest(string request)
+    // {
+    //     // Search by tags.
+
+    //     List<ActionBlock> actionBlocksToShow = new List<ActionBlock>();
+
+    //     Dictionary<ActionBlock, int> priorityByActionBlock =
+    //         new Dictionary<ActionBlock, int>();
+
+    //     string[] tags = request.Split(' ');
+
+    //     foreach (string tag in tags)
+    //     {
+    //         ActionBlock[] actionBlocksByTag = GetActionBlocksByTag(tag).ToArray().Reverse().ToArray();
+
+    //         foreach ()
+
+    //         foreach (ActionBlock actionBlock in actionBlocksByTag)
+    //         {
+    //             if (priorityByActionBlock.ContainsKey(actionBlock))
+    //             {
+    //                 priorityByActionBlock[actionBlock] += 1;
+    //             }
+    //             else
+    //             {
+    //                 priorityByActionBlock[actionBlock] = 1;
+    //             }
+    //         }
+    //     }
+
+    //     // Sort array from min priority value.
+    //     foreach (var pair in priorityByActionBlock.OrderBy(pair => pair.Value))
+    //     {
+    //         actionBlocksToShow.Add(pair.Key);
+    //     }
+        
+    //     return actionBlocksToShow.ToArray().Reverse().ToArray(); 
+    // }
+
     public ActionBlock[] GetActionBlocksFromFile()
     {
         ActionBlock[] actionBlocksFromFile = new ActionBlock[]{};
