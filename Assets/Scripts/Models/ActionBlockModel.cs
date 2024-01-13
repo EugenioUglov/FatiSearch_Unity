@@ -509,10 +509,8 @@ public class ActionBlockModel : MonoBehaviour
 
     public void DeleteActionBlock(ActionBlock actionBlock)
     {
-
-        
-        DialogResult res = MessageBox.Show("Do you want to delete also the original file?", "Confirmation", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Information);
-        if (res == DialogResult.Yes) {
+        DialogResult dialogResult = MessageBox.Show("Do you want to delete also the original file?", "Confirmation", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Information);
+        if (dialogResult == DialogResult.Yes) {
             try {
                 // Check if file exists with its full path
                 if (File.Exists(actionBlock.Content)) 
@@ -528,7 +526,7 @@ public class ActionBlockModel : MonoBehaviour
                 Console.WriteLine(ioExp.Message);
             }
         }
-        else if (res == DialogResult.Cancel) {
+        else if (dialogResult == DialogResult.Cancel) {
             return;
         }
 

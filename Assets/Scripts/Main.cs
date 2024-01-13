@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Windows.Forms;
+using System.Diagnostics;
+using Unity.VisualScripting;
 
 public class Main : MonoBehaviour
 {
@@ -18,6 +20,8 @@ public class Main : MonoBehaviour
     
     void Start()
     {
+        // CopyFileKeepingFolders(@"D:\Fun\Games my data\0 Shortcuts\Play web games in browser.txt", @"D:\Test");
+
         UserSettings userSettings = new UserSettings();
         userSettings.ApplySettings();
 
@@ -81,7 +85,7 @@ public class Main : MonoBehaviour
         //     })
         // );
 
-        
+        // !!! Not working well. Infinite loading.
         void CopyFiles(DirectoryInfo source, DirectoryInfo target) 
         {
             Directory.CreateDirectory(target.FullName);

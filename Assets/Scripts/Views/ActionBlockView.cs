@@ -290,8 +290,8 @@ public class ActionBlockView : MonoBehaviour
         }
         catch (Exception exception)
         {
-            print(exception);
-            print("Warning! Not possible set image for Action-Block");
+            // print(exception);
+            // print("Warning! Not possible set image for Action-Block");
         }
     }
 
