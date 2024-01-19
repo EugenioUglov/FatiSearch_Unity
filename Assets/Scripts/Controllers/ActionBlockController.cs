@@ -21,7 +21,6 @@ public class ActionBlockController : MonoBehaviour
     [SerializeField] private BottomMessageController _bottomMessageController;
     [SerializeField] private CommandController _commandController;
     [SerializeField] private PageService _pageService;
-    [SerializeField] private FileManager _fileManager;
     [SerializeField] private LoaderFullscreenService _loaderFullscreenService;
 
     [Header("UI")]
@@ -38,6 +37,7 @@ public class ActionBlockController : MonoBehaviour
     private int _countFilesFromDirectories = 0;
     private int _countDirectoriesForAutoCreationActionBlocks = 0;
 
+    private DirectoryManager _directoryManager;
 
     private void Update()
     {
@@ -53,6 +53,8 @@ public class ActionBlockController : MonoBehaviour
     
     public void Init()
     {
+        _directoryManager = new DirectoryManager();
+        
         EventAggregator.AddListener<ActionBlockClickedEvent>(this, OnActionBlockClicked);
         EventAggregator.AddListener<ActionBlockSettingsClickedEvent>(this, OnActionBlockSettingsClicked);
         EventAggregator.AddListener<ActionBlockFileLocationClickedEvent>(this, OnActionBlockFileLocationClicked);
@@ -278,7 +280,7 @@ public class ActionBlockController : MonoBehaviour
     {
         string titleActionBlock = actionBlockFileLocationClickedEvent.Title;
         ActionBlockModel.ActionBlock actionBlock = GetActionBlockByTitle(titleActionBlock);
-        _fileManager.GoToFileLocation(path: actionBlock.Content);
+        _directoryManager.GoToFileLocation(path: actionBlock.Content);
     }
 
     private void OnSearchEntered(SearchEnteredEvent searchEnteredEvent)
@@ -402,7 +404,7 @@ public class ActionBlockController : MonoBehaviour
     {
         if (actionBlock.Action == ActionBlockModel.ActionEnum.OpenPath)
         {
-            bool isOpened = _fileManager.OpenDirectory(actionBlock.Content);
+            bool isOpened = _directoryManager.OpenDirectory(actionBlock.Content);
             
             if (isOpened)
             {
@@ -415,7 +417,7 @@ public class ActionBlockController : MonoBehaviour
         }
         else if (actionBlock.Action == ActionBlockModel.ActionEnum.OpenPathAsAdministrator)
         {
-            bool isOpened = _fileManager.OpenDirectoryAsAdministrator(actionBlock.Content);
+            bool isOpened = _directoryManager.OpenDirectoryAsAdministrator(actionBlock.Content);
             
             if (isOpened)
             {
@@ -428,7 +430,7 @@ public class ActionBlockController : MonoBehaviour
         }
         else if (actionBlock.Action == ActionBlockModel.ActionEnum.SelectPath) 
         {
-            _fileManager.GoToFileLocation(actionBlock.Content);
+            _directoryManager.GoToFileLocation(actionBlock.Content);
         }
     }
 

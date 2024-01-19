@@ -16,10 +16,12 @@ public class Main : MonoBehaviour
     [SerializeField] private DragAndDropController _dragAndDropController;
     [SerializeField] private SearchController _searchController;
     [SerializeField] private CommandController _commandController;
+    [SerializeField] LoaderFullscreenService _loaderFullscreenService;
     
     
     void Start()
     {
+        _loaderFullscreenService.Show();
         // CopyFileKeepingFolders(@"D:\Fun\Games my data\0 Shortcuts\Play web games in browser.txt", @"D:\Test");
 
         UserSettings userSettings = new UserSettings();
@@ -31,6 +33,7 @@ public class Main : MonoBehaviour
         
 
         IndexingFilesFromFilesToIndexDirectory();
+        _loaderFullscreenService.Hide();
     }
 
     // void Update()
@@ -43,32 +46,25 @@ public class Main : MonoBehaviour
 
     private void IndexingFilesFromFilesToIndexDirectory()
     {
-
         string indexedFilesDirectory = @"Admin\IndexedFiles\";
         string filesToIndexDirectory = @"Admin\FilesToIndex\";
 
         List<string> filePathsToIndex = new List<string>();
 
+        DirectoryManager directoryManager = new DirectoryManager();
+
         DirectoryInfo indexedFilesDirectoryInfo = new DirectoryInfo(indexedFilesDirectory);
         DirectoryInfo filesToIndexDirectoryInfo = new DirectoryInfo(filesToIndexDirectory);
 
-        CreateDirectoryIfDoesNotExist(indexedFilesDirectory);
-        CreateDirectoryIfDoesNotExist(filesToIndexDirectory);
+        directoryManager.CreateDirectoryIfDoesNotExist(indexedFilesDirectory);
+        directoryManager.CreateDirectoryIfDoesNotExist(filesToIndexDirectory);
 
-        MoveFiles(filesToIndexDirectoryInfo, indexedFilesDirectoryInfo);
+        MoveFilesToIndexedFilesFolder(filesToIndexDirectoryInfo, indexedFilesDirectoryInfo);
         // RemoveFolders(filesToIndexDirectoryInfo);
-        RemoveEmptyFolders(filesToIndexDirectory);
+        directoryManager.RemoveEmptyFolders(filesToIndexDirectory);
 
         _actionBlockController.CreateActionBlocksByPaths(paths: filePathsToIndex.ToArray(), isShowError: true);
 
-        
-        void CreateDirectoryIfDoesNotExist(string directory)
-        {
-            if (!Directory.Exists(directory)) 
-            {
-                Directory.CreateDirectory(directory);
-            }
-        }
 
         // var allDirectories = Directory.GetDirectories(indexedFilesDirectory, "*", SearchOption.AllDirectories);
         // foreach (string dir in allDirectories)
@@ -85,26 +81,8 @@ public class Main : MonoBehaviour
         //     })
         // );
 
-        // !!! Not working well. Infinite loading.
-        void CopyFiles(DirectoryInfo source, DirectoryInfo target) 
-        {
-            Directory.CreateDirectory(target.FullName);
 
-            foreach (var file in source.GetFiles())
-            {
-                Thread.Sleep(50);
-                file.CopyTo(Path.Combine(target.FullName, file.Name), true);
-            }
-
-            foreach (var sourceSubdirectory in source.GetDirectories())
-            {
-                Thread.Sleep(50);
-                var targetSubdirectory = target.CreateSubdirectory(sourceSubdirectory.Name);
-                CopyFiles(sourceSubdirectory, targetSubdirectory);
-            }
-        }
-
-        void MoveFiles(DirectoryInfo source, DirectoryInfo target) 
+        void MoveFilesToIndexedFilesFolder(DirectoryInfo source, DirectoryInfo target) 
         {
             Directory.CreateDirectory(target.FullName);
 
@@ -120,6 +98,7 @@ public class Main : MonoBehaviour
                 else 
                 {
                     print("Move file " + targetPath);
+                    targetPath = targetPath.Substring(targetPath.IndexOf("Admin"));
                     file.MoveTo(targetPath);
                     filePathsToIndex.Add(targetPath);
                 }
@@ -128,58 +107,11 @@ public class Main : MonoBehaviour
             foreach (var sourceSubdirectory in source.GetDirectories())
             {
                 var targetSubdirectory = target.CreateSubdirectory(sourceSubdirectory.Name);
-                MoveFiles(sourceSubdirectory, targetSubdirectory);
-            }
-        }
-
-        void RemoveFiles(DirectoryInfo directoryInfo)
-        {
-            foreach (FileInfo file in directoryInfo.EnumerateFiles())
-            {
-                file.Delete(); 
-            }
-        } 
-
-        void RemoveFolders(DirectoryInfo directoryInfo)   
-        {
-            foreach (DirectoryInfo dir in directoryInfo.EnumerateDirectories())
-            {
-                dir.Delete(true); 
-            }
-        }
-
-        void RemoveEmptyFolders(string startLocation)
-        {    
-            foreach (var directory in Directory.GetDirectories(startLocation))
-            {
-                RemoveEmptyFolders(directory);
-                if (Directory.GetFiles(directory).Length == 0 && 
-                    Directory.GetDirectories(directory).Length == 0)
-                {
-                    print("Remove directory " + directory);
-                    Directory.Delete(directory, false);
-                }
+                MoveFilesToIndexedFilesFolder(sourceSubdirectory, targetSubdirectory);
             }
         }
     }
     
-    public IEnumerator GetFilesFromDirectoryAsync(string directory, Action<string> onGetFile = null, Action<string[]> onEnd = null)
-    {
-        List<string> files = new List<string>();
-
-        foreach(var file in Directory.EnumerateFiles(directory, "*.*", SearchOption.AllDirectories)) 
-        {
-            yield return null;
-            
-            files.Add(file);
-
-            onGetFile?.Invoke(file);
-        }
-        
-
-        onEnd?.Invoke(files.ToArray());
-    }
-
     public void Quit()
     {
         UnityEngine.Application.Quit();
