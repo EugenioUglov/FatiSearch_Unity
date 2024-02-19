@@ -510,20 +510,14 @@ public class ActionBlockModel : MonoBehaviour
     public void DeleteActionBlock(ActionBlock actionBlock)
     {
         DialogResult dialogResult = MessageBox.Show("Do you want to delete also the original file?", "Confirmation", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Information);
+
+        DirectoryManager directoryManager = new DirectoryManager();
+
         if (dialogResult == DialogResult.Yes) {
             try {
-                // Check if file exists with its full path
-                if (File.Exists(actionBlock.Content)) 
-                {
-                    // If file found, delete it
-                    File.Delete(actionBlock.Content);
-                } 
-                else {
-                    MessageBox.Show("File not found.");
-                }
+                directoryManager.DeleteByPath(actionBlock.Content);
             } catch (IOException ioExp) {
-                MessageBox.Show("Error.");
-                Console.WriteLine(ioExp.Message);
+                MessageBox.Show(ioExp.Message, "Error.");
             }
         }
         else if (dialogResult == DialogResult.Cancel) {

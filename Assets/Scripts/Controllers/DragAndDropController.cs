@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
-using B83.Win32;
 using System.Windows.Forms;
 using System.IO;
 
@@ -11,10 +8,13 @@ public class DragAndDropController : MonoBehaviour
    [Header("Links")]
    [SerializeField] private DragAndDropService _dragAndDropService;
    [SerializeField] private ActionBlockController _actionBlockController;
+   
+   private DirectoryManager _directoryManager;
 
 
    public void Init()
    {
+      _directoryManager = new DirectoryManager();
       _dragAndDropService.CallbackGetDroppedFilesPaths = OnGetDroppedFilePaths;
    }
    
@@ -25,8 +25,31 @@ public class DragAndDropController : MonoBehaviour
       if (dialogResult == DialogResult.Yes) {
          foreach (string path in paths)
          {
-            string targetPath = CopyFileKeepingFolders(path, @"Admin\IndexedFiles");
-            _actionBlockController.CreateActionBlockByPath(targetPath);
+            string filePathFromIndexedFolder = "";
+            string targetPath = @"Admin\IndexedFiles";
+
+            // get the file attributes for file or directory
+            FileAttributes attr = File.GetAttributes(path);
+
+            // detect whether its a directory
+            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+            {
+               try
+               {
+                  filePathFromIndexedFolder = _directoryManager.CopyFolder(path, targetPath);
+               }
+               catch (Exception exception)
+               {
+                  MessageBox.Show(exception.Message, "Error");
+                  return;
+               }
+            }
+            else
+            { 
+               filePathFromIndexedFolder = CopyFileKeepingFolders(path, targetPath);
+            }
+            
+            _actionBlockController.CreateActionBlockByPath(filePathFromIndexedFolder);
          }
       }
       else if (dialogResult == DialogResult.No) {

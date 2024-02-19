@@ -53,19 +53,14 @@ public class DirectoryManager : MonoBehaviour
         return isOpened;
     }
 
-    public bool GoToFileLocation(string path)
+    public bool ShowInExplorer(string path)
     {
         bool isSelected = false;
 
-        if (File.Exists(path))
+        if (File.Exists(path) || Directory.Exists(path))
         {
             Process.Start(new ProcessStartInfo("explorer.exe", " /select, " + path));
             isSelected = true;
-
-            _logs.Add("GoToFileLocation: " + path);
-        }
-        else {
-            _logs.Add("Not possible open file location: " + path);
         }
 
         return isSelected;
@@ -174,9 +169,83 @@ public class DirectoryManager : MonoBehaviour
         }
     }
         
-    /*
-        Remove empty folders with subfolders.
-    */
+
+    /// <summary>
+    /// Copy folder by path (sourcePath) to another directory (targetPath). If current folder already exists in destination directory then throw exception.
+    /// </summary>
+    /// <param name="sourcePath"></param>
+    /// <param name="targetPath"></param>
+    /// <returns>Target path of copied folder</returns>
+    public string CopyFolder(string sourcePath, string targetPath)
+    {
+        DirectoryInfo pathInfo = new DirectoryInfo(sourcePath);
+        string folderName = pathInfo.Name;
+        string targetPathWithSourceFolderName = targetPath + @"\" + folderName;
+
+        // get the file attributes for file or directory
+        FileAttributes attr = File.GetAttributes(sourcePath);
+
+        if (Directory.Exists(targetPathWithSourceFolderName))
+        {
+            throw new Exception("Current folder already exists");
+        }
+
+        if ((attr & FileAttributes.Directory) == FileAttributes.Directory == false)
+        {
+            throw new Exception("Source path is not a folder");
+        }
+
+        CopyFolderRecoursively(sourcePath, targetPathWithSourceFolderName);
+
+        void CopyFolderRecoursively(string sourceFolder, string destFolder)
+        {
+            if (!Directory.Exists(destFolder))
+            {
+                DirectoryInfo createdDirectory = Directory.CreateDirectory(destFolder);
+            }
+
+            string[] files = Directory.GetFiles(sourceFolder);
+            foreach (string file in files)
+            {
+                string name = Path.GetFileName(file);
+                string dest = Path.Combine(destFolder, name);
+                File.Copy(file, dest);
+            }
+
+            string[] folders = Directory.GetDirectories(sourceFolder);
+            
+            foreach (string folder in folders)
+            {
+                string name = Path.GetFileName(folder);
+                string dest = Path.Combine(destFolder, name);
+                CopyFolderRecoursively(folder, dest);
+            }
+        }
+
+        return targetPathWithSourceFolderName;
+    }
+
+    /// <summary>
+    /// Delete file or folder by path.
+    /// </summary>
+    public void DeleteByPath(string path)
+    {
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+        }
+        else if (Directory.Exists(path))
+        { 
+            Directory.Delete(path, true);
+        }
+        else {
+            throw new Exception("Path is not found");
+        }
+    }
+
+    /// <summary>
+    /// Remove empty folders with subfolders.
+    /// </summary>
     public void RemoveEmptyFolders(string startLocation)
     {    
         foreach (var directory in Directory.GetDirectories(startLocation))

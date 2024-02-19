@@ -282,7 +282,7 @@ public class ActionBlockController : MonoBehaviour
     {
         string titleActionBlock = actionBlockFileLocationClickedEvent.Title;
         ActionBlockModel.ActionBlock actionBlock = GetActionBlockByTitle(titleActionBlock);
-        _directoryManager.GoToFileLocation(path: actionBlock.Content);
+        _directoryManager.ShowInExplorer(path: actionBlock.Content);
     }
 
     private void OnSearchEntered(SearchEnteredEvent searchEnteredEvent)
@@ -432,7 +432,7 @@ public class ActionBlockController : MonoBehaviour
         }
         else if (actionBlock.Action == ActionBlockModel.ActionEnum.SelectPath) 
         {
-            _directoryManager.GoToFileLocation(actionBlock.Content);
+            _directoryManager.ShowInExplorer(actionBlock.Content);
         }
     }
 
