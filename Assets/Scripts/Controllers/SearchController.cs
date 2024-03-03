@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using Views;
 
 namespace Controllers
@@ -102,7 +101,6 @@ namespace Controllers
 
         private void OnValueInputFieldChanged(string text)
         {
-            print("Value is changed to: " + text);
             ValueChangedInInputFieldSearchEvent valueChangedInInputFieldSearchEvent = new ValueChangedInInputFieldSearchEvent();
             valueChangedInInputFieldSearchEvent.Request = text;
             EventAggregator.Invoke<ValueChangedInInputFieldSearchEvent>(valueChangedInInputFieldSearchEvent);

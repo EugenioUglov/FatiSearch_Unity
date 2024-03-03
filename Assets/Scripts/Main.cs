@@ -1,13 +1,5 @@
 using Controllers;
 using UnityEngine;
-using System.IO;
-using System.Collections;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Windows.Forms;
-using System.Diagnostics;
-using Unity.VisualScripting;
 
 public class Main : MonoBehaviour
 {
@@ -31,6 +23,8 @@ public class Main : MonoBehaviour
         _searchController.Init();
         _actionBlockController.Init();
         _loaderFullscreenService.Hide();
+
+        
     }
 
     // void Update()

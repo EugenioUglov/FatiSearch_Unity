@@ -8,7 +8,6 @@ using TMPro;
 using UnityEngine;
 using Unity.VisualScripting;
 
-
 public class ActionBlockController : MonoBehaviour
 {
     [Header("Links to scripts")]
@@ -627,6 +626,8 @@ public class ActionBlockController : MonoBehaviour
 
     private ActionBlockModel.ActionBlock GetActionBlockObject(string path)
     {
+        NounNumber nounNumber = new NounNumber();
+
         UserSettings settings = new UserSettings();
         List<string> tags = new List<string>();
         string fileName = Path.GetFileNameWithoutExtension(path);
@@ -644,6 +645,7 @@ public class ActionBlockController : MonoBehaviour
             // Add to tags folder names from path of a file.
             
             tags.Add(foldersOfPath[i]);
+            AddSingularizedWordsOfFolderNameToTags(foldersOfPath[i]);
 
             if (Convert.ToBoolean(settingsData.IsDirectoryInTitle)) 
             {
@@ -667,6 +669,29 @@ public class ActionBlockController : MonoBehaviour
             path, tags);
 
         return actionBlock;
+
+        
+        void AddSingularizedWordsOfFolderNameToTags(string folderName)
+        {
+            string[] folderWords = folderName.Split(' ');
+
+            foreach (var originalFolderWord in folderWords)
+            {            
+                try
+                {
+                    string singularizedFolderWord = nounNumber.GetSingularWord(originalFolderWord);
+
+                    if (originalFolderWord != singularizedFolderWord)
+                    {
+                        tags.Add(singularizedFolderWord);
+                    }
+                }
+                catch(Exception ex)
+                {
+                    print("Singularize API error: " + ex.Message);
+                }
+            }
+        }
     }
 
     
@@ -686,7 +711,6 @@ public class ActionBlockController : MonoBehaviour
         directoryManager.CreateDirectoryIfDoesNotExist(filesToIndexDirectory);
 
         MoveFilesToIndexedFilesFolder(filesToIndexDirectoryInfo, indexedFilesDirectoryInfo);
-        // RemoveFolders(filesToIndexDirectoryInfo);
         directoryManager.RemoveEmptyFolders(filesToIndexDirectory);
 
         CreateActionBlocksByPaths(paths: filePathsToIndex.ToArray(), isShowError: true);
@@ -723,7 +747,6 @@ public class ActionBlockController : MonoBehaviour
                 }
                 else 
                 {
-                    print("Move file " + targetPath);
                     targetPath = targetPath.Substring(targetPath.IndexOf("Admin"));
                     file.MoveTo(targetPath);
                     filePathsToIndex.Add(targetPath);
