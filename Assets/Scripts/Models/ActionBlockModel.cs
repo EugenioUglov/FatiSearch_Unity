@@ -303,15 +303,20 @@ public class ActionBlockModel : MonoBehaviour
 
     public bool CreateActionBlock(ActionBlock actionBlock, bool isShowError = true)
     {
+        print("Create Action-Block");
         OnStartChangeActionBlocksVariables();
 
         string titleForActionBlock = actionBlock.Title;
+
+        print("titleForActionBlock: " + titleForActionBlock);
 
         if (IsActionBlockValidToAdd(actionBlock, isShowError) == false)
         {
             return false;
         }
 
+        print(titleForActionBlock.ToLower());
+        print(_actionBlockByTitle.Contains(titleForActionBlock.ToLower()));
 
         if (_actionBlockByTitle.Contains(titleForActionBlock.ToLower()))
         {
@@ -323,6 +328,7 @@ public class ActionBlockModel : MonoBehaviour
 
                 if (_actionBlockByTitle.Contains(titleForActionBlock.ToLower()))
                 {
+                    print("Action-Block already exists");
                     return false;
                 }
 
@@ -337,6 +343,7 @@ public class ActionBlockModel : MonoBehaviour
             }
             else
             {
+                print("false");
                 return false;
             }
         }
@@ -733,6 +740,7 @@ public class ActionBlockModel : MonoBehaviour
             
             return false;
         }
+
 
         return true;
     }

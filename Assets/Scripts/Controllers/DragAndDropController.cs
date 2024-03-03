@@ -48,6 +48,11 @@ public class DragAndDropController : MonoBehaviour
             { 
                filePathFromIndexedFolder = CopyFileKeepingFolders(path, targetPath);
             }
+
+            if (string.IsNullOrEmpty(filePathFromIndexedFolder)) {
+               MessageBox.Show("Creating operation is canceled. Action-Block already exists.", "Warning");
+               return;
+            }
             
             _actionBlockController.CreateActionBlockByPath(filePathFromIndexedFolder);
          }

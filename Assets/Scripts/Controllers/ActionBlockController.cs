@@ -177,7 +177,7 @@ public class ActionBlockController : MonoBehaviour
     public bool CreateActionBlockByPath(string path, bool isShowError = true)
     {
         ActionBlockModel.ActionBlock actionBlock = GetActionBlockObject(path);
-        
+
         CreateActionBlock(actionBlock, isShowError);
 
         return true;
@@ -634,6 +634,8 @@ public class ActionBlockController : MonoBehaviour
         string[] foldersOfPath = path.Split('\\');
         string titleActionBlock = fileName;
         SettingsData settingsData = settings.GetSettings();
+
+        print(path);
                 
         if (Convert.ToBoolean(settingsData.IsDirectoryInTitle)) 
         {
