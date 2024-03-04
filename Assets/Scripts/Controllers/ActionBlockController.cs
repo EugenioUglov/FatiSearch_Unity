@@ -635,7 +635,7 @@ public class ActionBlockController : MonoBehaviour
         string titleActionBlock = fileName;
         SettingsData settingsData = settings.GetSettings();
 
-        print(path);
+        AddSingularizedWordsOfPhraseToTags(fileName);
                 
         if (Convert.ToBoolean(settingsData.IsDirectoryInTitle)) 
         {
@@ -647,7 +647,7 @@ public class ActionBlockController : MonoBehaviour
             // Add to tags folder names from path of a file.
             
             tags.Add(foldersOfPath[i]);
-            AddSingularizedWordsOfFolderNameToTags(foldersOfPath[i]);
+            AddSingularizedWordsOfPhraseToTags(foldersOfPath[i]);
 
             if (Convert.ToBoolean(settingsData.IsDirectoryInTitle)) 
             {
@@ -673,19 +673,19 @@ public class ActionBlockController : MonoBehaviour
         return actionBlock;
 
         
-        void AddSingularizedWordsOfFolderNameToTags(string folderName)
+        void AddSingularizedWordsOfPhraseToTags(string phrase)
         {
-            string[] folderWords = folderName.Split(' ');
+            string[] words = phrase.Split(' ');
 
-            foreach (var originalFolderWord in folderWords)
+            foreach (var word in words)
             {            
                 try
                 {
-                    string singularizedFolderWord = nounNumber.GetSingularWord(originalFolderWord);
+                    string singularizedWord = nounNumber.GetSingularWord(word);
 
-                    if (originalFolderWord != singularizedFolderWord)
+                    if (word != singularizedWord)
                     {
-                        tags.Add(singularizedFolderWord);
+                        tags.Add(singularizedWord);
                     }
                 }
                 catch(Exception ex)

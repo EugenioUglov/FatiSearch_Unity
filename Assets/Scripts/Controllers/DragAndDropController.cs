@@ -102,25 +102,25 @@ public class DragAndDropController : MonoBehaviour
 
          void CreateDirectoryIfNotExist(string directory)
          {
-               try
+            try
+            {
+               // Determine whether the directory exists.
+               if (Directory.Exists(directory))
                {
-                  // Determine whether the directory exists.
-                  if (Directory.Exists(directory))
-                  {
 
-                  }
-                  else 
-                  {
-                     // Try to create the directory.
-                     DirectoryInfo di = Directory.CreateDirectory(directory);
-                     Console.WriteLine("The directory was created successfully at {0}.", Directory.GetCreationTime(directory));
-                  }
                }
-               catch (Exception e)
+               else 
                {
-                  Console.WriteLine("The process failed: {0}", e.ToString());
+                  // Try to create the directory.
+                  DirectoryInfo di = Directory.CreateDirectory(directory);
+                  Console.WriteLine("The directory was created successfully at {0}.", Directory.GetCreationTime(directory));
                }
-               finally {}
+            }
+            catch (Exception e)
+            {
+               Console.WriteLine("The process failed: {0}", e.ToString());
+            }
+            finally {}
          }
 
          return targetFilePath;
