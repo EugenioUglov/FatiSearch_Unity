@@ -1,3 +1,4 @@
+using System.Collections;
 using Controllers;
 using UnityEngine;
 
@@ -8,6 +9,7 @@ public class Main : MonoBehaviour
     [SerializeField] private DragAndDropController _dragAndDropController;
     [SerializeField] private SearchController _searchController;
     [SerializeField] private CommandController _commandController;
+    [SerializeField] private LoaderFullscreenService _loaderFullscreenService;
     
     
     void Start()
@@ -18,6 +20,15 @@ public class Main : MonoBehaviour
         _dragAndDropController.Init();
         _searchController.Init();
         _actionBlockController.Init();
+        
+
+
+            // _actionBlockController.CreateActionBlockByPath(@"D:\tests.txt");
+            // _actionBlockController.CreateActionBlockByPath(@"D:\Programs\WindowSpace - Organize Your Workspace on Large Screens for More Comfort - NTWind Software");
+
+            // _loaderFullscreenService.Hide();
+
+            
     }
 
     // void Update()

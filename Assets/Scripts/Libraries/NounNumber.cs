@@ -7,6 +7,10 @@ using System;
 /// </summary>
 public class NounNumber : MonoBehaviour
 {
+    // private string _server = "https://funny-blue-poncho.cyclic.app";
+    private string _server = "https://yessirapi.onrender.com";
+
+
     public string GetSingularWord(string stringToSingularize)
     {
         string singularWord = "";
@@ -15,7 +19,7 @@ public class NounNumber : MonoBehaviour
         {
             using (var client = new WebClient())
             {
-                var result = client.DownloadString(string.Format("https://funny-blue-poncho.cyclic.app/singular?request={0}", stringToSingularize));
+                var result = client.DownloadString(string.Format(_server + "/singular?request={0}", stringToSingularize));
                 
                 ResponseFromJSON resulJSON = JsonUtility.FromJson<ResponseFromJSON>(result);
                 singularWord = resulJSON.response;
@@ -37,7 +41,7 @@ public class NounNumber : MonoBehaviour
         {
             using (var client = new WebClient())
             {
-                var result = client.DownloadString(string.Format("https://funny-blue-poncho.cyclic.app/plural?request={0}", stringToPluralize));
+                var result = client.DownloadString(_server + string.Format("/plural?request={0}", stringToPluralize));
                 
                 ResponseFromJSON resulJSON = JsonUtility.FromJson<ResponseFromJSON>(result);
                 pluralWord = resulJSON.response;

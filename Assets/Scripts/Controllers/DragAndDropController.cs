@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using System.Windows.Forms;
 using System.IO;
+using System.Collections;
 
 public class DragAndDropController : MonoBehaviour
 {
@@ -25,9 +26,9 @@ public class DragAndDropController : MonoBehaviour
    {
       DialogResult dialogResult = MessageBox.Show("Do you want to copy dragged file (files) to the program data?", "Confirmation", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Information);
       
+
       if (dialogResult == DialogResult.Yes) {
          _loaderFullscreenService.Show();
-
          foreach (string path in paths)
          {
             string filePathFromIndexedFolder = "";
@@ -45,8 +46,9 @@ public class DragAndDropController : MonoBehaviour
                }
                catch (Exception exception)
                {
-                  _loaderFullscreenService.Hide();
                   MessageBox.Show(exception.Message, "Error");
+                  _loaderFullscreenService.Hide();
+
                   return;
                }
             }
@@ -56,8 +58,9 @@ public class DragAndDropController : MonoBehaviour
             }
 
             if (string.IsNullOrEmpty(filePathFromIndexedFolder)) {
+               MessageBox.Show("Creating operation is canceled. Action-Block already exists from path: " + path, "Warning");
+               
                _loaderFullscreenService.Hide();
-               MessageBox.Show("Creating operation is canceled. Action-Block already exists.", "Warning");
                return;
             }
             
@@ -79,5 +82,6 @@ public class DragAndDropController : MonoBehaviour
       _actionBlockController.SetActionBlocksToShow();
       _actionBlockController.RefreshActionBlocksOnPage();
       _loaderFullscreenService.Hide();
+
    }
 }
