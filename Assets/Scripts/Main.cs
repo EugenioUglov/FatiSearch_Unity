@@ -18,8 +18,6 @@ public class Main : MonoBehaviour
         _dragAndDropController.Init();
         _searchController.Init();
         _actionBlockController.Init();
-
-        _actionBlockController.CreateActionBlockByPath(@"F:\Перебрать\Urls\(764) Online Tutorials - YouTube");
     }
 
     // void Update()
