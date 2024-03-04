@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -8,6 +6,7 @@ public class LoaderFullscreenView : MonoBehaviour
 {
     [SerializeField] private GameObject _loaderFullscreenGO;
     [SerializeField] private TextMeshProUGUI _textComponent;
+    [SerializeField] private GameObject _cancelButton;
     
     private Action _onClickButtonCancel = null;
 
@@ -35,5 +34,15 @@ public class LoaderFullscreenView : MonoBehaviour
     public void OnClickButtonCancel()
     {
         _onClickButtonCancel?.Invoke();
+    }
+
+    public void ShowCancelButton()
+    {
+        _cancelButton.SetActive(true);
+    }
+
+    public void HideCancelButton()
+    {
+        _cancelButton.SetActive(false);
     }
 }

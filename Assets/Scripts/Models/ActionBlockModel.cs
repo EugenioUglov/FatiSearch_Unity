@@ -303,20 +303,14 @@ public class ActionBlockModel : MonoBehaviour
 
     public bool CreateActionBlock(ActionBlock actionBlock, bool isShowError = true)
     {
-        print("Create Action-Block");
         OnStartChangeActionBlocksVariables();
 
         string titleForActionBlock = actionBlock.Title;
-
-        print("titleForActionBlock: " + titleForActionBlock);
 
         if (IsActionBlockValidToAdd(actionBlock, isShowError) == false)
         {
             return false;
         }
-
-        print(titleForActionBlock.ToLower());
-        print(_actionBlockByTitle.Contains(titleForActionBlock.ToLower()));
 
         if (_actionBlockByTitle.Contains(titleForActionBlock.ToLower()))
         {
@@ -343,7 +337,6 @@ public class ActionBlockModel : MonoBehaviour
             }
             else
             {
-                print("false");
                 return false;
             }
         }
@@ -663,10 +656,15 @@ public class ActionBlockModel : MonoBehaviour
         {
             // Delete empty spaces from sides of tags.
             string tagTrimmed = tag.Trim();
+
+            // Repalce multiple spaces to one space.
+            string tagTrimmedWithoutMultipleSpaces = Regex.Replace(tagTrimmed, @"\s+", " ");
+
+            string normalizedTag = tagTrimmedWithoutMultipleSpaces;
             
-            if (string.IsNullOrEmpty(tagTrimmed) == false)
+            if (string.IsNullOrEmpty(normalizedTag) == false)
             {
-                normalizedTags.Add(tagTrimmed);
+                normalizedTags.Add(normalizedTag);
             }
         }
 

@@ -7,7 +7,10 @@ public class DragAndDropController : MonoBehaviour
 {
    [Header("Links")]
    [SerializeField] private DragAndDropService _dragAndDropService;
+   [SerializeField] LoaderFullscreenService _loaderFullscreenService;
+
    [SerializeField] private ActionBlockController _actionBlockController;
+   
    
    private DirectoryManager _directoryManager;
 
@@ -23,6 +26,8 @@ public class DragAndDropController : MonoBehaviour
       DialogResult dialogResult = MessageBox.Show("Do you want to copy dragged file (files) to the program data?", "Confirmation", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Information);
       
       if (dialogResult == DialogResult.Yes) {
+         _loaderFullscreenService.Show();
+
          foreach (string path in paths)
          {
             string filePathFromIndexedFolder = "";
@@ -40,16 +45,18 @@ public class DragAndDropController : MonoBehaviour
                }
                catch (Exception exception)
                {
+                  _loaderFullscreenService.Hide();
                   MessageBox.Show(exception.Message, "Error");
                   return;
                }
             }
             else
             { 
-               filePathFromIndexedFolder = CopyFileKeepingFolders(path, targetPath);
+               filePathFromIndexedFolder = _directoryManager.CopyFileKeepingFolders(path, targetPath);
             }
 
             if (string.IsNullOrEmpty(filePathFromIndexedFolder)) {
+               _loaderFullscreenService.Hide();
                MessageBox.Show("Creating operation is canceled. Action-Block already exists.", "Warning");
                return;
             }
@@ -58,6 +65,8 @@ public class DragAndDropController : MonoBehaviour
          }
       }
       else if (dialogResult == DialogResult.No) {
+         _loaderFullscreenService.Show();
+
          foreach (string path in paths)
          {
             _actionBlockController.CreateActionBlockByPath(path);
@@ -69,61 +78,6 @@ public class DragAndDropController : MonoBehaviour
 
       _actionBlockController.SetActionBlocksToShow();
       _actionBlockController.RefreshActionBlocksOnPage();
-
-      string CopyFileKeepingFolders(string fileToCopy, string targetDirectory)
-      {
-         string directoryOfFileToCopy = Path.GetDirectoryName(fileToCopy);
-         string fileNameToCopy = Path.GetFileName(fileToCopy);
-
-         string directoryOfFileToCopyWithoutDriveOrNetworkShare = directoryOfFileToCopy.Substring(Path.GetPathRoot(directoryOfFileToCopy).Length);
-
-         // If the last symbol in directory is not slash then add it.
-         if (targetDirectory[targetDirectory.Length - 1] != '\\')
-         {
-               targetDirectory += @"\";
-         }
-
-         targetDirectory += directoryOfFileToCopyWithoutDriveOrNetworkShare + @"\";
-
-         string targetFilePath = targetDirectory + fileNameToCopy;
-
-         if (File.Exists(targetFilePath))
-         {
-               print("File already exists: " + targetFilePath);
-               return "";
-         }
-         else 
-         {
-
-         }
-
-         CreateDirectoryIfNotExist(targetDirectory);
-         File.Copy(fileToCopy, targetFilePath);
-
-         void CreateDirectoryIfNotExist(string directory)
-         {
-            try
-            {
-               // Determine whether the directory exists.
-               if (Directory.Exists(directory))
-               {
-
-               }
-               else 
-               {
-                  // Try to create the directory.
-                  DirectoryInfo di = Directory.CreateDirectory(directory);
-                  Console.WriteLine("The directory was created successfully at {0}.", Directory.GetCreationTime(directory));
-               }
-            }
-            catch (Exception e)
-            {
-               Console.WriteLine("The process failed: {0}", e.ToString());
-            }
-            finally {}
-         }
-
-         return targetFilePath;
-      }
+      _loaderFullscreenService.Hide();
    }
 }

@@ -6766,7 +6766,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: v11
+  m_text: v12
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -13187,7 +13187,6 @@ GameObject:
   - component: {fileID: 2008285825}
   - component: {fileID: 2008285836}
   - component: {fileID: 2008285838}
-  - component: {fileID: 2008285840}
   - component: {fileID: 2008285841}
   - component: {fileID: 2008285842}
   - component: {fileID: 2008285820}
@@ -13279,7 +13278,6 @@ MonoBehaviour:
   _dragAndDropController: {fileID: 2008285831}
   _searchController: {fileID: 2008285829}
   _commandController: {fileID: 2008285841}
-  _loaderFullscreenService: {fileID: 2008285820}
 --- !u!114 &2008285823
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13333,6 +13331,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _loaderFullscreenGO: {fileID: 1775221727}
   _textComponent: {fileID: 1763647840}
+  _cancelButton: {fileID: 893098751}
 --- !u!114 &2008285827
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13414,6 +13413,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dragAndDropService: {fileID: 2008285836}
+  _loaderFullscreenService: {fileID: 2008285820}
   _actionBlockController: {fileID: 2008285818}
 --- !u!114 &2008285832
 MonoBehaviour:
@@ -13532,18 +13532,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _view: {fileID: 2008285830}
---- !u!114 &2008285840
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2008285817}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 66921fcd37941564abedb5ee29d26822, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &2008285841
 MonoBehaviour:
   m_ObjectHideFlags: 0

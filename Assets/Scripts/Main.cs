@@ -8,19 +8,18 @@ public class Main : MonoBehaviour
     [SerializeField] private DragAndDropController _dragAndDropController;
     [SerializeField] private SearchController _searchController;
     [SerializeField] private CommandController _commandController;
-    [SerializeField] LoaderFullscreenService _loaderFullscreenService;
     
     
     void Start()
     {
         UserSettings userSettings = new UserSettings();
 
-        _loaderFullscreenService.Show();
         userSettings.ApplySettings();
         _dragAndDropController.Init();
         _searchController.Init();
         _actionBlockController.Init();
-        _loaderFullscreenService.Hide();
+
+        _actionBlockController.CreateActionBlockByPath(@"F:\Перебрать\Urls\(764) Online Tutorials - YouTube");
     }
 
     // void Update()

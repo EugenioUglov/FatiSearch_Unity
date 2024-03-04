@@ -141,25 +141,86 @@ public class DirectoryManager : MonoBehaviour
         }
     }
 
-   
-    // !!! Not working well. Infinite loading.
-    public void CopyFiles(DirectoryInfo source, DirectoryInfo target) 
+    /// <summary>
+    /// Copy file with all folders where the file contained.
+    /// </summary>
+    /// <param name="fileToCopy"></param>
+    /// <param name="targetDirectory"></param>
+    /// <returns></returns>
+    public string CopyFileKeepingFolders(string fileToCopy, string targetDirectory)
     {
-        Directory.CreateDirectory(target.FullName);
+        string directoryOfFileToCopy = Path.GetDirectoryName(fileToCopy);
+        string fileNameToCopy = Path.GetFileName(fileToCopy);
 
-        foreach (var file in source.GetFiles())
+        string directoryOfFileToCopyWithoutDriveOrNetworkShare = directoryOfFileToCopy.Substring(Path.GetPathRoot(directoryOfFileToCopy).Length);
+
+        // If the last symbol in directory is not slash then add it.
+        if (targetDirectory[targetDirectory.Length - 1] != '\\')
         {
-            // Thread.Sleep(50);
-            file.CopyTo(Path.Combine(target.FullName, file.Name), true);
+            targetDirectory += @"\";
         }
 
-        foreach (var sourceSubdirectory in source.GetDirectories())
+        targetDirectory += directoryOfFileToCopyWithoutDriveOrNetworkShare + @"\";
+
+        string targetFilePath = targetDirectory + fileNameToCopy;
+
+        if (File.Exists(targetFilePath))
         {
-            // Thread.Sleep(50);
-            var targetSubdirectory = target.CreateSubdirectory(sourceSubdirectory.Name);
-            CopyFiles(sourceSubdirectory, targetSubdirectory);
+            print("File already exists: " + targetFilePath);
+            return "";
         }
+        else 
+        {
+
+        }
+
+        CreateDirectoryIfNotExist(targetDirectory);
+        File.Copy(fileToCopy, targetFilePath);
+
+        void CreateDirectoryIfNotExist(string directory)
+        {
+        try
+        {
+            // Determine whether the directory exists.
+            if (Directory.Exists(directory))
+            {
+
+            }
+            else 
+            {
+                // Try to create the directory.
+                DirectoryInfo di = Directory.CreateDirectory(directory);
+                Console.WriteLine("The directory was created successfully at {0}.", Directory.GetCreationTime(directory));
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("The process failed: {0}", e.ToString());
+        }
+        finally {}
+        }
+
+        return targetFilePath;
     }
+
+    // !!! Not working well. Infinite loading.
+    // public void CopyFiles(DirectoryInfo source, DirectoryInfo target) 
+    // {
+    //     Directory.CreateDirectory(target.FullName);
+
+    //     foreach (var file in source.GetFiles())
+    //     {
+    //         // Thread.Sleep(50);
+    //         file.CopyTo(Path.Combine(target.FullName, file.Name), true);
+    //     }
+
+    //     foreach (var sourceSubdirectory in source.GetDirectories())
+    //     {
+    //         // Thread.Sleep(50);
+    //         var targetSubdirectory = target.CreateSubdirectory(sourceSubdirectory.Name);
+    //         CopyFiles(sourceSubdirectory, targetSubdirectory);
+    //     }
+    // }
    
     public void RemoveFiles(DirectoryInfo directoryInfo)
     {
@@ -169,7 +230,6 @@ public class DirectoryManager : MonoBehaviour
         }
     }
         
-
     /// <summary>
     /// Copy folder by path (sourcePath) to another directory (targetPath). If current folder already exists in destination directory then throw exception.
     /// </summary>

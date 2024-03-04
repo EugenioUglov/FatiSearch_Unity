@@ -156,8 +156,6 @@ public class ActionBlockController : MonoBehaviour
                 _model.SaveToFile();
                 SetActionBlocksToShow();
                 RefreshActionBlocksOnPage();
-                _loaderFullscreenService.Hide();
-                _loaderFullscreenService.SetText("");
             }
         ));
         
@@ -257,10 +255,7 @@ public class ActionBlockController : MonoBehaviour
 
     public void OnCancelCreateActionBlocksByDirectories()
     {
-        _loaderFullscreenService.OnCancel(
-            onCancel: () => {
-                _loaderFullscreenService.Hide();
-            });
+
     }
     
     

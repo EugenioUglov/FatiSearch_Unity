@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using System;
 
@@ -15,7 +13,15 @@ public class LoaderFullscreenService : MonoBehaviour
 
     public void Show(Action onCancel = null)
     {
-        OnCancel(onCancel);
+        if (onCancel != null) {
+            _view.ShowCancelButton();
+            OnCancel(onCancel);
+        }
+        else
+        {
+            _view.HideCancelButton();
+        }
+
         _view.Show();
     }
 
@@ -26,6 +32,7 @@ public class LoaderFullscreenService : MonoBehaviour
 
     public void OnCancel(Action onCancel)
     {
+        Hide();
         _view.SetCancelHandler(onCancel);
     }
 }
