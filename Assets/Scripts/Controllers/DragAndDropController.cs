@@ -22,7 +22,7 @@ public class DragAndDropController : MonoBehaviour
          _actionBlockController.CreateActionBlocksByPathsNoFreezeWithCopyingFilesToProgramData(paths);
       }
       else if (dialogResult == DialogResult.No) {
-         _actionBlockController.CreateActionBlocksByPathsNoFreeze(paths);
+         _actionBlockController.CreateActionBlocksByPathsAsync(paths);
       }
       else if (dialogResult == DialogResult.Cancel) {
          return;

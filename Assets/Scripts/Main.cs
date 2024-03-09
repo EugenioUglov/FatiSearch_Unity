@@ -1,5 +1,6 @@
-using Controllers;
 using UnityEngine;
+using System.Collections;
+using Controllers;
 
 public class Main : MonoBehaviour
 {
@@ -13,14 +14,21 @@ public class Main : MonoBehaviour
 
     private void Start()
     {
-        UserSettings userSettings = new UserSettings();
+        _loaderFullscreenService.Show(text: "Preparing all Action-Blocks");
+        
 
-        userSettings.ApplySettings();
-        _dragAndDropController.Init();
-        _searchController.Init();
-        _actionBlockController.Init();
+        StartCoroutine(StartWithNoFreeze());
 
-        _actionBlockController.CreateActionBlockByPath(@"D:\Projects\Unity\TypewriterEffectForText-Unity-main.zip");
+        IEnumerator StartWithNoFreeze()
+        {
+            yield return null;
+
+            UserSettings userSettings = new UserSettings();
+            userSettings.ApplySettings();
+            _dragAndDropController.Init();
+            _searchController.Init();
+            _actionBlockController.Init();
+        }
     }
 
     // void Update()

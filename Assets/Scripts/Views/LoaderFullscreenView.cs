@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using TMPro;
 using UnityEngine;
 
@@ -22,18 +21,6 @@ public class LoaderFullscreenView : MonoBehaviour
         _onClickButtonCancel = newCancelHandler;
     }
 
-    public void ShowDuringActionInProgress(Action actionDuringLoading)
-    { 
-        StartCoroutine(ShowLoadingWhileActionInProgress());
-        
-        IEnumerator ShowLoadingWhileActionInProgress()
-        {
-            Show();
-            yield return null;
-            actionDuringLoading();
-            Hide();
-        }
-    }
 
     public void Show()
     {

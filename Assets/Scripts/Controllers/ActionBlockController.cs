@@ -182,13 +182,71 @@ public class ActionBlockController : MonoBehaviour
         return true;
     }
 
-    public bool CreateActionBlockByPath(string path, bool isShowError = true)
+    public void CreateActionBlockByPathAsync(string path, Action<ActionBlockModel.ActionBlock> onDone, bool isShowError = true)
     {
         ActionBlockModel.ActionBlock actionBlock = GetActionBlockObject(path);
-        
-        CreateActionBlock(actionBlock, isShowError);
 
-        return true;
+        void GetSingularizedTagsAsync(string[] tags, Action<List<string>> onDone, Action onCancel = null)
+        {
+            NounNumber nounNumber = new NounNumber();
+            List<string> singularizedTags = new List<string>();
+
+            StartCoroutine(GetSingularizedTags());
+
+
+            IEnumerator GetSingularizedTags()
+            { 
+                bool isCanceled = false;
+
+                _loaderFullscreenService.Show(
+                    text: "Creating singularized tags. It can take a while...\nYou can skip this process by clicking \"Cancel\" button", 
+                    onCancel: ()  => { isCanceled = true; }
+                );
+
+                foreach (string tag in tags)
+                {
+                    yield return null;
+
+                    if (isCanceled) 
+                    {
+                        onCancel?.Invoke();
+                        yield break; 
+                    }
+                    
+                    try
+                    {
+                        string singularizedTag = nounNumber.GetSingularWord(tag);
+
+                        if (tag != singularizedTag)
+                        {
+                            singularizedTags.Add(singularizedTag);
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        MessageBox.Show("Singularize API error: " + ex.Message);
+                    }
+                }
+
+                onDone?.Invoke(singularizedTags);
+            }
+        }
+
+        GetSingularizedTagsAsync(
+            tags: actionBlock.Tags.ToArray(),
+            onDone: (singularizedTags) => 
+            {
+                actionBlock.Tags = actionBlock.Tags.Concat(singularizedTags).ToList();
+
+                CreateActionBlock(actionBlock, isShowError);
+                onDone?.Invoke(actionBlock);
+            },
+            onCancel: () =>
+            { 
+                CreateActionBlock(actionBlock, isShowError);
+                onDone?.Invoke(actionBlock);
+            }
+        );
     }
 
     public bool CreateActionBlocksByPaths(string[] paths, bool isShowError = true)
@@ -206,30 +264,63 @@ public class ActionBlockController : MonoBehaviour
         return true;
     }
 
-    public void CreateActionBlocksByPathsNoFreeze(string[] paths)
-    { 
+    public void CreateActionBlocksByPathsAsync(string[] paths)
+    {
+        bool isCanceled = false;
+
+        _loaderFullscreenService.Show(text: "Preparing Action-Blocks...", onCancel: () => { isCanceled = true; });
+
+
         StartCoroutine(CreateActionBlocksByPathsNoFreeze());
 
         IEnumerator CreateActionBlocksByPathsNoFreeze()
         {
             _loaderFullscreenService.Show();
-            
-            foreach (string path in paths)
-            {
-                yield return null;
 
-                CreateActionBlockByPath(path);
+            yield return null;
+
+            IEnumerator pathsEnumerator = paths.GetEnumerator();
+
+            if (pathsEnumerator.MoveNext())
+            {
+                StartCoroutine(CreateActionBlockByPath((string)pathsEnumerator.Current));
             }
 
-            SetActionBlocksToShow();
-            RefreshActionBlocksOnPage();
 
-            _loaderFullscreenService.Hide();
+            IEnumerator CreateActionBlockByPath(string path)
+            { 
+                yield return null;
+                if (isCanceled) yield break;
+
+                CreateActionBlockByPathAsync(
+                    path, 
+                    onDone: (actionBlock) => 
+                    {
+                        if (pathsEnumerator.MoveNext())
+                        {
+                            string path = (string)pathsEnumerator.Current;
+                            StartCoroutine(CreateActionBlockByPath(path));
+                        }
+                        else 
+                        {
+                            SetActionBlocksToShow();
+                            RefreshActionBlocksOnPage();
+
+                            _loaderFullscreenService.Hide();
+                        }
+                    }
+                );
+            }
         }
     }
 
     public void CreateActionBlocksByPathsNoFreezeWithCopyingFilesToProgramData(string[] paths)
-    { 
+    {
+        bool isCanceled = false;
+        List<string> filePathsFromIndexedFolders = new List<string>();
+
+        _loaderFullscreenService.Show(text: "Preparing Action-Blocks...", onCancel: () => { isCanceled = true; });
+
         StartCoroutine(CreateActionBlockByPathsNoFreeze());
 
         IEnumerator CreateActionBlockByPathsNoFreeze()
@@ -239,6 +330,8 @@ public class ActionBlockController : MonoBehaviour
             foreach (string path in paths)
             {
                 yield return null;
+                if (isCanceled) yield break;
+
                 string filePathFromIndexedFolder = "";
                 string targetPath = @"Admin\IndexedFiles";
 
@@ -271,7 +364,40 @@ public class ActionBlockController : MonoBehaviour
                     continue;
                 }
 
-                CreateActionBlockByPath(filePathFromIndexedFolder);
+                filePathsFromIndexedFolders.Add(filePathFromIndexedFolder);
+            }
+
+            IEnumerator pathsEnumerator = filePathsFromIndexedFolders.GetEnumerator();
+
+            if (pathsEnumerator.MoveNext())
+            {
+                StartCoroutine(CreateActionBlockByPath((string)pathsEnumerator.Current));
+            }
+
+
+            IEnumerator CreateActionBlockByPath(string path)
+            { 
+                yield return null;
+                if (isCanceled) yield break;
+
+                CreateActionBlockByPathAsync(
+                    path, 
+                    onDone: (actionBlock) => 
+                    {
+                        if (pathsEnumerator.MoveNext())
+                        {
+                            string path = (string)pathsEnumerator.Current;
+                            StartCoroutine(CreateActionBlockByPath(path));
+                        }
+                        else 
+                        {
+                            SetActionBlocksToShow();
+                            RefreshActionBlocksOnPage();
+
+                            _loaderFullscreenService.Hide();
+                        }
+                    }
+                );
             }
 
             SetActionBlocksToShow();
@@ -705,7 +831,6 @@ public class ActionBlockController : MonoBehaviour
 
     private ActionBlockModel.ActionBlock GetActionBlockObject(string path)
     {
-        NounNumber nounNumber = new NounNumber();
         UserSettings settings = new UserSettings();
         SettingsData settingsData = settings.GetSettings();
         
@@ -714,8 +839,6 @@ public class ActionBlockController : MonoBehaviour
         string[] foldersOfPath = path.Split('\\');
         string titleActionBlock = fileName;
         path = path.Replace(@"\\", @"\");
-
-        AddSingularizedWordsOfPhraseToTags(fileName);
                 
         if (Convert.ToBoolean(settingsData.IsDirectoryInTitle)) 
         {
@@ -727,7 +850,6 @@ public class ActionBlockController : MonoBehaviour
             // Add to tags folder names from path of a file.
             
             tags.Add(foldersOfPath[i]);
-            // AddSingularizedWordsOfPhraseToTags(foldersOfPath[i]);
 
             if (Convert.ToBoolean(settingsData.IsDirectoryInTitle)) 
             {
@@ -744,36 +866,15 @@ public class ActionBlockController : MonoBehaviour
         {
             titleActionBlock += ")";    
         }
-        
 
+        
         ActionBlockModel.ActionBlock actionBlock = 
         new ActionBlockModel.ActionBlock(titleActionBlock, ActionBlockModel.ActionEnum.OpenPath, 
             path, tags);
 
+
+
         return actionBlock;
-
-        
-        void AddSingularizedWordsOfPhraseToTags(string phrase)
-        {
-            string[] words = phrase.Split(' ');
-
-            foreach (var word in words)
-            {            
-                try
-                {
-                    string singularizedWord = nounNumber.GetSingularWord(word);
-
-                    if (word != singularizedWord)
-                    {
-                        tags.Add(singularizedWord);
-                    }
-                }
-                catch(Exception ex)
-                {
-                    print("Singularize API error: " + ex.Message);
-                }
-            }
-        }
     }
 
     
