@@ -607,12 +607,13 @@ public class ActionBlockModel : MonoBehaviour
     {
         string titleLowerCase = actionBlock.Title.ToLower();
         string titleWithoutSpecialSymbols = _stringManager.GetTextWithoutSpecialSymbols(actionBlock.Title.ToLower());
+        string titleWithoutSpecialSymbolsAndSplitedCamelCase = _stringManager.SplitCamelCase(titleWithoutSpecialSymbols);
         List<string> tags = actionBlock.Tags;
             
         // Add tags from title words.
         AddTitleToTag();
 
-        if (string.Equals(titleLowerCase, titleWithoutSpecialSymbols) == false)
+        if (string.Equals(titleLowerCase, titleWithoutSpecialSymbolsAndSplitedCamelCase) == false)
         {
             AddTitleWithoutSpecialSymbolsToTag();
         }
@@ -635,14 +636,14 @@ public class ActionBlockModel : MonoBehaviour
         {
             foreach (var tag in tags)
             {
-                if (tag == titleWithoutSpecialSymbols)
+                if (tag == titleWithoutSpecialSymbolsAndSplitedCamelCase)
                 {
                     // Tag as the title without spec symbols exists.
                     return;
                 }
             }
             
-            tags.Add(titleWithoutSpecialSymbols);
+            tags.Add(titleWithoutSpecialSymbolsAndSplitedCamelCase);
         }
 
         return tags;

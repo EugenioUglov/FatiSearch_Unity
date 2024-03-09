@@ -9,9 +9,9 @@ public class Main : MonoBehaviour
     [SerializeField] private SearchController _searchController;
     [SerializeField] private CommandController _commandController;
     [SerializeField] private LoaderFullscreenService _loaderFullscreenService;
-    
-    
-    void Start()
+
+
+    private void Start()
     {
         UserSettings userSettings = new UserSettings();
 

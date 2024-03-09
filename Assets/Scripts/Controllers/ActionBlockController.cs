@@ -7,6 +7,7 @@ using Controllers;
 using TMPro;
 using UnityEngine;
 using Unity.VisualScripting;
+using System.Windows.Forms;
 
 public class ActionBlockController : MonoBehaviour
 {
@@ -203,6 +204,80 @@ public class ActionBlockController : MonoBehaviour
         ));
 
         return true;
+    }
+
+    public void CreateActionBlocksByPathsNoFreeze(string[] paths)
+    { 
+        StartCoroutine(CreateActionBlocksByPathsNoFreeze());
+
+        IEnumerator CreateActionBlocksByPathsNoFreeze()
+        {
+            _loaderFullscreenService.Show();
+            
+            foreach (string path in paths)
+            {
+                yield return null;
+
+                CreateActionBlockByPath(path);
+            }
+
+            SetActionBlocksToShow();
+            RefreshActionBlocksOnPage();
+
+            _loaderFullscreenService.Hide();
+        }
+    }
+
+    public void CreateActionBlocksByPathsNoFreezeWithCopyingFilesToProgramData(string[] paths)
+    { 
+        StartCoroutine(CreateActionBlockByPathsNoFreeze());
+
+        IEnumerator CreateActionBlockByPathsNoFreeze()
+        {
+            _loaderFullscreenService.Show();
+            
+            foreach (string path in paths)
+            {
+                yield return null;
+                string filePathFromIndexedFolder = "";
+                string targetPath = @"Admin\IndexedFiles";
+
+                // get the file attributes for file or directory
+                FileAttributes attr = File.GetAttributes(path);
+
+                // detect whether its a directory
+                if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                {
+                    try
+                    {
+                        filePathFromIndexedFolder = _directoryManager.CopyFolder(path, targetPath);
+                    }
+                    catch (Exception exception)
+                    {
+                        MessageBox.Show(exception.Message, "Error");
+
+                        continue;
+                    }
+                }
+                else
+                {
+                    filePathFromIndexedFolder = _directoryManager.CopyFileKeepingFolders(path, targetPath);
+                }
+
+                if (string.IsNullOrEmpty(filePathFromIndexedFolder))
+                {
+                    MessageBox.Show("Creating operation is canceled. Action-Block already exists from path: " + path, "Warning");
+
+                    continue;
+                }
+
+                CreateActionBlockByPath(filePathFromIndexedFolder);
+            }
+
+            SetActionBlocksToShow();
+            RefreshActionBlocksOnPage();
+            _loaderFullscreenService.Hide();
+        }
     }
 
     public bool UpdateActionBlock(string title, ActionBlockModel.ActionBlock actionBlock)
