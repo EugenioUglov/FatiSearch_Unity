@@ -7,47 +7,44 @@ using System;
 
 public class DirectoryManager : MonoBehaviour
 {
-    List<string> _logs = new List<string>();
-
-
-    public bool OpenDirectory(string diretory)
+    public bool OpenDirectory(string directory)
     {
         bool isOpened = false;
+
+        directory = directory.Replace(@"\\", @"\");
         
         try
         {
-            Process.Start(diretory);
+            Process.Start(directory);
             isOpened = true;
-
-            _logs.Add("Directory opened: " + diretory);
         }
         catch (Exception exception)
         {
-            _logs.Add("Not possible to open directory: " + diretory);
+            print(exception.Message);
         }
 
         return isOpened;
     }
     
-    public bool OpenDirectoryAsAdministrator(string diretory)
+    public bool OpenDirectoryAsAdministrator(string directory)
     {
         bool isOpened = false;
+
+        directory = directory.Replace(@"\\", @"\");
         
         try
         {
             Process process = new Process();
-            process.StartInfo.FileName = diretory;
+            process.StartInfo.FileName = directory;
             process.StartInfo.UseShellExecute = true;
             process.StartInfo.Verb = "runas";
             process.Start();
             // Process.Start(diretory);
             isOpened = true;
-
-            _logs.Add("Directory opened: " + diretory);
         }
         catch (Exception exception)
         {
-            _logs.Add("Not possible to open directory: " + diretory);
+            print(exception.Message);
         }
 
         return isOpened;
@@ -56,6 +53,8 @@ public class DirectoryManager : MonoBehaviour
     public bool ShowInExplorer(string path)
     {
         bool isSelected = false;
+
+        path = path.Replace(@"\\", @"\");
 
         if (File.Exists(path) || Directory.Exists(path))
         {
@@ -75,16 +74,14 @@ public class DirectoryManager : MonoBehaviour
 
         int iFile = 0;
 
-        foreach (var file in allfiles){
+        foreach (var file in allfiles)
+        {
             FileInfo info = new FileInfo(file);
             // Do something with the Folder or just add them to a list via nameoflist.add();
             fileDirectories[iFile] = info.FullName;
 
             iFile++;
         }
-
-        _logs.Add("Directory opened: " + folderDirectory);
-
 
         return fileDirectories;
     }
