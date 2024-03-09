@@ -9,7 +9,6 @@ public class DragAndDropController : MonoBehaviour
    [Header("Links")]
    [SerializeField] private DragAndDropService _dragAndDropService;
    [SerializeField] LoaderFullscreenService _loaderFullscreenService;
-
    [SerializeField] private ActionBlockController _actionBlockController;
    
    
@@ -28,60 +27,81 @@ public class DragAndDropController : MonoBehaviour
       
 
       if (dialogResult == DialogResult.Yes) {
-         _loaderFullscreenService.Show();
-         foreach (string path in paths)
+         StartCoroutine(CreateActionBlockByPathsNoFreeze());
+
+         IEnumerator CreateActionBlockByPathsNoFreeze()
          {
-            string filePathFromIndexedFolder = "";
-            string targetPath = @"Admin\IndexedFiles";
-
-            // get the file attributes for file or directory
-            FileAttributes attr = File.GetAttributes(path);
-
-            // detect whether its a directory
-            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
-            {
-               try
-               {
-                  filePathFromIndexedFolder = _directoryManager.CopyFolder(path, targetPath);
-               }
-               catch (Exception exception)
-               {
-                  MessageBox.Show(exception.Message, "Error");
-                  _loaderFullscreenService.Hide();
-
-                  return;
-               }
-            }
-            else
-            { 
-               filePathFromIndexedFolder = _directoryManager.CopyFileKeepingFolders(path, targetPath);
-            }
-
-            if (string.IsNullOrEmpty(filePathFromIndexedFolder)) {
-               MessageBox.Show("Creating operation is canceled. Action-Block already exists from path: " + path, "Warning");
-               
-               _loaderFullscreenService.Hide();
-               return;
-            }
+            _loaderFullscreenService.Show();
             
-            _actionBlockController.CreateActionBlockByPath(filePathFromIndexedFolder);
+            foreach (string path in paths)
+            {
+               yield return null;
+               string filePathFromIndexedFolder = "";
+               string targetPath = @"Admin\IndexedFiles";
+
+               // get the file attributes for file or directory
+               FileAttributes attr = File.GetAttributes(path);
+
+               // detect whether its a directory
+               if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+               {
+                  try
+                  {
+                     filePathFromIndexedFolder = _directoryManager.CopyFolder(path, targetPath);
+                  }
+                  catch (Exception exception)
+                  {
+                     MessageBox.Show(exception.Message, "Error");
+
+                     continue;
+                  }
+               }
+               else
+               {
+                  filePathFromIndexedFolder = _directoryManager.CopyFileKeepingFolders(path, targetPath);
+               }
+
+               if (string.IsNullOrEmpty(filePathFromIndexedFolder))
+               {
+                  MessageBox.Show("Creating operation is canceled. Action-Block already exists from path: " + path, "Warning");
+
+                  continue;
+               }
+
+               _actionBlockController.CreateActionBlockByPath(filePathFromIndexedFolder);
+            }
+
+            OnActionBlocksCreated();
+            _loaderFullscreenService.Hide();
          }
       }
       else if (dialogResult == DialogResult.No) {
-         _loaderFullscreenService.Show();
+         StartCoroutine(CreateActionBlockByPathsNoFreeze());
 
-         foreach (string path in paths)
+         IEnumerator CreateActionBlockByPathsNoFreeze()
          {
-            _actionBlockController.CreateActionBlockByPath(path);
+            _loaderFullscreenService.Show();
+            
+            foreach (string path in paths)
+            {
+               yield return null;
+
+               _actionBlockController.CreateActionBlockByPath(path);
+            }
+
+            OnActionBlocksCreated();
+
+            _loaderFullscreenService.Hide();
          }
       }
       else if (dialogResult == DialogResult.Cancel) {
          return;
       }
 
-      _actionBlockController.SetActionBlocksToShow();
-      _actionBlockController.RefreshActionBlocksOnPage();
-      _loaderFullscreenService.Hide();
-
+      void OnActionBlocksCreated()
+      { 
+         _actionBlockController.SetActionBlocksToShow();
+         _actionBlockController.RefreshActionBlocksOnPage();
+      }
    }
 }

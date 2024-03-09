@@ -175,7 +175,7 @@ public class ActionBlockController : MonoBehaviour
     public bool CreateActionBlockByPath(string path, bool isShowError = true)
     {
         ActionBlockModel.ActionBlock actionBlock = GetActionBlockObject(path);
-
+        
         CreateActionBlock(actionBlock, isShowError);
 
         return true;
@@ -622,13 +622,14 @@ public class ActionBlockController : MonoBehaviour
     private ActionBlockModel.ActionBlock GetActionBlockObject(string path)
     {
         NounNumber nounNumber = new NounNumber();
-
         UserSettings settings = new UserSettings();
+        SettingsData settingsData = settings.GetSettings();
+        
         List<string> tags = new List<string>();
         string fileName = Path.GetFileNameWithoutExtension(path);
         string[] foldersOfPath = path.Split('\\');
         string titleActionBlock = fileName;
-        SettingsData settingsData = settings.GetSettings();
+        path = path.Replace("//", "/");
 
         AddSingularizedWordsOfPhraseToTags(fileName);
                 

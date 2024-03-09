@@ -14,9 +14,22 @@ public class LoaderFullscreenService : MonoBehaviour
         _view.SetText(newText);
     }
 
+    public void ShowDuringActionInProgress(Action actionDuringLoading, Action onCancel = null)
+    {
+        if (onCancel != null) {
+            _view.ShowCancelButton();
+            OnCancel(onCancel);
+        }
+        else
+        {
+            _view.HideCancelButton();
+        }
+        
+        _view.ShowDuringActionInProgress(actionDuringLoading);
+    }
+
     public void Show(Action onCancel = null)
     {
-        print("Show");
         _isToShow = true;
 
         if (onCancel != null) {
@@ -28,7 +41,9 @@ public class LoaderFullscreenService : MonoBehaviour
             _view.HideCancelButton();
         }
 
-        StartCoroutine(ShowLoaderullscreen());
+        _view.Show();
+
+        // StartCoroutine(ShowLoaderullscreen());
 
         IEnumerator ShowLoaderullscreen()
         {
@@ -45,10 +60,10 @@ public class LoaderFullscreenService : MonoBehaviour
 
     public void Hide()
     {
-        print("Hide");
         _isToShow = false;
+        _view.Hide();
 
-        StartCoroutine(HideLoaderullscreen());
+        // StartCoroutine(HideLoaderullscreen());
 
         IEnumerator HideLoaderullscreen()
         {
