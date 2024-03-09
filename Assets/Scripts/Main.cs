@@ -19,6 +19,8 @@ public class Main : MonoBehaviour
         _dragAndDropController.Init();
         _searchController.Init();
         _actionBlockController.Init();
+
+        _actionBlockController.CreateActionBlockByPath(@"D:\Projects\Unity\TypewriterEffectForText-Unity-main.zip");
     }
 
     // void Update()

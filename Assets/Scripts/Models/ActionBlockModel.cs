@@ -610,15 +610,12 @@ public class ActionBlockModel : MonoBehaviour
             
         // Add tags from title words.
         AddTitleToTag();
-        AddTitleWithoutSpecialSymbolsToTag();
-        AddTitleWithSplitedCamelCaseToTag();
+        AddTitleWithoutSpecialSymbolsAndSplitedCamelCaseToTag();
         
         void AddTitleToTag()
         {
             foreach (var tag in tags)
             {
-                print(tag);
-
                 if (tag == actionBlock.Title)
                 {
                     return;
@@ -628,45 +625,26 @@ public class ActionBlockModel : MonoBehaviour
             tags.Add(actionBlock.Title);
         }
 
-        void AddTitleWithoutSpecialSymbolsToTag()
+        void AddTitleWithoutSpecialSymbolsAndSplitedCamelCaseToTag()
         {
-            string titleWithoutSpecialSymbols = _stringManager.GetTextWithoutSpecialSymbols(titleLowerCase);
+            string titleWithSplitedCamelCase = _stringManager.SplitCamelCase(actionBlock.Title);
+            string titleWithoutSpecialSymbolsAndWithSplitedCamelCase = _stringManager.GetTextWithoutSpecialSymbols(titleWithSplitedCamelCase);
 
-            if (string.Equals(titleLowerCase, titleWithoutSpecialSymbols))
+            if (string.Equals(titleLowerCase, titleWithoutSpecialSymbolsAndWithSplitedCamelCase))
             {
                 return;
             }
 
             foreach (var tag in tags)
             {
-                if (tag == titleWithoutSpecialSymbols)
+                if (tag == titleWithoutSpecialSymbolsAndWithSplitedCamelCase)
                 {
                     // Tag as the title without spec symbols exists.
                     return;
                 }
             }
             
-            tags.Add(titleWithoutSpecialSymbols);
-        }
-
-        void AddTitleWithSplitedCamelCaseToTag()
-        {
-            string titleWithSplitedCamelCase = _stringManager.SplitCamelCase(actionBlock.Title);
-
-            if (string.Equals(titleLowerCase, titleWithSplitedCamelCase))
-            {
-                return;
-            }
-
-            foreach (var tag in tags)
-            {
-                if (tag == titleWithSplitedCamelCase)
-                {
-                    return;
-                }
-            }
-            
-            tags.Add(titleWithSplitedCamelCase);
+            tags.Add(titleWithoutSpecialSymbolsAndWithSplitedCamelCase);
         }
 
         return tags;
