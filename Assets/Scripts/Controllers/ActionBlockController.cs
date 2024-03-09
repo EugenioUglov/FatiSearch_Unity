@@ -629,7 +629,7 @@ public class ActionBlockController : MonoBehaviour
         string fileName = Path.GetFileNameWithoutExtension(path);
         string[] foldersOfPath = path.Split('\\');
         string titleActionBlock = fileName;
-        path = path.Replace("//", "/");
+        path = path.Replace(@"\\", @"\");
 
         AddSingularizedWordsOfPhraseToTags(fileName);
                 
