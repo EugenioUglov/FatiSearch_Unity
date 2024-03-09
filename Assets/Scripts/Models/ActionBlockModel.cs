@@ -606,25 +606,21 @@ public class ActionBlockModel : MonoBehaviour
     private List<string> GetTagsWithActionBlockTitle(string originalTitle, ActionBlock actionBlock)
     {
         string titleLowerCase = actionBlock.Title.ToLower();
-        string titleWithoutSpecialSymbols = _stringManager.GetTextWithoutSpecialSymbols(actionBlock.Title.ToLower());
-        string titleWithoutSpecialSymbolsAndSplitedCamelCase = _stringManager.SplitCamelCase(titleWithoutSpecialSymbols);
         List<string> tags = actionBlock.Tags;
             
         // Add tags from title words.
         AddTitleToTag();
-
-        if (string.Equals(titleLowerCase, titleWithoutSpecialSymbolsAndSplitedCamelCase) == false)
-        {
-            AddTitleWithoutSpecialSymbolsToTag();
-        }
+        AddTitleWithoutSpecialSymbolsToTag();
+        AddTitleWithSplitedCamelCaseToTag();
         
         void AddTitleToTag()
         {
             foreach (var tag in tags)
             {
+                print(tag);
+
                 if (tag == actionBlock.Title)
                 {
-                    print("Tag already exists " + actionBlock.Title);
                     return;
                 }
             }
@@ -634,16 +630,43 @@ public class ActionBlockModel : MonoBehaviour
 
         void AddTitleWithoutSpecialSymbolsToTag()
         {
+            string titleWithoutSpecialSymbols = _stringManager.GetTextWithoutSpecialSymbols(titleLowerCase);
+
+            if (string.Equals(titleLowerCase, titleWithoutSpecialSymbols))
+            {
+                return;
+            }
+
             foreach (var tag in tags)
             {
-                if (tag == titleWithoutSpecialSymbolsAndSplitedCamelCase)
+                if (tag == titleWithoutSpecialSymbols)
                 {
                     // Tag as the title without spec symbols exists.
                     return;
                 }
             }
             
-            tags.Add(titleWithoutSpecialSymbolsAndSplitedCamelCase);
+            tags.Add(titleWithoutSpecialSymbols);
+        }
+
+        void AddTitleWithSplitedCamelCaseToTag()
+        {
+            string titleWithSplitedCamelCase = _stringManager.SplitCamelCase(actionBlock.Title);
+
+            if (string.Equals(titleLowerCase, titleWithSplitedCamelCase))
+            {
+                return;
+            }
+
+            foreach (var tag in tags)
+            {
+                if (tag == titleWithSplitedCamelCase)
+                {
+                    return;
+                }
+            }
+            
+            tags.Add(titleWithSplitedCamelCase);
         }
 
         return tags;

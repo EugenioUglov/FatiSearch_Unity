@@ -727,7 +727,7 @@ public class ActionBlockController : MonoBehaviour
             // Add to tags folder names from path of a file.
             
             tags.Add(foldersOfPath[i]);
-            AddSingularizedWordsOfPhraseToTags(foldersOfPath[i]);
+            // AddSingularizedWordsOfPhraseToTags(foldersOfPath[i]);
 
             if (Convert.ToBoolean(settingsData.IsDirectoryInTitle)) 
             {
