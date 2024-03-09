@@ -139,6 +139,15 @@ public class ActionBlockController : MonoBehaviour
 
     public bool CreateActionBlock(ActionBlockModel.ActionBlock actionBlock, bool isShowError = true)
     {
+        // If path includes project path then start path from "\".
+        string projectPath = Directory.GetCurrentDirectory();
+
+        if (actionBlock.Content.Contains(projectPath))
+        { 
+            actionBlock.Content = actionBlock.Content.Replace(projectPath + @"\","");
+        }
+        //
+
         bool isCreated = _model.CreateActionBlock(actionBlock, isShowError);
         _model.SaveToFile();
         RefreshView();
