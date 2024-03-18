@@ -15,9 +15,9 @@ public class UserSettings : MonoBehaviour
 
     public SettingsData GetSettings()
     {
-        FileController fileController = new FileController();
+        FileStreamManager fileStreamManager = new FileStreamManager();
         SettingsData settingsFromFile = new SettingsData();
-        string settingsJSONFromFile = fileController.GetContentFromFile(_settingsFilePath);
+        string settingsJSONFromFile = fileStreamManager.GetContentFromFile(_settingsFilePath);
 
         if (string.IsNullOrEmpty(settingsJSONFromFile) == false)
         {
@@ -39,6 +39,7 @@ public class UserSettings : MonoBehaviour
     public void ApplySettings() 
     {
         SettingsData settingsData = GetSettings();
+
         if (settingsData.Theme == "light")
         {
             Camera.main.backgroundColor = new Color32(180, 180, 180, 225);

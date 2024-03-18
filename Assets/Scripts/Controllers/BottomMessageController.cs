@@ -9,6 +9,7 @@ public class BottomMessageController : MonoBehaviour
     private Queue<string> _queueOfMessages = new Queue<string>();
     private bool _isActive = false;
 
+
     public void Show(string text)
     {
         if (_isActive)

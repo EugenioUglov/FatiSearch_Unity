@@ -1,5 +1,5 @@
+using System;
 using System.Text.RegularExpressions;
-
 
 public class StringManager
 {
@@ -23,6 +23,22 @@ public class StringManager
 
     public string SplitCamelCase(string input)
     {
-        return System.Text.RegularExpressions.Regex.Replace(input, "([A-Z])", " $1", System.Text.RegularExpressions.RegexOptions.Compiled).Trim();
+        if (IsAllUpper(input))
+        {
+            return input;
+        }
+
+        bool IsAllUpper(string input)
+        {
+            for (int i = 0; i < input.Length; i++)
+            {
+                if (Char.IsLetter(input[i]) && !Char.IsUpper(input[i]))
+                    return false;
+            }
+            return true;
+        }
+
+
+        return Regex.Replace(input, "([A-Z])", " $1", RegexOptions.Compiled).Trim();
     }
 }

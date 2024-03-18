@@ -12,6 +12,7 @@ using System.Windows.Forms;
 public class ActionBlockModel : MonoBehaviour
 {
     [SerializeField] private AlertController _alertController;
+    [SerializeField] private DialogMessageService _dialogMessageService;
     
     public static class ActionEnum
     {
@@ -36,8 +37,6 @@ public class ActionBlockModel : MonoBehaviour
 
     }
     
-    [Header("Links")] 
-    [SerializeField] private FileController _fileController;
 
     private bool _isCanceled = false;
     private string _actionBlocksFilePath = @"Admin\Action-Blocks.json";
@@ -46,7 +45,7 @@ public class ActionBlockModel : MonoBehaviour
     private OrderedDictionary _actionBlockByTitle = new OrderedDictionary();
     private Dictionary<string, HashSet<ActionBlock>> _actionBlocksByTag = new Dictionary<string, HashSet<ActionBlock>>();
     private StringManager _stringManager = new StringManager();
-
+    private FileStreamManager _fileStreamManager = new FileStreamManager();
 
     public struct ActionBlock
     {
@@ -93,7 +92,7 @@ public class ActionBlockModel : MonoBehaviour
         }
         catch
         {
-            Debug.Log("ActionBlock by title \"" + titleLowerCase + "\" is not found");
+            // Debug.Log("ActionBlock by title \"" + titleLowerCase + "\" is not found");
         }
 
         return actionBlock;
@@ -232,10 +231,71 @@ public class ActionBlockModel : MonoBehaviour
     //     return actionBlocksToShow.ToArray().Reverse().ToArray(); 
     // }
 
+    public ActionBlock GetActionBlockObjectByPath(string path)
+    {
+        List<string> tags = new List<string>();
+        UserSettings settings = new UserSettings();
+
+        SettingsData settingsData = settings.GetSettings();
+        string fileName = Path.GetFileNameWithoutExtension(path);
+        string[] foldersOfPath = path.Split('\\');
+        string titleActionBlock = fileName;
+        path = path.Replace(@"\\", @"\");
+
+
+        AddDirectoryFoldersToTags();
+        
+        ActionBlock actionBlock = 
+        new ActionBlock(titleActionBlock, ActionEnum.OpenPath, 
+            path, tags);
+
+        tags.Concat(GetTagsWithActionBlockTitle(actionBlock));
+        tags = GetNormalizedTags(tags);
+        actionBlock.Tags = tags;
+
+
+        if (Convert.ToBoolean(settingsData.IsDirectoryInTitle))
+        {
+            actionBlock.Title = AddDirectoryToActionBlockTitle(titleActionBlock, foldersOfPath);
+        }
+
+        void AddDirectoryFoldersToTags()
+        {
+            for (int i = 0; i < foldersOfPath.Length - 1; i++)
+            {
+                // Add to tags folder names from path of a file.
+                
+                tags.Add(foldersOfPath[i]);
+            }
+        }
+
+        string AddDirectoryToActionBlockTitle(string titleActionBlock, string[] foldersOfPath)
+        {
+            titleActionBlock += " (";
+
+            for (int i = 0; i < foldersOfPath.Length - 1; i++)
+            {
+                if (i > 0)
+                {
+                    titleActionBlock += "\\";
+                }
+
+                titleActionBlock += foldersOfPath[i];
+            }
+
+            titleActionBlock += ")";
+
+            return titleActionBlock;
+        }
+
+
+        return actionBlock;
+    }
+
     public ActionBlock[] GetActionBlocksFromFile()
     {
         ActionBlock[] actionBlocksFromFile = new ActionBlock[]{};
-        string actionBlocksJSONFromFile = _fileController.GetContentFromFile(_actionBlocksFilePath);
+        string actionBlocksJSONFromFile = _fileStreamManager.GetContentFromFile(_actionBlocksFilePath);
 
         if (string.IsNullOrEmpty(actionBlocksJSONFromFile) == false)
         {
@@ -259,7 +319,7 @@ public class ActionBlockModel : MonoBehaviour
         string filePath = @"Admin\DirectoriesForAutoCreationActionBlocks.json";
 
         string[] directoriesFromFile = new string[]{};
-        string directoriesJSONFromFile = _fileController.GetContentFromFile(filePath);
+        string directoriesJSONFromFile = _fileStreamManager.GetContentFromFile(filePath);
 
         if (string.IsNullOrEmpty(directoriesJSONFromFile) == false)
         {
@@ -301,10 +361,8 @@ public class ActionBlockModel : MonoBehaviour
         return titlesActionBlocks;
     }
 
-    public bool CreateActionBlock(ActionBlock actionBlock, bool isShowError = true)
+    public bool CreateActionBlock(ActionBlock actionBlock, bool isShowError = true, bool isAddTagsAutomatically = true)
     {
-        OnStartChangeActionBlocksVariables();
-
         string titleForActionBlock = actionBlock.Title;
 
         if (IsActionBlockValidToAdd(actionBlock, isShowError) == false)
@@ -341,12 +399,15 @@ public class ActionBlockModel : MonoBehaviour
             }
         }
 
-
-
         ActionBlock actionBlockToCreate = actionBlock;
+
+        if (isAddTagsAutomatically)
+        {
+            actionBlockToCreate.Tags = GetTagsWithActionBlockTitle(actionBlockToCreate);
+            actionBlockToCreate.Tags = GetNormalizedTags(actionBlockToCreate.Tags);
+        }
+        
         actionBlockToCreate.Title = titleForActionBlock;
-        actionBlockToCreate.Tags = GetTagsWithActionBlockTitle(titleForActionBlock, actionBlockToCreate);
-        actionBlockToCreate.Tags = GetNormalizedTags(actionBlockToCreate.Tags);
 
         if (string.IsNullOrEmpty(actionBlock.ImagePath))
         {
@@ -400,12 +461,6 @@ public class ActionBlockModel : MonoBehaviour
             return "";
         }
 
-        bool IsValidUrl(string url)
-        {
-            string pattern = @"^(https?|ftp)://[^\s/$.?#].[^\s]*$";
-            Regex regex = new Regex(pattern, RegexOptions.IgnoreCase);
-            return regex.IsMatch(url);
-        }
 
         return true;
     }
@@ -414,7 +469,6 @@ public class ActionBlockModel : MonoBehaviour
     {
         foreach (ActionBlock actionBlock in actionBlocks)
         {
-            print(actionBlock.Title);
             OnStartChangeActionBlocksVariables();
             string titleLowerCase = actionBlock.Title.ToLower();
 
@@ -452,9 +506,9 @@ public class ActionBlockModel : MonoBehaviour
             }
             
             ActionBlock actionBlockToCreate = actionBlock;
-            actionBlockToCreate.Title = titleForActionBlock;
-            actionBlockToCreate.Tags = GetTagsWithActionBlockTitle(titleForActionBlock, actionBlockToCreate);
+            actionBlockToCreate.Tags = GetTagsWithActionBlockTitle(actionBlockToCreate);
             actionBlockToCreate.Tags = GetNormalizedTags(actionBlockToCreate.Tags);
+            actionBlockToCreate.Title = titleForActionBlock;
             AddActionBlockToVariables(actionBlockToCreate);
 
             onActionBlockProcessedCallback?.Invoke();
@@ -497,7 +551,7 @@ public class ActionBlockModel : MonoBehaviour
 
         if (string.Equals(originalTitle, actionBlock.Title) == false)
         {
-            actionBlock.Tags = GetTagsWithActionBlockTitle(originalTitleLowerCase, actionBlock);
+            actionBlock.Tags = GetTagsWithActionBlockTitle(actionBlock);
         }
         actionBlock.Tags = GetNormalizedTags(actionBlock.Tags);
         _actionBlockByTitle.Remove(originalTitleLowerCase);
@@ -507,45 +561,46 @@ public class ActionBlockModel : MonoBehaviour
         return true;
     }
 
-    public void DeleteActionBlock(ActionBlock actionBlock)
+    public void DeleteActionBlock(ActionBlock actionBlock, Action onDone = null)
     {
-        DialogResult dialogResult = MessageBox.Show("Do you want to delete also the original file?", "Confirmation", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Information);
+        _dialogMessageService.ShowMessage("Do you want to delete also the original file?", "Confirmation", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Information, onClickButton: (dialogResult) => {
+            DirectoryManager directoryManager = new DirectoryManager();
 
-        DirectoryManager directoryManager = new DirectoryManager();
-
-        if (dialogResult == DialogResult.Yes) {
-            try {
-                directoryManager.DeleteByPath(actionBlock.Content);
-            } catch (IOException ioExp) {
-                MessageBox.Show(ioExp.Message, "Error.");
+            if (dialogResult == DialogResult.Yes) {
+                try {
+                    directoryManager.DeleteByPath(actionBlock.Content);
+                } catch (IOException ioExp) {
+                    _dialogMessageService.ShowMessage(ioExp.Message, "Error.");
+                }
             }
-        }
-        else if (dialogResult == DialogResult.Cancel) {
-            return;
-        }
+            else if (dialogResult == DialogResult.Cancel) {
+                onDone?.Invoke();
+            }
 
-        
-        OnStartChangeActionBlocksVariables();
+            
+            // int isFromIndexedFilesFolder = actionBlock.Content.IndexOf("Admin\\IndexedFiles");
 
-        // int isFromIndexedFilesFolder = actionBlock.Content.IndexOf("Admin\\IndexedFiles");
+            // if (isFromIndexedFilesFolder >= 0)
+            // {
+            //     try {
+            //         // Check if file exists with its full path
+            //         if (File.Exists(actionBlock.Content)) 
+            //         {
+            //             // If file found, delete it
+            //             File.Delete(actionBlock.Content);
+            //             Console.WriteLine("File deleted.");
+            //         } else Console.WriteLine("File not found");
+            //     } catch (IOException ioExp) {
+            //         Console.WriteLine(ioExp.Message);
+            //     }
+            // }
+            
+            _actionBlockByTitle.Remove(actionBlock.Title.ToLower());
+            UpdateIndexActionBlockByTags();
+            onDone?.Invoke();
+        });
 
-        // if (isFromIndexedFilesFolder >= 0)
-        // {
-        //     try {
-        //         // Check if file exists with its full path
-        //         if (File.Exists(actionBlock.Content)) 
-        //         {
-        //             // If file found, delete it
-        //             File.Delete(actionBlock.Content);
-        //             Console.WriteLine("File deleted.");
-        //         } else Console.WriteLine("File not found");
-        //     } catch (IOException ioExp) {
-        //         Console.WriteLine(ioExp.Message);
-        //     }
-        // }
-        
-        _actionBlockByTitle.Remove(actionBlock.Title.ToLower());
-        UpdateIndexActionBlockByTags();
+   
     }
 
     public void DeleteAllActionBlocks()
@@ -599,22 +654,22 @@ public class ActionBlockModel : MonoBehaviour
     {
         ActionBlock[] actionBlocks = GetActionBlocks().ToArray();
         string actionBlocksJSON = JsonConvert.SerializeObject(actionBlocks);
-        _fileController.Save(_actionBlocksFilePath, actionBlocksJSON);
+        _fileStreamManager.Save(_actionBlocksFilePath, actionBlocksJSON);
     }
 
 
-    private List<string> GetTagsWithActionBlockTitle(string originalTitle, ActionBlock actionBlock)
+    private List<string> GetTagsWithActionBlockTitle(ActionBlock actionBlock)
     {
         string titleLowerCase = actionBlock.Title.ToLower();
         List<string> tags = actionBlock.Tags;
             
         // Add tags from title words.
         AddTitleToTag();
-        AddTitleWithoutSpecialSymbolsAndSplitedCamelCaseToTag();
+        // AddTitleWithoutSpecialSymbolsAndSplitedCamelCaseToTag();
         
         void AddTitleToTag()
         {
-            foreach (var tag in tags)
+            foreach (string tag in tags)
             {
                 if (tag == actionBlock.Title)
                 {
@@ -670,6 +725,26 @@ public class ActionBlockModel : MonoBehaviour
             }
         }
 
+        AddTagsWithoutSpecialSymbolsAndWithSplitedCamelCase();
+
+        void AddTagsWithoutSpecialSymbolsAndWithSplitedCamelCase()
+        { 
+            foreach (string tag in tags)
+            {
+                string tagWithSplitedCamelCase = _stringManager.SplitCamelCase(tag);
+
+                string tagWithoutSpecialSymbolsAndWithSplitedCamelCase = _stringManager.GetTextWithoutSpecialSymbols(tagWithSplitedCamelCase);
+
+                if (tag == tagWithoutSpecialSymbolsAndWithSplitedCamelCase)
+                {
+                    // Tag as the title without spec symbols exists.
+                    continue;
+                }
+
+                normalizedTags.Add(tagWithoutSpecialSymbolsAndWithSplitedCamelCase);
+            }
+        }
+
         return normalizedTags;
     }
 
@@ -696,7 +771,7 @@ public class ActionBlockModel : MonoBehaviour
 
         CreateFolderIfMissing(_backupFolderPath);
         
-        _fileController.Save(_backupFolderPath + "/" + "Action-Blocks_" + 
+        _fileStreamManager.Save(_backupFolderPath + "/" + "Action-Blocks_" + 
                              DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".json", 
             actionBlocksJSON);
     }

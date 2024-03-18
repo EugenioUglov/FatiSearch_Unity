@@ -14,7 +14,8 @@ namespace Views
 
         private TMP_InputField _inputFieldTMP;
         private int lastCaretPosition = 0;
-            
+        
+        
         private void Awake()
         {
             _inputFieldTMP = _inputFieldGO.GetComponent<TMP_InputField>();

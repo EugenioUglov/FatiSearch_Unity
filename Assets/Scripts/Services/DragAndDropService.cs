@@ -5,7 +5,6 @@ using B83.Win32;
 
 public class DragAndDropService : MonoBehaviour
 {
-    List<string> log = new List<string>();
     public Action<string[]> CallbackGetDroppedFilesPaths;
     
     void OnEnable()
@@ -28,18 +27,5 @@ public class DragAndDropService : MonoBehaviour
         // mouse position within the window where the files has been dropped.
         //string str = "Dropped " + aFiles.Count + " files at: " + aPos + "\n\t" +
         //            aFiles.Aggregate((a, b) => a + "\n\t" + b);
-
-
-        //Debug.Log(str);
-        //log.Add(str);
-
-    }
-
-    private void OnGUI()
-    {
-        if (GUILayout.Button("clear log"))
-            log.Clear();
-        foreach (var s in log)
-            GUILayout.Label(s);
     }
 }

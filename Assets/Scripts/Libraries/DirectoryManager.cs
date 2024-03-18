@@ -4,6 +4,9 @@ using UnityEngine;
 using System.IO;
 using System.Diagnostics;
 using System;
+using System.Threading.Tasks;
+using System.Threading;
+using PimDeWitte.UnityMainThreadDispatcher;
 
 public class DirectoryManager : MonoBehaviour
 {
@@ -144,7 +147,7 @@ public class DirectoryManager : MonoBehaviour
     /// <param name="fileToCopy"></param>
     /// <param name="targetDirectory"></param>
     /// <returns></returns>
-    public string CopyFileKeepingFolders(string fileToCopy, string targetDirectory)
+    public void CopyFileKeepingFoldersAsync(string fileToCopy, string targetDirectory, Action<string> onDone, Action<string> onFail)
     {
         string directoryOfFileToCopy = Path.GetDirectoryName(fileToCopy);
         string fileNameToCopy = Path.GetFileName(fileToCopy);
@@ -163,8 +166,9 @@ public class DirectoryManager : MonoBehaviour
 
         if (File.Exists(targetFilePath))
         {
-            print("File already exists: " + targetFilePath);
-            return "";
+            // print("File already exists: " + targetFilePath);
+            onFail("File already exists: " + targetFilePath);
+            return;
         }
         else 
         {
@@ -172,32 +176,71 @@ public class DirectoryManager : MonoBehaviour
         }
 
         CreateDirectoryIfNotExist(targetDirectory);
-        File.Copy(fileToCopy, targetFilePath);
+
+        Task task = Task.Run(async () => await CopyFileAsync(
+            fileToCopy, 
+            targetFilePath, 
+            onDone: (message) => {
+                UnityMainThreadDispatcher.Instance().Enqueue(() => { onDone(targetFilePath); });
+            }
+        ));
+
+        async Task CopyFileAsync(string fileToCopy, string targetFilePath, Action<string> onDone)
+        {
+            // Create a CancellationTokenSource to facilitate cancellation
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+            
+            // Cancel the file move operation
+            // cancellationTokenSource.Cancel();
+
+            // Start the file move operation in a separate task
+            Task moveTask = Task.Run(() =>
+            {
+                if (cancellationTokenSource.Token.IsCancellationRequested) return;
+                
+                try
+                {
+                    File.Copy(fileToCopy, targetFilePath);
+                    onDone("File moved successfully.");
+                }
+                catch (Exception ex)
+                {
+                    onDone($"Error occurred: {ex.Message}");
+                }
+            });
+
+            print("after task run");
+
+            await moveTask;
+
+            print("File move process stopped.");
+        }
 
         void CreateDirectoryIfNotExist(string directory)
         {
-        try
-        {
-            // Determine whether the directory exists.
-            if (Directory.Exists(directory))
+            try
             {
+                // Determine whether the directory exists.
+                if (Directory.Exists(directory))
+                {
 
+                }
+                else 
+                {
+                    // Try to create the directory.
+                    DirectoryInfo di = Directory.CreateDirectory(directory);
+                    Console.WriteLine("The directory was created successfully at {0}.", Directory.GetCreationTime(directory));
+                }
             }
-            else 
+            catch (Exception e)
             {
-                // Try to create the directory.
-                DirectoryInfo di = Directory.CreateDirectory(directory);
-                Console.WriteLine("The directory was created successfully at {0}.", Directory.GetCreationTime(directory));
+                Console.WriteLine("The process failed: {0}", e.ToString());
             }
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine("The process failed: {0}", e.ToString());
-        }
-        finally {}
+            finally {}
         }
 
-        return targetFilePath;
+        // return targetFilePath;
     }
 
     // !!! Not working well. Infinite loading.
@@ -226,14 +269,14 @@ public class DirectoryManager : MonoBehaviour
             file.Delete(); 
         }
     }
-        
+
     /// <summary>
     /// Copy folder by path (sourcePath) to another directory (targetPath). If current folder already exists in destination directory then throw exception.
     /// </summary>
     /// <param name="sourcePath"></param>
     /// <param name="targetPath"></param>
     /// <returns>Target path of copied folder</returns>
-    public string CopyFolder(string sourcePath, string targetPath)
+    public void CopyFolderAsync(string sourcePath, string targetPath, Action<string> onDone)
     {
         DirectoryInfo pathInfo = new DirectoryInfo(sourcePath);
         string folderName = pathInfo.Name;
@@ -261,25 +304,72 @@ public class DirectoryManager : MonoBehaviour
                 DirectoryInfo createdDirectory = Directory.CreateDirectory(destFolder);
             }
 
-            string[] files = Directory.GetFiles(sourceFolder);
-            foreach (string file in files)
-            {
-                string name = Path.GetFileName(file);
-                string dest = Path.Combine(destFolder, name);
-                File.Copy(file, dest);
-            }
+            Task task = Task.Run(async () => await CopyFolderFilesAsync(
+                sourceFolder, 
+                destFolder, 
+                onDone: (messages) => {
+                    foreach (string message in messages)
+                    {
+                        print(message);
+                    }
 
-            string[] folders = Directory.GetDirectories(sourceFolder);
-            
-            foreach (string folder in folders)
-            {
-                string name = Path.GetFileName(folder);
-                string dest = Path.Combine(destFolder, name);
-                CopyFolderRecoursively(folder, dest);
-            }
+                    string[] folders = Directory.GetDirectories(sourceFolder);
+                
+                    foreach (string folder in folders)
+                    {
+                        string name = Path.GetFileName(folder);
+                        string dest = Path.Combine(destFolder, name);
+                        CopyFolderRecoursively(folder, dest);
+                    }
+
+                    UnityMainThreadDispatcher.Instance().Enqueue(() => { onDone(targetPathWithSourceFolderName); });
+                }
+            ));
         }
 
-        return targetPathWithSourceFolderName;
+        async Task CopyFolderFilesAsync(string sourceFolder, string destFolder, Action<List<string>> onDone)
+        {
+            List<string> messages = new List<string>();
+
+            // Create a CancellationTokenSource to facilitate cancellation
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+            
+            // Cancel the file move operation
+            // cancellationTokenSource.Cancel();
+
+            // Start the file move operation in a separate task
+            Task moveTask = Task.Run(() =>
+            {
+                if (cancellationTokenSource.Token.IsCancellationRequested) return;
+                
+                string[] files = Directory.GetFiles(sourceFolder);
+
+                foreach (string file in files)
+                {
+                    string name = Path.GetFileName(file);
+                    string dest = Path.Combine(destFolder, name);
+                    
+                    try
+                    {
+                        File.Copy(file, dest);
+                        messages.Add($"File \"{file}\" moved successfully.");
+                    }
+                    catch (Exception ex)
+                    {
+                        messages.Add($"Error occurred for file \"{file}\": {ex.Message}");
+                    }
+                }
+            });
+
+            await moveTask;
+
+            onDone(messages);
+            
+            print("File move process stopped.");
+        }
+
+        // return targetPathWithSourceFolderName;
     }
 
     /// <summary>

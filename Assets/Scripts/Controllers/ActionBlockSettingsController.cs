@@ -17,6 +17,7 @@ public class ActionBlockSettingsController : MonoBehaviour
     
     [Header("Links")]
     [SerializeField] private ActionBlockController _actionBlockController;
+    [SerializeField] private ActionBlockService _actionBlockService;
     [SerializeField] private PageService _pageService;
     [SerializeField] private SearchController _searchController;
     [SerializeField] private AlertController _alertController;
@@ -31,8 +32,7 @@ public class ActionBlockSettingsController : MonoBehaviour
     
     
     public void OnClickButtonClose()
-    {        
-        print("Page: " + _pageService.PageState);
+    {
         if (_pageService.PageState == PageService.PageStateEnum.ActionBlockModifier)
         {
             SetDefaultFields();
@@ -116,12 +116,12 @@ public class ActionBlockSettingsController : MonoBehaviour
 
         if (_pageService.PageState == PageService.PageStateEnum.ActionBlockCreator)
         {
-            bool isCreated = _actionBlockController.CreateActionBlock(actionBlock);
+            bool isCreated = _actionBlockService.CreateActionBlock(actionBlock);
             if (isCreated == false) return;
         }
         else if (_pageService.PageState == PageService.PageStateEnum.ActionBlockModifier)
         {
-            bool isUpdated = _actionBlockController.UpdateActionBlock(OriginalTitle, actionBlock);
+            bool isUpdated = _actionBlockService.UpdateActionBlock(OriginalTitle, actionBlock);
             if (isUpdated == false) return;
                 
             HideDeleteButton();
@@ -132,12 +132,13 @@ public class ActionBlockSettingsController : MonoBehaviour
     
     public void OnClickButtonDelete()
     {
-        _actionBlockController.DeleteActionBlock(originalActionBlock);
-        _deleteButton.SetActive(false);
-        
-        HidePage();
-        //_searchController.ShowPage();
-        SetDefaultFields();
+        _actionBlockService.DeleteActionBlock(originalActionBlock, onDone: () => { 
+            _deleteButton.SetActive(false);
+            
+            HidePage();
+            //_searchController.ShowPage();
+            SetDefaultFields();
+        });
     }
     
 

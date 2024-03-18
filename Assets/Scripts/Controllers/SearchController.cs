@@ -8,6 +8,7 @@ namespace Controllers
         [SerializeField] private SearchView _view;
         [SerializeField] private PageService _pageService;
 
+
         private void Awake()
         {
             EventAggregator.AddListener<KeyClickedEvent>(this, OnKeyClicked);
@@ -30,6 +31,7 @@ namespace Controllers
                 }
             }
         }
+        
 
         public void FocusInputField()
         {
@@ -57,7 +59,6 @@ namespace Controllers
         {
             OnEnterInputField();
         }
-
 
         public void ShowPage()
         {

@@ -2,14 +2,20 @@ using System;
 using TMPro;
 using UnityEngine;
 
-public class LoaderFullscreenView : MonoBehaviour
+public class MessageFullscreenView : MonoBehaviour
 {
-    [SerializeField] private GameObject _loaderFullscreenGO;
+    [SerializeField] private GameObject _messageFullscreenGO;
+    [SerializeField] private TextMeshProUGUI _titleComponent;
     [SerializeField] private TextMeshProUGUI _textComponent;
     [SerializeField] private GameObject _cancelButton;
     
     private Action _onClickButtonCancel = null;
 
+
+    public void SetTitle(string newTitle)
+    {
+        _titleComponent.text = newTitle;
+    }
 
     public void SetText(string newText)
     {
@@ -21,15 +27,14 @@ public class LoaderFullscreenView : MonoBehaviour
         _onClickButtonCancel = newCancelHandler;
     }
 
-
     public void Show()
     {
-        _loaderFullscreenGO.SetActive(true);
+        _messageFullscreenGO.SetActive(true);
     }
 
     public void Hide()
     {
-        _loaderFullscreenGO.SetActive(false);
+        _messageFullscreenGO.SetActive(false);
     }
 
     public void OnClickButtonCancel()

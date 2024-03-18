@@ -1,14 +1,22 @@
 using UnityEngine;
 using System;
 
-public class LoaderFullscreenService : MonoBehaviour
+public class MessageFullscreenService : MonoBehaviour
 {
-    [SerializeField] private LoaderFullscreenView _view;
+    [SerializeField] private MessageFullscreenView _view;
+
+    public static class Title
+    {
+        public const string WaitingForResponse = "Waiting for response";
+        public const string Loading = "Loading";
+        public const string None = "";
+    }
 
 
-    public void Show(string text = "", Action onCancel = null)
+    public void Show(string text = "", string title = "", Action onCancel = null)
     {
         _view.SetText(text);
+        _view.SetTitle(title);
 
         if (onCancel != null) {
             _view.ShowCancelButton();

@@ -7,6 +7,7 @@ namespace Controllers
         [SerializeField] private PageService _pageService;
         [SerializeField] private SearchService _searchService;
         
+        
         void Update()
         {
             if (_pageService.PageState == PageService.PageStateEnum.SearchPage)
