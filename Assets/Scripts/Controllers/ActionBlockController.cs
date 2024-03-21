@@ -214,27 +214,34 @@ public class ActionBlockController : MonoBehaviour
         {
             ActionBlockModel.ActionBlock actionBlockByTitle = _model.GetActionBlockByTitle(userRequest);
             // Not async.
-            HashSet<ActionBlockModel.ActionBlock> actionBlocksByRequest = _model.GetActionBlocksByRequest(userRequest).ToHashSet(); 
+            // HashSet<ActionBlockModel.ActionBlock> actionBlocksByRequest = _model.GetActionBlocksByRequest(userRequest).ToHashSet();
 
-            if (string.IsNullOrEmpty(actionBlockByTitle.Title) == false)
+            _model.GetActionBlocksByRequestAsync(request: userRequest,
+            onGet: (actionBlocks) =>
             {
-                actionBlocksToShow.Add(actionBlockByTitle);
+                HashSet<ActionBlockModel.ActionBlock> actionBlocksByRequest = actionBlocks.ToHashSet();
 
-                foreach (var actionBlock in actionBlocksByRequest)
+                if (string.IsNullOrEmpty(actionBlockByTitle.Title) == false)
                 {
-                    if (actionBlockByTitle.Title == actionBlock.Title) continue;
-                    
-                    actionBlocksToShow.Add(actionBlock);
+                    actionBlocksToShow.Add(actionBlockByTitle);
+
+                    foreach (var actionBlock in actionBlocksByRequest)
+                    {
+                        if (actionBlockByTitle.Title == actionBlock.Title) continue;
+                        
+                        actionBlocksToShow.Add(actionBlock);
+                    }
                 }
-            }
-            else 
-            {
-                actionBlocksToShow = actionBlocksByRequest;
-            }
-            
-            _service.SetActionBlocksToShow(actionBlocksToShow);
-            _service.RefreshActionBlocksOnPage();
-            _view.DestroyLoadingText();
+                else 
+                {
+                    actionBlocksToShow = actionBlocksByRequest;
+                }
+                
+                _service.SetActionBlocksToShow(actionBlocksToShow);
+                _service.RefreshActionBlocksOnPage();
+                _view.DestroyLoadingText();
+            });
+           
             //
 
             // StartCoroutine(_model.GetActionBlocksByRequestAsync(

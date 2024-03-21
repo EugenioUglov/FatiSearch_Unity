@@ -339,7 +339,7 @@ public class DirectoryManager : MonoBehaviour
             // cancellationTokenSource.Cancel();
 
             // Start the file move operation in a separate task
-            Task moveTask = Task.Run(() =>
+            Task copyTask = Task.Run(() =>
             {
                 if (cancellationTokenSource.Token.IsCancellationRequested) return;
                 
@@ -362,7 +362,7 @@ public class DirectoryManager : MonoBehaviour
                 }
             });
 
-            await moveTask;
+            await copyTask;
 
             onDone(messages);
             

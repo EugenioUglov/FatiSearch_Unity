@@ -38,8 +38,13 @@ public class Main : MonoBehaviour
             _dragAndDropController.Init();
             _searchController.Init();
             _actionBlockController.Init();
-            _actionBlockService.Init();
+            _actionBlockService.Init(); 
             _messageFullscreenService.Hide();
+
+            // _actionBlockService.CreateActionBlockByPathAsync(@"D:\Fun\Games my data\Install\Lies of P.(.v.1.5.0.0.build.13450100).(2023) [Decepticon] RePack\game-2.bin", (actionBlock) => { 
+                // print(actionBlock.Title); 
+                
+            // });
 
             // string[] paths = {@"D:\Fun\Games my data\Install\Lies of P.(.v.1.5.0.0.build.13450100).(2023) [Decepticon] RePack\game-2.bin"};
             // _actionBlockService.CreateActionBlocksByPathsAsync(paths);

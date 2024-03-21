@@ -115,11 +115,9 @@ public class ActionBlockModel : MonoBehaviour
 
         return actionBlocksByTag;
     }
-    
+
     public ActionBlock[] GetActionBlocksByRequest(string request)
     {
-        // Search by tags.
-
         List<ActionBlock> actionBlocksToShow = new List<ActionBlock>();
 
         Dictionary<ActionBlock, int> priorityByActionBlock =
@@ -153,43 +151,50 @@ public class ActionBlockModel : MonoBehaviour
         return actionBlocksToShow.ToArray().Reverse().ToArray(); 
     }
 
-    public IEnumerator GetActionBlocksByRequestAsync(string request, Action<ActionBlock[]> onGet = null)
+    public void GetActionBlocksByRequestAsync(string request, Action<ActionBlock[]> onGet = null)
     {
-        // Search by tags.
+        StartCoroutine(GetActionBlocks());
 
-        List<ActionBlock> actionBlocksToShow = new List<ActionBlock>();
-
-        Dictionary<ActionBlock, int> priorityByActionBlock =
-            new Dictionary<ActionBlock, int>();
-
-        string[] tags = request.Split(' ');
-
-        foreach (string tag in tags)
+        IEnumerator GetActionBlocks()
         {
-            yield return null;
+            // Search by tags.
 
-            ActionBlock[] actionBlocksByTag = GetActionBlocksByTag(tag).ToArray().Reverse().ToArray();
+            List<ActionBlock> actionBlocksToShow = new List<ActionBlock>();
 
-            foreach (ActionBlock actionBlock in actionBlocksByTag)
+            Dictionary<ActionBlock, int> priorityByActionBlock =
+                new Dictionary<ActionBlock, int>();
+
+            string[] tags = request.Split(' ');
+
+            foreach (string tag in tags)
             {
-                if (priorityByActionBlock.ContainsKey(actionBlock))
+                yield return null;
+
+                ActionBlock[] actionBlocksByTag = GetActionBlocksByTag(tag).ToArray().Reverse().ToArray();
+
+                foreach (ActionBlock actionBlock in actionBlocksByTag)
                 {
-                    priorityByActionBlock[actionBlock] += 1;
-                }
-                else
-                {
-                    priorityByActionBlock[actionBlock] = 1;
+                    if (priorityByActionBlock.ContainsKey(actionBlock))
+                    {
+                        priorityByActionBlock[actionBlock] += 1;
+                    }
+                    else
+                    {
+                        priorityByActionBlock[actionBlock] = 1;
+                    }
                 }
             }
-        }
 
-        // Sort array from min priority value.
-        foreach (var pair in priorityByActionBlock.OrderBy(pair => pair.Value))
-        {
-            actionBlocksToShow.Add(pair.Key);
+            // Sort array from min priority value.
+            foreach (var pair in priorityByActionBlock.OrderBy(pair => pair.Value))
+            {
+                yield return null;
+
+                actionBlocksToShow.Add(pair.Key);
+            }
+
+            onGet(actionBlocksToShow.ToArray().Reverse().ToArray());
         }
-        
-        onGet(actionBlocksToShow.ToArray().Reverse().ToArray()); 
     }
 
     // public ActionBlock[] GetActionBlocksWithExactTagsByRequest(string request)
@@ -367,6 +372,7 @@ public class ActionBlockModel : MonoBehaviour
 
         if (IsActionBlockValidToAdd(actionBlock, isShowError) == false)
         {
+            print("not valid action block");
             return false;
         }
 
@@ -641,7 +647,6 @@ public class ActionBlockModel : MonoBehaviour
             onGetFile?.Invoke(file);
         }
         
-
         onEnd?.Invoke(files.ToArray());
     }
 

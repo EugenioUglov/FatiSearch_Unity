@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using System.Linq;
 using System.IO;
+using System.Threading.Tasks;
+using System.Threading;
 
 public class ActionBlockService : MonoBehaviour
 {
@@ -252,54 +254,32 @@ public class ActionBlockService : MonoBehaviour
 
         void GetSingularizedTagsAsync(string[] tags, Action<List<string>> onDone, Action onCancel)
         {
-            NounNumber nounNumber = new NounNumber();
-            List<string> singularizedTags = new List<string>();
-
             StartCoroutine(GetSingularizedTags());
 
             IEnumerator GetSingularizedTags()
-            { 
-                bool isCanceled = false;
+            {
+                // Create a CancellationTokenSource to facilitate cancellation
+                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
                 _messageFullscreenService.Show(
                     text: "Creating singularized tags. It can take a while...\nYou can skip this process by clicking \"Cancel\" button", 
                     title: MessageFullscreenService.Title.Loading,
-                    onCancel: ()  => { print("button cancel clicked"); isCanceled = true; }
+                    onCancel: ()  => 
+                    { 
+                        cancellationTokenSource.Cancel(); 
+                        onCancel?.Invoke(); 
+                    }
                 );
 
-                foreach (string tag in tags)
-                {
-                    yield return null;
-
-                    string[] wordsOfTag = tag.Split(' ');
-
-                    foreach (string wordOfTag in wordsOfTag)
-                    {
-                        string trimmedWordOfTag = wordOfTag.Trim();
-
-                        if (isCanceled) 
-                        {
-                            onCancel?.Invoke();
-                            yield break; 
-                        }
+                yield return null;
                     
-                        try
-                        {
-                            string singularizedTag = nounNumber.GetSingularWord(trimmedWordOfTag);
-
-                            if (trimmedWordOfTag != singularizedTag)
-                            {
-                                singularizedTags.Add(singularizedTag);
-                            }
-                        }
-                        catch(Exception ex)
-                        {
-                            _dialogMessageService.SendMessage("Singularize API error: " + ex.Message);
-                        }
-                    }
-                }
-
-                onDone?.Invoke(singularizedTags);
+                Task task = Task.Run(async () => await new TagsManager().GetSyngularizedTagsAsync(
+                    tags: tags,
+                    onSingularizedTagsReady: (singularizedTagsFromAsync) => {
+                        onDone?.Invoke(singularizedTagsFromAsync);
+                    },
+                    cancellationTokenSource: cancellationTokenSource
+                ));
             }
         }
 
@@ -307,31 +287,37 @@ public class ActionBlockService : MonoBehaviour
             tags: actionBlock.Tags.ToArray(),
             onDone: (singularizedTags) => 
             {
+                print("GetSingularizedTagsAsync done");
                 actionBlock.Tags = actionBlock.Tags.Concat(singularizedTags).ToList();
                 OnMethodEnd();
             },
             onCancel: () =>
             {
+                print("GetSingularizedTagsAsync canceled");
                 OnMethodEnd();
             }
         );
 
         void OnMethodEnd()
         {
+            _messageFullscreenService.Show(
+                text: "Creating Action-Block.", 
+                title: MessageFullscreenService.Title.Loading
+            );
+            
             bool isCreated = CreateActionBlock(actionBlock, isShowError, isAddTagsAutomatically: false);
+
             if (isCreated == false)
             {
-                print("action block not created");
+                _alertController.Show("Action Block is not created: " + actionBlock.Title);
             }
 
-            
             _messageFullscreenService.Hide();
             
             onDone?.Invoke(actionBlock);
         }
     }
 
-    
     public bool CreateActionBlock(ActionBlockModel.ActionBlock actionBlock, bool isShowError = true, bool isAddTagsAutomatically = true)
     {
         // If path includes project path then start path from "\".
@@ -351,7 +337,6 @@ public class ActionBlockService : MonoBehaviour
         
         return isCreated;
     }
-
     
     public void CreateActionBlocksByPathsAsync(string[] paths)
     {
@@ -360,7 +345,7 @@ public class ActionBlockService : MonoBehaviour
         _messageFullscreenService.Show(
             text: "Preparing Action-Blocks.", 
             title: MessageFullscreenService.Title.Loading,
-            onCancel: () => { isCanceled = true; }
+            onCancel: () => { print("Creating Action-Block is canceled");  isCanceled = true; }
         );
 
 
