@@ -108,21 +108,16 @@ public class ActionBlockController : MonoBehaviour
 
             if (string.IsNullOrEmpty(actionBlockByTitle.Title) == false)
             {
-                print("IsNullOrEmpty MO");
                 actionBlocksToShow.Add(actionBlockByTitle);
 
                 foreach (var actionBlock in actionBlocksByRequest)
                 {
-                    print(actionBlock.Title);
-                    print(actionBlockByTitle.Title);
                     if (actionBlockByTitle.Title == actionBlock.Title) continue;
                     actionBlocksToShow.Add(actionBlock);
                 }
             }
             else 
             {
-                print("IsNullOrEmpty YES");
-
                 actionBlocksToShow = actionBlocksByRequest;
             }
         }
@@ -175,7 +170,6 @@ public class ActionBlockController : MonoBehaviour
 
             _service.SetActionBlocksToShow(_actionBlocksByExactTagsToShow.ToHashSet());
 
-
             _service.RefreshActionBlocksOnPage();
             _view.DestroyLoadingText();
 
@@ -196,9 +190,11 @@ public class ActionBlockController : MonoBehaviour
 
     private void OnValueChangedInInputFieldSearch(ValueChangedInInputFieldSearchEvent valueChangedInInputFieldSearchEvent)
     {
+        _model.StopCoroutineGetActionBlocksByRequestAsync();
+
         string userRequest = valueChangedInInputFieldSearchEvent.Request;
         _userRequest = userRequest;
-        // HashSet<ActionBlockModel.ActionBlock> actionBlocksToShow = _model.GetActionBlocks().ToHashSet();
+ 
         HashSet<ActionBlockModel.ActionBlock> actionBlocksToShow = new HashSet<ActionBlockModel.ActionBlock>();
         _view.ClearActionBlocks();
         _view.AddLoadingText();
@@ -216,8 +212,15 @@ public class ActionBlockController : MonoBehaviour
             // Not async.
             // HashSet<ActionBlockModel.ActionBlock> actionBlocksByRequest = _model.GetActionBlocksByRequest(userRequest).ToHashSet();
 
-            _model.GetActionBlocksByRequestAsync(request: userRequest,
-            onGet: (actionBlocks) =>
+            StartCoroutine(_model.GetActionBlocksByRequestAsync(
+                request: userRequest,
+                onGet: (actionBlocks) =>
+                {
+                    ShowActionBlocks(actionBlocks);
+                }
+            ));
+
+            void ShowActionBlocks(ActionBlockModel.ActionBlock[] actionBlocks)
             {
                 HashSet<ActionBlockModel.ActionBlock> actionBlocksByRequest = actionBlocks.ToHashSet();
 
@@ -240,9 +243,7 @@ public class ActionBlockController : MonoBehaviour
                 _service.SetActionBlocksToShow(actionBlocksToShow);
                 _service.RefreshActionBlocksOnPage();
                 _view.DestroyLoadingText();
-            });
-           
-            //
+            }
 
             // StartCoroutine(_model.GetActionBlocksByRequestAsync(
             //     userRequest, 
@@ -254,7 +255,6 @@ public class ActionBlockController : MonoBehaviour
             // ));
         }
     }
-
 
     private void OnScrollbarValueChange(float value)
     {

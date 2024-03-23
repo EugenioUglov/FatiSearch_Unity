@@ -262,7 +262,7 @@ public class ActionBlockService : MonoBehaviour
                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
                 _messageFullscreenService.Show(
-                    text: "Creating singularized tags. It can take a while...\nYou can skip this process by clicking \"Cancel\" button", 
+                    text: $"Creating singularized tags for Action-Block: \"{actionBlock.Title}\".\nIt can take a while...\nYou can skip this process by clicking \"Cancel\" button", 
                     title: MessageFullscreenService.Title.Loading,
                     onCancel: ()  => 
                     { 
@@ -273,7 +273,7 @@ public class ActionBlockService : MonoBehaviour
 
                 yield return null;
                     
-                Task task = Task.Run(async () => await new TagsManager().GetSyngularizedTagsAsync(
+                Task task = Task.Run(async () => await new TagManager().GetSyngularizedTagsAsync(
                     tags: tags,
                     onSingularizedTagsReady: (singularizedTagsFromAsync) => {
                         onDone?.Invoke(singularizedTagsFromAsync);

@@ -47,6 +47,9 @@ public class ActionBlockModel : MonoBehaviour
     private StringManager _stringManager = new StringManager();
     private FileStreamManager _fileStreamManager = new FileStreamManager();
 
+    private string _lastRequestOfActionBlocksByRequestAsync = null;
+    private Action<ActionBlock[]> _lastActionOnGet = null;
+
     public struct ActionBlock
     {
         public string Title;
@@ -151,50 +154,58 @@ public class ActionBlockModel : MonoBehaviour
         return actionBlocksToShow.ToArray().Reverse().ToArray(); 
     }
 
-    public void GetActionBlocksByRequestAsync(string request, Action<ActionBlock[]> onGet = null)
+    public IEnumerator GetActionBlocksByRequestAsync(string request, Action<ActionBlock[]> onGet = null)
     {
-        StartCoroutine(GetActionBlocks());
+        // Search by tags.
 
-        IEnumerator GetActionBlocks()
+        _lastRequestOfActionBlocksByRequestAsync = request;
+        _lastActionOnGet = onGet;
+
+        List<ActionBlock> actionBlocksToShow = new List<ActionBlock>();
+
+        Dictionary<ActionBlock, int> priorityByActionBlock =
+            new Dictionary<ActionBlock, int>();
+
+        string[] tags = request.Split(' ');
+
+        foreach (string tag in tags)
         {
-            // Search by tags.
+            yield return null;
 
-            List<ActionBlock> actionBlocksToShow = new List<ActionBlock>();
+            ActionBlock[] actionBlocksByTag = GetActionBlocksByTag(tag).ToArray().Reverse().ToArray();
 
-            Dictionary<ActionBlock, int> priorityByActionBlock =
-                new Dictionary<ActionBlock, int>();
-
-            string[] tags = request.Split(' ');
-
-            foreach (string tag in tags)
+            foreach (ActionBlock actionBlock in actionBlocksByTag)
             {
-                yield return null;
-
-                ActionBlock[] actionBlocksByTag = GetActionBlocksByTag(tag).ToArray().Reverse().ToArray();
-
-                foreach (ActionBlock actionBlock in actionBlocksByTag)
+                if (priorityByActionBlock.ContainsKey(actionBlock))
                 {
-                    if (priorityByActionBlock.ContainsKey(actionBlock))
-                    {
-                        priorityByActionBlock[actionBlock] += 1;
-                    }
-                    else
-                    {
-                        priorityByActionBlock[actionBlock] = 1;
-                    }
+                    priorityByActionBlock[actionBlock] += 1;
+                }
+                else
+                {
+                    priorityByActionBlock[actionBlock] = 1;
                 }
             }
-
-            // Sort array from min priority value.
-            foreach (var pair in priorityByActionBlock.OrderBy(pair => pair.Value))
-            {
-                yield return null;
-
-                actionBlocksToShow.Add(pair.Key);
-            }
-
-            onGet(actionBlocksToShow.ToArray().Reverse().ToArray());
         }
+
+        // Sort array from min priority value.
+        foreach (var pair in priorityByActionBlock.OrderBy(pair => pair.Value))
+        {
+            yield return null;
+
+            actionBlocksToShow.Add(pair.Key);
+        }
+
+        onGet(actionBlocksToShow.ToArray().Reverse().ToArray());
+
+        _lastRequestOfActionBlocksByRequestAsync = null;
+        _lastActionOnGet = null;
+    }
+
+    public void StopCoroutineGetActionBlocksByRequestAsync()
+    {
+        if (_lastRequestOfActionBlocksByRequestAsync == null && _lastActionOnGet == null) return;
+
+        StopCoroutine(GetActionBlocksByRequestAsync(_lastRequestOfActionBlocksByRequestAsync, _lastActionOnGet));
     }
 
     // public ActionBlock[] GetActionBlocksWithExactTagsByRequest(string request)
@@ -475,7 +486,6 @@ public class ActionBlockModel : MonoBehaviour
     {
         foreach (ActionBlock actionBlock in actionBlocks)
         {
-            OnStartChangeActionBlocksVariables();
             string titleLowerCase = actionBlock.Title.ToLower();
 
             if (IsActionBlockValidToAdd(actionBlock, isShowError) == false)
@@ -545,8 +555,6 @@ public class ActionBlockModel : MonoBehaviour
 
     public bool UpdateActionBlock(string originalTitle, ActionBlock actionBlock)
     {
-        OnStartChangeActionBlocksVariables();
-        
         string originalTitleLowerCase = originalTitle.ToLower();
         string newTitle = actionBlock.Title;
 
@@ -611,7 +619,6 @@ public class ActionBlockModel : MonoBehaviour
 
     public void DeleteAllActionBlocks()
     {
-        OnStartChangeActionBlocksVariables();
         _actionBlockByTitle.Clear();
     }
     
@@ -712,45 +719,7 @@ public class ActionBlockModel : MonoBehaviour
 
     private List<string> GetNormalizedTags(List<string> tags)
     {
-        List<string> normalizedTags = new List<string>();
-            
-        foreach (string tag in tags)
-        {
-            // Delete empty spaces from sides of tags.
-            string tagTrimmed = tag.Trim();
-
-            // Repalce multiple spaces to one space.
-            string tagTrimmedWithoutMultipleSpaces = Regex.Replace(tagTrimmed, @"\s+", " ");
-
-            string normalizedTag = tagTrimmedWithoutMultipleSpaces;
-            
-            if (string.IsNullOrEmpty(normalizedTag) == false)
-            {
-                normalizedTags.Add(normalizedTag);
-            }
-        }
-
-        AddTagsWithoutSpecialSymbolsAndWithSplitedCamelCase();
-
-        void AddTagsWithoutSpecialSymbolsAndWithSplitedCamelCase()
-        { 
-            foreach (string tag in tags)
-            {
-                string tagWithSplitedCamelCase = _stringManager.SplitCamelCase(tag);
-
-                string tagWithoutSpecialSymbolsAndWithSplitedCamelCase = _stringManager.GetTextWithoutSpecialSymbols(tagWithSplitedCamelCase);
-
-                if (tag == tagWithoutSpecialSymbolsAndWithSplitedCamelCase)
-                {
-                    // Tag as the title without spec symbols exists.
-                    continue;
-                }
-
-                normalizedTags.Add(tagWithoutSpecialSymbolsAndWithSplitedCamelCase);
-            }
-        }
-
-        return normalizedTags;
+        return new TagManager().GetNormalizedTags(tags);
     }
 
     private void CreateFolderIfMissing(string path)
@@ -779,11 +748,6 @@ public class ActionBlockModel : MonoBehaviour
         _fileStreamManager.Save(_backupFolderPath + "/" + "Action-Blocks_" + 
                              DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".json", 
             actionBlocksJSON);
-    }
-
-    private void OnStartChangeActionBlocksVariables()
-    {
-
     }
 
     private bool IsActionBlockValidToAdd(ActionBlock actionBlockToAdd,  bool isShowError = true)
