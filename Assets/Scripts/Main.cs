@@ -25,7 +25,6 @@ public class Main : MonoBehaviour
     private void Start()
     {
         _messageFullscreenService.Show(text: "Preparing all Action-Blocks", MessageFullscreenService.Title.Loading);
-      
 
         StartCoroutine(StartWithNoFreeze());
 

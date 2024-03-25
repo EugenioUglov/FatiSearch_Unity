@@ -23,6 +23,7 @@ public class ActionBlockController : MonoBehaviour
     [SerializeField] private CommandController _commandController;
 
     private string _userRequest = "";
+    private IEnumerator _coroutineToShowActionBlocks = null;
 
 
     private bool _isLoadingActionBlocks = false;
@@ -190,12 +191,19 @@ public class ActionBlockController : MonoBehaviour
 
     private void OnValueChangedInInputFieldSearch(ValueChangedInInputFieldSearchEvent valueChangedInInputFieldSearchEvent)
     {
-        _model.StopCoroutineGetActionBlocksByRequestAsync();
+        // _model.StopCoroutineGetActionBlocksByRequestAsync();
+
+        if (_coroutineToShowActionBlocks != null)
+        {
+            StopCoroutine(_coroutineToShowActionBlocks);
+            _coroutineToShowActionBlocks = null;
+        }
 
         string userRequest = valueChangedInInputFieldSearchEvent.Request;
         _userRequest = userRequest;
  
         HashSet<ActionBlockModel.ActionBlock> actionBlocksToShow = new HashSet<ActionBlockModel.ActionBlock>();
+
         _view.ClearActionBlocks();
         _view.AddLoadingText();
 
@@ -211,14 +219,15 @@ public class ActionBlockController : MonoBehaviour
             ActionBlockModel.ActionBlock actionBlockByTitle = _model.GetActionBlockByTitle(userRequest);
             // Not async.
             // HashSet<ActionBlockModel.ActionBlock> actionBlocksByRequest = _model.GetActionBlocksByRequest(userRequest).ToHashSet();
-
-            StartCoroutine(_model.GetActionBlocksByRequestAsync(
+            _coroutineToShowActionBlocks = _model.GetActionBlocksByRequestAsync(
                 request: userRequest,
                 onGet: (actionBlocks) =>
                 {
                     ShowActionBlocks(actionBlocks);
                 }
-            ));
+            );
+
+            StartCoroutine(_coroutineToShowActionBlocks);
 
             void ShowActionBlocks(ActionBlockModel.ActionBlock[] actionBlocks)
             {
