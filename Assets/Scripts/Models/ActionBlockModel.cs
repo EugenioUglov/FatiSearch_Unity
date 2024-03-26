@@ -158,9 +158,6 @@ public class ActionBlockModel : MonoBehaviour
     {
         // Search by tags.
 
-        _lastRequestOfActionBlocksByRequestAsync = request;
-        _lastActionOnGet = onGet;
-
         List<ActionBlock> actionBlocksToShow = new List<ActionBlock>();
 
         Dictionary<ActionBlock, int> priorityByActionBlock =
@@ -196,17 +193,8 @@ public class ActionBlockModel : MonoBehaviour
         }
 
         onGet(actionBlocksToShow.ToArray().Reverse().ToArray());
-
-        _lastRequestOfActionBlocksByRequestAsync = null;
-        _lastActionOnGet = null;
     }
 
-    public void StopCoroutineGetActionBlocksByRequestAsync()
-    {
-        if (_lastRequestOfActionBlocksByRequestAsync == null && _lastActionOnGet == null) return;
-
-        StopCoroutine(GetActionBlocksByRequestAsync(_lastRequestOfActionBlocksByRequestAsync, _lastActionOnGet));
-    }
 
     // public ActionBlock[] GetActionBlocksWithExactTagsByRequest(string request)
     // {

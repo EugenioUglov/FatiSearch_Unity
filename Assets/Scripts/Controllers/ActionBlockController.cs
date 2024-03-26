@@ -191,6 +191,8 @@ public class ActionBlockController : MonoBehaviour
 
     private void OnValueChangedInInputFieldSearch(ValueChangedInInputFieldSearchEvent valueChangedInInputFieldSearchEvent)
     {
+        _view.ClearActionBlocks();
+        _view.AddLoadingText();
         // _model.StopCoroutineGetActionBlocksByRequestAsync();
 
         if (_coroutineToShowActionBlocks != null)
@@ -204,8 +206,8 @@ public class ActionBlockController : MonoBehaviour
  
         HashSet<ActionBlockModel.ActionBlock> actionBlocksToShow = new HashSet<ActionBlockModel.ActionBlock>();
 
-        _view.ClearActionBlocks();
-        _view.AddLoadingText();
+        // _view.ClearActionBlocks();
+        // _view.AddLoadingText();
 
         if (userRequest == "")
         {
