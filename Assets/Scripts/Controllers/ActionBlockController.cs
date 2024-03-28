@@ -15,12 +15,14 @@ public class ActionBlockController : MonoBehaviour
     [SerializeField] private ActionBlockModel _model;
     [SerializeField] private ActionBlockView _view;
     [SerializeField] private ActionBlockService _service;
+    [SerializeField] private GameObject _results;
 
     [SerializeField] private ActionBlockSettingsController _actionBlockSettingsController;
     [SerializeField] private SearchController _searchController;
     [SerializeField] private AlertController _alertController;
     [SerializeField] private BottomMessageController _bottomMessageController;
     [SerializeField] private CommandController _commandController;
+    [SerializeField] private MessageFullscreenService _messageFullscreenService;
 
     private string _userRequest = "";
     private IEnumerator _coroutineToShowActionBlocks = null;
@@ -29,6 +31,7 @@ public class ActionBlockController : MonoBehaviour
     private bool _isLoadingActionBlocks = false;
     private DirectoryManager _directoryManager;
     private DialogMessageService _dialogMessageService;
+    
 
 
     private void Update()
@@ -191,9 +194,10 @@ public class ActionBlockController : MonoBehaviour
 
     private void OnValueChangedInInputFieldSearch(ValueChangedInInputFieldSearchEvent valueChangedInInputFieldSearchEvent)
     {
+        _view.ScrollToTop();
+        _results.SetActive(false);
         _view.ClearActionBlocks();
         _view.AddLoadingText();
-        // _model.StopCoroutineGetActionBlocksByRequestAsync();
 
         if (_coroutineToShowActionBlocks != null)
         {
@@ -206,15 +210,11 @@ public class ActionBlockController : MonoBehaviour
  
         HashSet<ActionBlockModel.ActionBlock> actionBlocksToShow = new HashSet<ActionBlockModel.ActionBlock>();
 
-        // _view.ClearActionBlocks();
-        // _view.AddLoadingText();
 
         if (userRequest == "")
         {
             actionBlocksToShow = _model.GetActionBlocks().ToHashSet();
-            _service.SetActionBlocksToShow(actionBlocksToShow);
-            _service.RefreshActionBlocksOnPage();
-            _view.DestroyLoadingText();
+            ShowActionBlocksInScrollPanel(actionBlocksToShow);
         }
         else
         {
@@ -250,10 +250,8 @@ public class ActionBlockController : MonoBehaviour
                 {
                     actionBlocksToShow = actionBlocksByRequest;
                 }
-                
-                _service.SetActionBlocksToShow(actionBlocksToShow);
-                _service.RefreshActionBlocksOnPage();
-                _view.DestroyLoadingText();
+
+                ShowActionBlocksInScrollPanel(actionBlocksToShow);
             }
 
             // StartCoroutine(_model.GetActionBlocksByRequestAsync(
@@ -264,6 +262,15 @@ public class ActionBlockController : MonoBehaviour
             //         _view.DestroyLoadingText();
             //     }
             // ));
+        }
+
+        void ShowActionBlocksInScrollPanel(HashSet<ActionBlockModel.ActionBlock> actionBlocks)
+        { 
+            _results.SetActive(true);
+            _service.SetActionBlocksToShow(actionBlocks);
+            _service.RefreshActionBlocksOnPage();
+            _view.DestroyLoadingText();
+            _view.ScrollToTop();
         }
     }
 

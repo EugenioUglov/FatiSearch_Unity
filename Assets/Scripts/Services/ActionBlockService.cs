@@ -437,7 +437,6 @@ public class ActionBlockService : MonoBehaviour
     
     public void SetActionBlocksToShow(HashSet<ActionBlockModel.ActionBlock> newActionBlocksToShow = null)
     {
-        _view.ScrollToTop();
         if (newActionBlocksToShow == null)
         {
             newActionBlocksToShow = _model.GetActionBlocks().ToHashSet();
@@ -448,7 +447,6 @@ public class ActionBlockService : MonoBehaviour
         
         _countShowedActionBlocks = 0;
         _actionBlocksToShow = newActionBlocksToShow;
-        _view.ScrollToTop();
     }
 
     public ActionBlockModel.ActionBlock GetActionBlockByTitle(string title)
