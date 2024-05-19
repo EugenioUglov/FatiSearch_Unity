@@ -1,14 +1,10 @@
 using UnityEngine;
 using System.Collections;
 using Controllers;
-using System.IO;
-
 using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using PimDeWitte.UnityMainThreadDispatcher;
-using System.Windows.Forms;
 
 public class Main : MonoBehaviour
 {
@@ -16,10 +12,8 @@ public class Main : MonoBehaviour
     [SerializeField] private ActionBlockController _actionBlockController;
     [SerializeField] private DragAndDropController _dragAndDropController;
     [SerializeField] private SearchController _searchController;
-    [SerializeField] private CommandController _commandController;
     [SerializeField] private MessageFullscreenService _messageFullscreenService;
     [SerializeField] private ActionBlockService _actionBlockService;
-    [SerializeField] private DialogMessageService _dialogService;
    
 
     private void Start()

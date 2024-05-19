@@ -13,6 +13,7 @@ using System.Threading;
 public class ActionBlockService : MonoBehaviour
 {
     [HideInInspector] public bool IsMouseButtonLeftDown = false;
+    
 
     [Header("Links to scripts")]
     [SerializeField] private ActionBlockModel _model;
@@ -26,14 +27,18 @@ public class ActionBlockService : MonoBehaviour
 
     [Header("UI")]
     [SerializeField] private TextMeshProUGUI _centralLogText;
+    [SerializeField] private GameObject _results;
+    
 
     private HashSet<ActionBlockModel.ActionBlock> _actionBlocksToShow;
+    private HashSet<ActionBlockModel.ActionBlock> _showedActionBlocks;
     private DirectoryManager _directoryManager;
     private int _countShowedActionBlocks = 0;
     private int _maxCountActionBlocksToShowAtTime = 10;
     private int _countProcessedFilesFromDirectories = 0;
     private int _countFilesFromDirectories = 0;
     private int _countDirectoriesForAutoCreationActionBlocks = 0;
+    private IEnumerator _coroutineToShowActionBlocks = null;
 
 
     public void Init()
@@ -124,7 +129,6 @@ public class ActionBlockService : MonoBehaviour
         return true;
     }
 
-    
     public void CreateActionBlocksByPathsNoFreezeWithCopyingFilesToProgramData(string[] paths)
     {
         bool isCanceled = false;
@@ -167,7 +171,7 @@ public class ActionBlockService : MonoBehaviour
                     }
                     catch (Exception exception)
                     {
-                        _dialogMessageService.SendMessage(exception.Message, "Error");
+                        _dialogMessageService.ShowMessage(exception.Message, "Error");
 
                         continue;
                     }
@@ -671,7 +675,88 @@ public class ActionBlockService : MonoBehaviour
         )); 
     }
 
-    
+    public void ShowActionBlocksInScrollPanel(string userRequest)
+    {
+        _showedActionBlocks = null;
+        _centralLogText.text = "Loading...";
+        _view.ScrollToTop();
+        _results.SetActive(false);
+        _view.ClearActionBlocks();
+        _view.AddLoadingText();
+
+        if (_coroutineToShowActionBlocks != null)
+        {
+            StopCoroutine(_coroutineToShowActionBlocks);
+            _coroutineToShowActionBlocks = null;
+        }
+
+        HashSet<ActionBlockModel.ActionBlock> actionBlocksToShow = new HashSet<ActionBlockModel.ActionBlock>();
+
+
+        if (userRequest == "")
+        {
+            actionBlocksToShow = _model.GetActionBlocks().ToHashSet();
+            OnReceiveActionBlocks(actionBlocksToShow);
+        }
+        else
+        {
+            ActionBlockModel.ActionBlock actionBlockByTitle = _model.GetActionBlockByTitle(userRequest);
+            // Not async.
+            // HashSet<ActionBlockModel.ActionBlock> actionBlocksByRequest = _model.GetActionBlocksByRequest(userRequest).ToHashSet();
+            _coroutineToShowActionBlocks = _model.GetActionBlocksByRequestAsync(
+                request: userRequest,
+                onGet: (actionBlocks) =>
+                {
+                    ShowActionBlocks(actionBlocks);
+                }
+            );
+
+            StartCoroutine(_coroutineToShowActionBlocks);
+
+            void ShowActionBlocks(ActionBlockModel.ActionBlock[] actionBlocks)
+            {
+                HashSet<ActionBlockModel.ActionBlock> actionBlocksByRequest = actionBlocks.ToHashSet();
+
+                if (string.IsNullOrEmpty(actionBlockByTitle.Title) == false)
+                {
+                    actionBlocksToShow.Add(actionBlockByTitle);
+
+                    foreach (var actionBlock in actionBlocksByRequest)
+                    {
+                        if (actionBlockByTitle.Title == actionBlock.Title) continue;
+                        
+                        actionBlocksToShow.Add(actionBlock);
+                    }
+                }
+                else 
+                {
+                    actionBlocksToShow = actionBlocksByRequest;
+                }
+
+                OnReceiveActionBlocks(actionBlocksToShow);
+            }
+        }
+
+        void OnReceiveActionBlocks(HashSet<ActionBlockModel.ActionBlock> actionBlocks)
+        {
+            _showedActionBlocks = actionBlocks;
+            _results.SetActive(true);
+            SetActionBlocksToShow(actionBlocks);
+            RefreshActionBlocksOnPage();
+            _view.DestroyLoadingText();
+            _view.ScrollToTop();
+            _centralLogText.text = "";
+        }
+    }
+
+    public void ExecuteFirstShowedActionBlock()
+    {
+        if (_showedActionBlocks.Count > 0)
+        {
+            ExecuteByTitle(_showedActionBlocks.ToArray()[0].Title);
+        }
+    }
+
     public void IndexingFilesFromFilesToIndexDirectory()
     {
         string indexedFilesDirectory = @"Admin\IndexedFiles\";

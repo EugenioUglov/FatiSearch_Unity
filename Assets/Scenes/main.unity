@@ -6809,7 +6809,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: v18
+  m_text: v19.0.0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -13293,13 +13293,9 @@ MonoBehaviour:
   _model: {fileID: 2008285824}
   _view: {fileID: 2008285828}
   _service: {fileID: 2008285844}
-  _results: {fileID: 2007831717}
   _actionBlockSettingsController: {fileID: 2008285837}
   _searchController: {fileID: 2008285829}
-  _alertController: {fileID: 2008285832}
-  _bottomMessageController: {fileID: 2008285835}
   _commandController: {fileID: 2008285841}
-  _messageFullscreenService: {fileID: 2008285820}
 --- !u!4 &2008285819
 Transform:
   m_ObjectHideFlags: 0
@@ -13356,10 +13352,8 @@ MonoBehaviour:
   _actionBlockController: {fileID: 2008285818}
   _dragAndDropController: {fileID: 2008285831}
   _searchController: {fileID: 2008285829}
-  _commandController: {fileID: 2008285841}
   _messageFullscreenService: {fileID: 2008285820}
   _actionBlockService: {fileID: 2008285844}
-  _dialogService: {fileID: 2008285840}
 --- !u!114 &2008285824
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13667,6 +13661,7 @@ MonoBehaviour:
   _messageFullscreenService: {fileID: 2008285820}
   _dialogMessageService: {fileID: 2008285840}
   _centralLogText: {fileID: 547541391}
+  _results: {fileID: 2007831717}
 --- !u!1 &2024325903
 GameObject:
   m_ObjectHideFlags: 0

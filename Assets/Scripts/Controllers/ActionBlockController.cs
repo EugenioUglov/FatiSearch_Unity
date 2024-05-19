@@ -1,13 +1,7 @@
-using System;
-using System.IO;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Controllers;
-using TMPro;
 using UnityEngine;
 using Unity.VisualScripting;
-using System.Windows.Forms;
 
 public class ActionBlockController : MonoBehaviour
 {
@@ -15,24 +9,15 @@ public class ActionBlockController : MonoBehaviour
     [SerializeField] private ActionBlockModel _model;
     [SerializeField] private ActionBlockView _view;
     [SerializeField] private ActionBlockService _service;
-    [SerializeField] private GameObject _results;
 
     [SerializeField] private ActionBlockSettingsController _actionBlockSettingsController;
     [SerializeField] private SearchController _searchController;
-    [SerializeField] private AlertController _alertController;
-    [SerializeField] private BottomMessageController _bottomMessageController;
     [SerializeField] private CommandController _commandController;
-    [SerializeField] private MessageFullscreenService _messageFullscreenService;
 
     private string _userRequest = "";
-    private IEnumerator _coroutineToShowActionBlocks = null;
-
-
     private bool _isLoadingActionBlocks = false;
     private DirectoryManager _directoryManager;
-    private DialogMessageService _dialogMessageService;
     
-
 
     private void Update()
     {
@@ -49,7 +34,6 @@ public class ActionBlockController : MonoBehaviour
     public void Init()
     {
         _directoryManager = new DirectoryManager();
-        _dialogMessageService = new DialogMessageService();
         
         EventAggregator.AddListener<ActionBlockClickedEvent>(this, OnActionBlockClicked);
         EventAggregator.AddListener<ActionBlockSettingsClickedEvent>(this, OnActionBlockSettingsClicked);
@@ -59,13 +43,7 @@ public class ActionBlockController : MonoBehaviour
         EventAggregator.AddListener<ValueChangedInInputFieldSearchEvent>(this, OnValueChangedInInputFieldSearch);
 
         _view.BindScrollbarValueChange(OnScrollbarValueChange);
-
-
-        // _service.GetActionBlocksToShow() = new HashSet<ActionBlockModel.ActionBlock>();
-
-        // HashSet<ActionBlockModel.ActionBlock> actionBlocksToShow = _model.GetActionBlocks().ToHashSet();
     }
-
 
     public void OnClickButtonCreate()
     {
@@ -96,38 +74,7 @@ public class ActionBlockController : MonoBehaviour
 
     private void OnSearchEntered(SearchEnteredEvent searchEnteredEvent)
     {
-        string userRequest = searchEnteredEvent.Request;
-        HashSet<ActionBlockModel.ActionBlock> actionBlocksToShow = _model.GetActionBlocks().ToHashSet();
-        
-        if (userRequest == "")
-        {
-            actionBlocksToShow = _model.GetActionBlocks().ToHashSet();
-        }
-        else
-        {
-            bool isExecutedByTitle = _service.ExecuteByTitle(userRequest);
-            ActionBlockModel.ActionBlock actionBlockByTitle = _model.GetActionBlockByTitle(userRequest);
-
-            HashSet<ActionBlockModel.ActionBlock> actionBlocksByRequest = _model.GetActionBlocksByRequest(userRequest).ToHashSet();
-
-            if (string.IsNullOrEmpty(actionBlockByTitle.Title) == false)
-            {
-                actionBlocksToShow.Add(actionBlockByTitle);
-
-                foreach (var actionBlock in actionBlocksByRequest)
-                {
-                    if (actionBlockByTitle.Title == actionBlock.Title) continue;
-                    actionBlocksToShow.Add(actionBlock);
-                }
-            }
-            else 
-            {
-                actionBlocksToShow = actionBlocksByRequest;
-            }
-        }
-        
-        _service.SetActionBlocksToShow(actionBlocksToShow);
-        _service.RefreshActionBlocksOnPage();
+        _service.ExecuteFirstShowedActionBlock();
     }
 
     private void OnCommandEntered(CommandEnteredEvent commandEnteredEvent)
@@ -194,84 +141,10 @@ public class ActionBlockController : MonoBehaviour
 
     private void OnValueChangedInInputFieldSearch(ValueChangedInInputFieldSearchEvent valueChangedInInputFieldSearchEvent)
     {
-        _view.ScrollToTop();
-        _results.SetActive(false);
-        _view.ClearActionBlocks();
-        _view.AddLoadingText();
-
-        if (_coroutineToShowActionBlocks != null)
-        {
-            StopCoroutine(_coroutineToShowActionBlocks);
-            _coroutineToShowActionBlocks = null;
-        }
-
         string userRequest = valueChangedInInputFieldSearchEvent.Request;
         _userRequest = userRequest;
- 
-        HashSet<ActionBlockModel.ActionBlock> actionBlocksToShow = new HashSet<ActionBlockModel.ActionBlock>();
 
-
-        if (userRequest == "")
-        {
-            actionBlocksToShow = _model.GetActionBlocks().ToHashSet();
-            ShowActionBlocksInScrollPanel(actionBlocksToShow);
-        }
-        else
-        {
-            ActionBlockModel.ActionBlock actionBlockByTitle = _model.GetActionBlockByTitle(userRequest);
-            // Not async.
-            // HashSet<ActionBlockModel.ActionBlock> actionBlocksByRequest = _model.GetActionBlocksByRequest(userRequest).ToHashSet();
-            _coroutineToShowActionBlocks = _model.GetActionBlocksByRequestAsync(
-                request: userRequest,
-                onGet: (actionBlocks) =>
-                {
-                    ShowActionBlocks(actionBlocks);
-                }
-            );
-
-            StartCoroutine(_coroutineToShowActionBlocks);
-
-            void ShowActionBlocks(ActionBlockModel.ActionBlock[] actionBlocks)
-            {
-                HashSet<ActionBlockModel.ActionBlock> actionBlocksByRequest = actionBlocks.ToHashSet();
-
-                if (string.IsNullOrEmpty(actionBlockByTitle.Title) == false)
-                {
-                    actionBlocksToShow.Add(actionBlockByTitle);
-
-                    foreach (var actionBlock in actionBlocksByRequest)
-                    {
-                        if (actionBlockByTitle.Title == actionBlock.Title) continue;
-                        
-                        actionBlocksToShow.Add(actionBlock);
-                    }
-                }
-                else 
-                {
-                    actionBlocksToShow = actionBlocksByRequest;
-                }
-
-                ShowActionBlocksInScrollPanel(actionBlocksToShow);
-            }
-
-            // StartCoroutine(_model.GetActionBlocksByRequestAsync(
-            //     userRequest, 
-            //     onGet: (actionBlocksToShow) => {
-            //         _service.SetActionBlocksToShow(actionBlocksToShow.ToHashSet());
-            //         _service.RefreshActionBlocksOnPage();
-            //         _view.DestroyLoadingText();
-            //     }
-            // ));
-        }
-
-        void ShowActionBlocksInScrollPanel(HashSet<ActionBlockModel.ActionBlock> actionBlocks)
-        { 
-            _results.SetActive(true);
-            _service.SetActionBlocksToShow(actionBlocks);
-            _service.RefreshActionBlocksOnPage();
-            _view.DestroyLoadingText();
-            _view.ScrollToTop();
-        }
+        _service.ShowActionBlocksInScrollPanel(userRequest);
     }
 
     private void OnScrollbarValueChange(float value)

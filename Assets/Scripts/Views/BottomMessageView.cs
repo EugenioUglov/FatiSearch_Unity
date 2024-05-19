@@ -30,20 +30,16 @@ public class BottomMessageView : MonoBehaviour
     }
     
     public void Show()
-    {   
-        // print(_textBottomAlertComponent.rectTransform.sizeDelta.y);
-        print(_bottomMessagePanelRectTransform.sizeDelta.y);
+    {
         _bottomMessagePanel.SetActive(true);
-        print(_textBottomAlertComponent.GetComponent<TextMeshProUGUI>().text);
+
         RefreshHeight(onFinish: ()=> {
             // float widthFactor = Screen.width/720;
             //  float heightFactor = Screen.height/769;
             _bottomMessagePanel.SetActive(true);
             
             // _bottomMessagePanelRectTransform.anchoredPosition = new Vector3(0,  _textBottomAlertComponent.rectTransform.sizeDelta.y * -2, 0);
-            print("sizeDelta.y : " + _textBottomAlertComponent.rectTransform.sizeDelta.y );
-            
-            print("height: " + Screen.height);
+
             return;
             Vector2 anchoredPosition = _bottomMessagePanelRectTransform.anchoredPosition;
             var position = _bottomMessagePanelTransform.position;
@@ -58,12 +54,7 @@ public class BottomMessageView : MonoBehaviour
 
             
             StartCoroutine(MoveBottomMessage(startPosition: startAnchoredPosition, endPosition: endAnchoredPosition));
-            
         });
-
-        
-
-        
 
         void RefreshHeight(Action onFinish = null)
         {
