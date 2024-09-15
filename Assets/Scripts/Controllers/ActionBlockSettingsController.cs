@@ -92,7 +92,7 @@ public class ActionBlockSettingsController : MonoBehaviour
         string title = TitleInputField.GetComponent<TMP_InputField>().text;
         // string action = ActionBlockModel.ActionEnum.OpenPath;
         // Dropdown.options[GetComponent<TMP_Dropdown>().value].text
-        print("Dropdown index: "+ ActionDropdown.GetComponent<TMP_Dropdown>().value);
+        // print("Dropdown index: "+ ActionDropdown.GetComponent<TMP_Dropdown>().value);
         string action = ActionDropdown.GetComponent<TMP_Dropdown>().options[ActionDropdown.GetComponent<TMP_Dropdown>().value].text;
         string content = ContentInputField.GetComponent<TMP_InputField>().text;
         string tagsTextFromInputField = TagsInputField.GetComponent<TMP_InputField>().text;

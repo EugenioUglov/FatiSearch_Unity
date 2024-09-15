@@ -536,7 +536,7 @@ public class ActionBlockService : MonoBehaviour
             }
             else
             {
-                _alertController.Show("Not possible to execute Action-Block " + actionBlock.Title);
+                _alertController.Show("Not possible to execute Action-Block " + "\"" + actionBlock.Title + "\"");
             }
         }
         else if (actionBlock.Action == ActionBlockModel.ActionEnum.OpenPathAsAdministrator)

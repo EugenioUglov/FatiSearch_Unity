@@ -555,7 +555,7 @@ public class ActionBlockModel : MonoBehaviour
         {
             actionBlock.Tags = GetTagsWithActionBlockTitle(actionBlock);
         }
-        actionBlock.Tags = GetNormalizedTags(actionBlock.Tags);
+        // actionBlock.Tags = GetNormalizedTags(actionBlock.Tags);
         _actionBlockByTitle.Remove(originalTitleLowerCase);
         AddActionBlockToVariables(actionBlock);
         UpdateIndexActionBlockByTags();

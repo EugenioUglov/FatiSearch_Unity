@@ -59,51 +59,86 @@ public class TagManager : MonoBehaviour
         UnityMainThreadDispatcher.Instance().Enqueue(() => { onFinish?.Invoke(); });
     }
 
+
     /// <summary>
-    /// Trimmed, no multi spaces, split camel case,no special symbols
+    /// Get tags trimmed, with no multi spaces, split camel case, no special symbols.
     /// </summary>
-    /// <param name="tags"></param>
+    /// <param name="tagsSeparatedByComma"></param>
     /// <returns></returns>
-    public List<string> GetNormalizedTags(List<string> tags)
+    public List<string> GetNormalizedTags(List<string> tagsSeparatedByComma)
     {
         List<string> normalizedTags = new List<string>();
+
+        
+        foreach (string tag in tagsSeparatedByComma)
+        {
+            string tagWithoutSpecialSymbolsAndWithSplitedCamelCase = GetStringWithoutSpecialSymbolsAndWithSplitedCamelCase(tag);
+            string tagWithNormalizedSpaces = GetStringWithNormalizedSpaces(tagWithoutSpecialSymbolsAndWithSplitedCamelCase);
+
             
-        foreach (string tag in tags)
+            if (string.IsNullOrEmpty(tag) == false)
+            {
+                normalizedTags.Add(tag);
+            }
+
+            
+            if (tagsSeparatedByComma.Contains(tagWithoutSpecialSymbolsAndWithSplitedCamelCase) == false)
+            {
+                normalizedTags.Add(tagWithoutSpecialSymbolsAndWithSplitedCamelCase);
+            }
+        }
+
+
+        string GetStringWithoutSpecialSymbolsAndWithSplitedCamelCase(string stringToNormalize)
+        {
+            StringManager stringManager = new StringManager();
+
+            string stringWithoutSpecialSymbolsAndWithSplitedCamelCase = "";
+
+            string stringWithoutSpecialSymbols = stringManager.GetTextWithoutSpecialSymbols(stringToNormalize);
+            string[] words = stringWithoutSpecialSymbols.Split(' ');
+
+
+            foreach (string word in words)
+            {
+                if (IsAllUpper(word))
+                {
+                    stringWithoutSpecialSymbolsAndWithSplitedCamelCase += word + " ";
+
+                    continue;
+                }
+                
+                stringWithoutSpecialSymbolsAndWithSplitedCamelCase += stringManager.SplitCamelCase(word) + " ";
+            }
+
+
+            bool IsAllUpper(string input)
+            {
+                for (int i = 0; i < input.Length; i++)
+                {
+                    if (Char.IsLetter(input[i]) && !Char.IsUpper(input[i]))
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+
+            return stringWithoutSpecialSymbolsAndWithSplitedCamelCase;
+        }
+
+        string GetStringWithNormalizedSpaces(string strToNormalize)
         {
             // Delete empty spaces from sides of tags.
-            string tagTrimmed = tag.Trim();
+            string tagTrimmed = strToNormalize.Trim();
 
             // Repalce multiple spaces to one space.
             string tagTrimmedWithoutMultipleSpaces = Regex.Replace(tagTrimmed, @"\s+", " ");
 
-            string normalizedTag = tagTrimmedWithoutMultipleSpaces;
-            
-            if (string.IsNullOrEmpty(normalizedTag) == false)
-            {
-                normalizedTags.Add(normalizedTag);
-            }
-        }
 
-        AddTagsWithoutSpecialSymbolsAndWithSplitedCamelCase();
-
-        void AddTagsWithoutSpecialSymbolsAndWithSplitedCamelCase()
-        {
-            var stringManager = new StringManager();
-
-            foreach (string tag in tags)
-            {
-                string tagWithSplitedCamelCase = stringManager.SplitCamelCase(tag);
-
-                string tagWithoutSpecialSymbolsAndWithSplitedCamelCase = stringManager.GetTextWithoutSpecialSymbols(tagWithSplitedCamelCase);
-
-                if (tag == tagWithoutSpecialSymbolsAndWithSplitedCamelCase)
-                {
-                    // Tag as the title without spec symbols exists.
-                    continue;
-                }
-
-                normalizedTags.Add(tagWithoutSpecialSymbolsAndWithSplitedCamelCase);
-            }
+            return tagTrimmedWithoutMultipleSpaces;
         }
 
         return normalizedTags;
