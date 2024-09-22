@@ -34,6 +34,7 @@ public class ActionBlockModel : MonoBehaviour
         public const string TextFile = directoryWithImages + "Text-file.png";
         public const string PdfFile = directoryWithImages + "Pdf-file.png";
         public const string Folder = directoryWithImages + "Folder.png";
+        public const string ProgrammingLanguageFile = directoryWithImages + "Programming-language.png";
     }
     
 
@@ -457,16 +458,20 @@ public class ActionBlockModel : MonoBehaviour
                 {
                     return ImagePath.ExcelFile;
                 }
-                else if (Extension.linkExtensions.Contains(extension))
+                else if (Extension.LinkExtensions.Contains(extension))
                 {
                     return ImagePath.LinkFile;
+                }
+                else if (Extension.ProgrammingLanguageExtensions.Contains(extension))
+                {
+                    return ImagePath.ProgrammingLanguageFile;
                 }
             }
 
             return "";
         }
         
-        
+
         return true;
     }
 
@@ -853,13 +858,14 @@ public class ActionBlockModel : MonoBehaviour
     }
 
     private static class  Extension {
-        public static string[] ExeExtensions {get; private set;} = new string[] {"exe"};
-        public static string[] TextExtensions {get; private set;} = new string[] {"txt", "md", "ini"};
-        public static string[] VideoExtensions {get; private set;} = new string[] {"avi", "mp4", "mov", "mkv"};
-        public static string[] ImageExtensions {get; private set;} = new string[] {"jpeg", "jpg", "png", "svg", "ai", "psd", "bmp", "tif", "tiff", "raw"};
-        public static string[] WordDocumentExtensions {get; private set;} = new string[] {"doc", "docx"};
-        public static string[] PdfDocumentExtensions {get; private set;} = new string[] {"pdf"};
-        public static string[] ExcelExtensions {get; private set;} = new string[] {"csv", "xls", "xlsx", "xml"};
-        public static string[] linkExtensions {get; private set;} = new string[] {"url"};
+        public static string[] ExeExtensions {get; private set;} = new string[] {".exe"};
+        public static string[] TextExtensions {get; private set;} = new string[] {".txt", ".md", ".ini"};
+        public static string[] VideoExtensions {get; private set;} = new string[] {".avi", ".mp4", ".mov", ".mkv"};
+        public static string[] ImageExtensions {get; private set;} = new string[] {".jpeg", ".jpg", ".png", "s.vg", ".ai", ".psd", ".bmp", ".tif", ".tiff", ".raw"};
+        public static string[] WordDocumentExtensions {get; private set;} = new string[] {".doc", ".docx"};
+        public static string[] PdfDocumentExtensions {get; private set;} = new string[] {".pdf"};
+        public static string[] ExcelExtensions {get; private set;} = new string[] {".csv", ".xls", ".xlsx", ".xml"};
+        public static string[] LinkExtensions {get; private set;} = new string[] {".url"};
+        public static string[] ProgrammingLanguageExtensions {get; private set;} = new string[] {".cs", ".js", ".ts", ".json", ".xml"};
     }
 }
