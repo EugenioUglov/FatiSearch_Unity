@@ -751,7 +751,7 @@ public class ActionBlockService : MonoBehaviour
 
     public void ExecuteFirstShowedActionBlock()
     {
-        if (_showedActionBlocks.Count > 0)
+        if (_showedActionBlocks != null && _showedActionBlocks.Count > 0)
         {
             ExecuteByTitle(_showedActionBlocks.ToArray()[0].Title);
         }
