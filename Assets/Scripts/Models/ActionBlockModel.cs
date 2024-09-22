@@ -34,7 +34,6 @@ public class ActionBlockModel : MonoBehaviour
         public const string TextFile = directoryWithImages + "Text-file.png";
         public const string PdfFile = directoryWithImages + "Pdf-file.png";
         public const string Folder = directoryWithImages + "Folder.png";
-
     }
     
 
@@ -421,43 +420,44 @@ public class ActionBlockModel : MonoBehaviour
 
         AddActionBlockToVariables(actionBlockToCreate);
 
+
         string GetImagePathByDirectory(string directory)
         {
-            string extension = Path.GetExtension(directory);
+            string extension = Path.GetExtension(directory).ToLower();
 
             if (String.IsNullOrEmpty(extension)) {
                 return ImagePath.Folder;
             }
             else {
-                if (extension.ToLower().Equals(".exe"))
+                if (Extension.ExeExtensions.Contains(extension))
                 {
                     return ImagePath.ExeFile;
                 }
-                else if (extension.ToLower().Equals(".txt") || extension.ToLower().Equals(".md") || extension.ToLower().Equals(".ini"))
+                else if (Extension.TextExtensions.Contains(extension))
                 {
                     return ImagePath.TextFile;
                 }
-                else if (extension.ToLower().Equals(".avi") || extension.ToLower().Equals(".mp4") || extension.ToLower().Equals(".mov") || extension.ToLower().Equals(".wmv") || extension.ToLower().Equals(".mkv"))
+                else if (Extension.VideoExtensions.Contains(extension))
                 {
                     return ImagePath.VideoFile;
                 }
-                else if (extension.ToLower().Equals(".jpeg") || extension.ToLower().Equals(".jpg") || extension.ToLower().Equals(".png") || extension.ToLower().Equals(".svg") || extension.ToLower().Equals(".ai") || extension.ToLower().Equals(".psd") || extension.ToLower().Equals(".bmp") || extension.ToLower().Equals(".tif") || extension.ToLower().Equals(".tiff") || extension.ToLower().Equals(".raw"))
+                else if (Extension.ImageExtensions.Contains(extension))
                 {
                     return ImagePath.ImageFile;
                 }
-                else if (extension.ToLower().Equals(".doc") || extension.ToLower().Equals(".docx"))
+                else if (Extension.WordDocumentExtensions.Contains(extension))
                 {
                     return ImagePath.WordFile;
                 }
-                else if (extension.ToLower().Equals(".pdf"))
+                else if (Extension.PdfDocumentExtensions.Contains(extension))
                 {
                     return ImagePath.PdfFile;
                 }
-                else if (extension.ToLower().Equals(".csv") || extension.ToLower().Equals(".xls") || extension.ToLower().Equals(".xlsx") || extension.ToLower().Equals(".xml"))
+                else if (Extension.ExcelExtensions.Contains(extension))
                 {
                     return ImagePath.ExcelFile;
                 }
-                else if (extension.ToLower().Equals(".url"))
+                else if (Extension.linkExtensions.Contains(extension))
                 {
                     return ImagePath.LinkFile;
                 }
@@ -465,8 +465,8 @@ public class ActionBlockModel : MonoBehaviour
 
             return "";
         }
-
-
+        
+        
         return true;
     }
 
@@ -850,5 +850,16 @@ public class ActionBlockModel : MonoBehaviour
         }
 
         return true;
+    }
+
+    private static class  Extension {
+        public static string[] ExeExtensions {get; private set;} = new string[] {"exe"};
+        public static string[] TextExtensions {get; private set;} = new string[] {"txt", "md", "ini"};
+        public static string[] VideoExtensions {get; private set;} = new string[] {"avi", "mp4", "mov", "mkv"};
+        public static string[] ImageExtensions {get; private set;} = new string[] {"jpeg", "jpg", "png", "svg", "ai", "psd", "bmp", "tif", "tiff", "raw"};
+        public static string[] WordDocumentExtensions {get; private set;} = new string[] {"doc", "docx"};
+        public static string[] PdfDocumentExtensions {get; private set;} = new string[] {"pdf"};
+        public static string[] ExcelExtensions {get; private set;} = new string[] {"csv", "xls", "xlsx", "xml"};
+        public static string[] linkExtensions {get; private set;} = new string[] {"url"};
     }
 }
