@@ -22,6 +22,7 @@ public class TagManager : MonoBehaviour
 
                 foreach (string wordOfTag in wordsOfTag)
                 {
+                    // Cancellation.
                     if (cancellationTokenSource != null &&  cancellationTokenSource.Token.IsCancellationRequested) 
                     {
                         UnityMainThreadDispatcher.Instance().Enqueue(() => {
@@ -30,6 +31,7 @@ public class TagManager : MonoBehaviour
                         
                         return; 
                     }
+                    //
 
                     string trimmedWordOfTag = wordOfTag.Trim();
                 
@@ -63,28 +65,26 @@ public class TagManager : MonoBehaviour
     /// <summary>
     /// Get tags trimmed, with no multi spaces, split camel case, no special symbols.
     /// </summary>
-    /// <param name="tagsSeparatedByComma"></param>
+    /// <param name="tagsToNormalize"></param>
     /// <returns></returns>
-    public List<string> GetNormalizedTags(List<string> tagsSeparatedByComma)
+    public List<string> GetNormalizedTags(List<string> tagsToNormalize)
     {
         List<string> normalizedTags = new List<string>();
 
         
-        foreach (string tag in tagsSeparatedByComma)
+        foreach (string tag in tagsToNormalize)
         {
             string tagWithoutSpecialSymbolsAndWithSplitedCamelCase = GetStringWithoutSpecialSymbolsAndWithSplitedCamelCase(tag);
-            string tagWithNormalizedSpaces = GetStringWithNormalizedSpaces(tagWithoutSpecialSymbolsAndWithSplitedCamelCase);
-
+            string normalizedTag = GetStringWithNormalizedSpaces(tagWithoutSpecialSymbolsAndWithSplitedCamelCase);
             
             if (string.IsNullOrEmpty(tag) == false)
             {
                 normalizedTags.Add(tag);
             }
 
-            
-            if (tagsSeparatedByComma.Contains(tagWithoutSpecialSymbolsAndWithSplitedCamelCase) == false)
+            if (normalizedTags.Contains(normalizedTag) == false)
             {
-                normalizedTags.Add(tagWithoutSpecialSymbolsAndWithSplitedCamelCase);
+                normalizedTags.Add(normalizedTag);
             }
         }
 
