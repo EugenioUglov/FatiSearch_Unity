@@ -247,15 +247,15 @@ public class ActionBlockModel : MonoBehaviour
         path = path.Replace(@"\\", @"\");
 
 
-        AddDirectoryFoldersToTags();
+        // AddDirectoryFoldersToTags();
         
         ActionBlock actionBlock = 
         new ActionBlock(titleActionBlock, ActionEnum.OpenPath, 
             path, tags);
 
-        tags.Concat(GetTagsWithActionBlockTitle(actionBlock));
-        tags = GetNormalizedTags(tags);
-        actionBlock.Tags = tags;
+        // tags.Concat(GetTagsWithActionBlockTitle(actionBlock));
+        // tags = GetNormalizedTags(tags);
+        actionBlock.Tags = GetTagsForActionBlock(actionBlock);
 
 
         if (Convert.ToBoolean(settingsData.IsDirectoryInTitle))
@@ -263,15 +263,6 @@ public class ActionBlockModel : MonoBehaviour
             actionBlock.Title = AddDirectoryToActionBlockTitle(titleActionBlock, foldersOfPath);
         }
 
-        void AddDirectoryFoldersToTags()
-        {
-            for (int i = 0; i < foldersOfPath.Length - 1; i++)
-            {
-                // Add to tags folder names from path of a file.
-                
-                tags.Add(foldersOfPath[i]);
-            }
-        }
 
         string AddDirectoryToActionBlockTitle(string titleActionBlock, string[] foldersOfPath)
         {
@@ -408,8 +399,11 @@ public class ActionBlockModel : MonoBehaviour
 
         if (isAddTagsAutomatically)
         {
-            actionBlockToCreate.Tags = GetTagsWithActionBlockTitle(actionBlockToCreate);
-            actionBlockToCreate.Tags = GetNormalizedTags(actionBlockToCreate.Tags);
+            string path = actionBlock.Content;
+            string fileName = Path.GetFileNameWithoutExtension(path);
+            string[] foldersOfPath = path.Split('\\');
+            path = path.Replace(@"\\", @"\");
+            actionBlockToCreate.Tags = GetTagsForActionBlock(actionBlock, foldersOfPath);
         }
         
         actionBlockToCreate.Title = titleForActionBlock;
@@ -867,5 +861,34 @@ public class ActionBlockModel : MonoBehaviour
         public static string[] ExcelExtensions {get; private set;} = new string[] {".csv", ".xls", ".xlsx", ".xml"};
         public static string[] LinkExtensions {get; private set;} = new string[] {".url"};
         public static string[] ProgrammingLanguageExtensions {get; private set;} = new string[] {".cs", ".js", ".ts", ".json", ".xml"};
+    }
+
+    // !!!
+    private List<string> GetTagsForActionBlock(ActionBlock actionBlock, string[]? foldersOfPath = null)
+    {
+        List<string> tagsToReturn = new List<string>();
+
+        if (foldersOfPath != null)
+        tagsToReturn = tagsToReturn.Concat(GetTagsByPath(foldersOfPath)).ToList();
+
+        tagsToReturn = tagsToReturn.Concat(GetTagsWithActionBlockTitle(actionBlock)).ToList();
+        
+
+        tagsToReturn = GetNormalizedTags(tagsToReturn);
+        
+        // Add folders and filename to tags without drive letter.
+        List<string> GetTagsByPath(string[] foldersOfPath)
+        {
+            List<string> tagsToReturn = new List<string>();
+
+            for (int i = 1; i < foldersOfPath.Length; i++)
+            {
+                tagsToReturn.Add(foldersOfPath[i]);
+            }
+
+            return tagsToReturn;
+        }
+        
+        return tagsToReturn;
     }
 }
