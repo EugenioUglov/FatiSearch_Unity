@@ -245,9 +245,6 @@ public class ActionBlockModel : MonoBehaviour
         string[] foldersOfPath = path.Split('\\');
         string titleActionBlock = fileName;
         path = path.Replace(@"\\", @"\");
-
-
-        // AddDirectoryFoldersToTags();
         
         ActionBlock actionBlock = 
         new ActionBlock(titleActionBlock, ActionEnum.OpenPath, 
@@ -255,13 +252,15 @@ public class ActionBlockModel : MonoBehaviour
 
         // tags.Concat(GetTagsWithActionBlockTitle(actionBlock));
         // tags = GetNormalizedTags(tags);
-        actionBlock.Tags = GetTagsForActionBlock(actionBlock);
 
 
         if (Convert.ToBoolean(settingsData.IsDirectoryInTitle))
         {
             actionBlock.Title = AddDirectoryToActionBlockTitle(titleActionBlock, foldersOfPath);
         }
+
+        
+        actionBlock.Tags = GetTagsForActionBlock(actionBlock, foldersOfPath);
 
 
         string AddDirectoryToActionBlockTitle(string titleActionBlock, string[] foldersOfPath)

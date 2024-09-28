@@ -194,7 +194,6 @@ public class ActionBlockService : MonoBehaviour
                     yield return new WaitForSeconds(1);
                 }
 
-                print("isFileCopyingFinished: " + isFileCopyingFinished);
 
                 if (string.IsNullOrEmpty(filePathFromIndexedFolder))
                 {
